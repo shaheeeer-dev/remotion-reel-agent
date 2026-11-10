@@ -93,6 +93,7 @@ export class InstagramService {
       };
     }
 
+    let containerId: string | undefined;
     try {
       // Step 1: Create Reel Media Container
       const createContainerUrl = `https://graph.facebook.com/${env.META_GRAPH_API_VERSION}/${igUserId}/media`;
@@ -113,7 +114,7 @@ export class InstagramService {
         throw new Error(containerData.error?.message || 'Failed to create Instagram media container');
       }
 
-      const containerId = containerData.id;
+      containerId = containerData.id;
       console.log(`[InstagramService] Container created: ${containerId}. Polling status...`);
 
       // Step 2: Poll container status until FINISHED or ERROR
@@ -166,6 +167,7 @@ export class InstagramService {
       return {
         success: false,
         error: err?.message || 'Unknown error during Instagram publish',
+        containerId,
       };
     }
   }

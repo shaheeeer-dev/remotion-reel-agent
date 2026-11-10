@@ -5,6 +5,7 @@ import { geminiService } from './gemini.service.js';
 import { remotionService } from './remotion.service.js';
 import { instagramService } from './instagram.service.js';
 import { REEL_STATUS, type ReelRenderInput } from '@learnops/schema';
+import { decryptToken } from '../utils/crypto.js';
 
 const QUEUE_NAME = process.env.QUEUE_NAME || 'social-reels-queue';
 
@@ -77,7 +78,10 @@ export class QueueService {
 
     if (this.queue && this.isRedisConnected) {
       try {
-        const job = await this.queue.add(name, { ...data, idempotencyKey }, { jobId: idempotencyKey });
+        const job = await this.queue.add(name, { ...data, idempotencyKey }, {
+          jobId: idempotencyKey.replace(/[^A-Za-z0-9_-]/g, '_'),
+          attempts: name === 'PUBLISH_REEL' ? 1 : 3,
+        });
         await prisma.jobRun.update({
           where: { idempotencyKey },
           data: { bullMqJobId: job.id },
@@ -124,7 +128,7 @@ export class QueueService {
           const script = await geminiService.generateReelScript({
             topic: topic?.title || 'Core Architecture Overview',
             category: topic?.category || 'DevOps',
-            brandName: brand?.displayName || 'LearnOps',
+            brandName: brand?.displayName || 'Brand',
             brandTone: brand?.profile?.voiceTone,
             brandAudience: brand?.profile?.audience,
             targetDurationSeconds: brand?.defaultDuration || 16,
@@ -143,6 +147,7 @@ export class QueueService {
                 hashtags: script.hashtags,
                 durationSeconds: script.durationSeconds,
                 scriptJson: script as any,
+                modelName: env.GEMINI_MODEL,
                 status: REEL_STATUS.SCRIPT_READY,
               },
             });
@@ -156,6 +161,7 @@ export class QueueService {
                 hashtags: script.hashtags,
                 durationSeconds: script.durationSeconds,
                 scriptJson: script as any,
+                modelName: env.GEMINI_MODEL,
                 status: REEL_STATUS.SCRIPT_READY,
               },
             });
@@ -205,6 +211,7 @@ export class QueueService {
               backgroundColor: reel.brand.profile?.bgColor || '#0B0F17',
               cardBackground: '#151D2A',
               textColor: '#F8FAFC',
+              creatorCredit: env.REPO_CREDIT_URL,
             },
             script: reel.scriptJson as any,
           };
@@ -245,10 +252,27 @@ export class QueueService {
             throw new Error('Reel has no rendered media asset to publish');
           }
 
-          const socialAccount = reel.brand.socialAccounts[0];
-          if (!socialAccount) {
-            throw new Error('No connected social account found for brand');
+          if (reel.status !== REEL_STATUS.APPROVED && reel.status !== REEL_STATUS.SCHEDULED) {
+            throw new Error('Only an approved or scheduled Reel can be published.');
           }
+
+          if (!media.publicUrl.startsWith('https://')) {
+            throw new Error('Publishing requires a publicly reachable HTTPS media URL.');
+          }
+
+          const socialAccount = reel.brand.socialAccounts.find(
+            (account) => account.platform === 'INSTAGRAM' && account.isConnected
+          );
+          if (!socialAccount) {
+            throw new Error('No connected Instagram account found for this brand.');
+          }
+
+          const accessToken = socialAccount.encryptedToken
+            ? decryptToken(socialAccount.encryptedToken)
+            : env.META_ACCESS_TOKEN;
+          const igUserId = socialAccount.providerUserId !== 'pending_setup'
+            ? socialAccount.providerUserId
+            : env.META_IG_USER_ID;
 
           await prisma.reel.update({
             where: { id: reel.id },
@@ -259,6 +283,8 @@ export class QueueService {
             videoUrl: media.publicUrl,
             caption: `${reel.caption}\n\n${reel.hashtags.map((h) => `#${h}`).join(' ')}`,
             idempotencyKey,
+            accessToken,
+            igUserId,
           });
 
           await prisma.publishAttempt.create({

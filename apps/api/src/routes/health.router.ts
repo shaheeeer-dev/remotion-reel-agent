@@ -6,7 +6,7 @@ healthRouter.get('/', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    service: 'learnops-api',
+    service: 'social-reel-api',
   });
 });
 

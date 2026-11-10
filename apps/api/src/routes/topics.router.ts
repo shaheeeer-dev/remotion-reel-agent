@@ -1,14 +1,16 @@
 import { Router } from 'express';
+import { resolveBrand } from '../middleware/resolve-brand.js';
 import crypto from 'node:crypto';
 import { prisma } from '../prisma/client.js';
 import { queueService } from '../services/queue.service.js';
 
 export const topicsRouter = Router({ mergeParams: true });
+topicsRouter.use(resolveBrand);
 
 // GET /api/v1/brands/:brandId/topics
 topicsRouter.get('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params as { brandId: string };
+    const brandId = res.locals.brandId as string;
     const topics = await prisma.topic.findMany({
       where: { brandId },
       orderBy: { createdAt: 'desc' },
@@ -22,7 +24,7 @@ topicsRouter.get('/', async (req, res, next) => {
 // POST /api/v1/brands/:brandId/topics
 topicsRouter.post('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params as { brandId: string };
+    const brandId = res.locals.brandId as string;
     const { title, category, brief } = req.body;
 
     const topic = await prisma.topic.create({
@@ -42,7 +44,8 @@ topicsRouter.post('/', async (req, res, next) => {
 // POST /api/v1/brands/:brandId/topics/:topicId/generate
 topicsRouter.post('/:topicId/generate', async (req, res, next) => {
   try {
-    const { brandId, topicId } = req.params as { brandId: string; topicId: string };
+    const brandId = res.locals.brandId as string;
+    const { topicId } = req.params as { topicId: string };
     const idempotencyKey =
       (req.headers['idempotency-key'] as string) ||
       `generate_${brandId}_${topicId}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;

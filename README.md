@@ -1,8 +1,8 @@
 # AI Social Media Manager — Technical Handoff
 
 **Document purpose:** implementation brief for the first usable version of a reusable, multi-brand system that creates short educational Instagram Reels.  
-**Status:** product and technology decisions are recorded below; this is a specification, not a claim that the system has been implemented.  
-**Last context review:** 10 November 2026.
+**Status:** this repository contains a working local prototype. The document distinguishes what currently runs from what still needs implementation or account verification.
+**Last context review:** 11 November 2026.
 
 ## 1. Status and decision labels
 
@@ -16,11 +16,12 @@ This handoff uses three labels:
 |---|---|
 | Product | Confirmed: reusable social content manager, with LearnOps as the first brand |
 | Video proof of concept | User-confirmed: one 12-second vertical Remotion video was generated and watched |
-| Test 2 | Pending: render three topic-specific 15–18-second videos with distinct animations |
-| Gemini | Selected for structured text generation on the free tier; account/model quota remains unverified |
+| Test 2 | Three topic-specific fixtures and a render command exist; actual MP4 output still needs to be rendered and inspected |
+| Gemini | `gemini-3.8-flash` is configured for structured text generation on the free tier; owner account quota and access still need verification |
 | Instagram | Instagram Graph API selected; account eligibility, app access, permissions, and publishing test remain unverified |
-| Automation | Intended end state includes a daily BullMQ-driven workflow; no scheduler or publishing automation is confirmed as implemented |
-| Repository and credentials | Not specified in this handoff; no repo paths, secrets, or account IDs are assumed |
+| Automation | A local daily scheduler and BullMQ generation job exist; the daily path currently drafts a script and does not automatically render or publish it |
+| Runtime | Node 24 is the project runtime; `.nvmrc` and the root `engines` field record it |
+| Local build | Root workspace build succeeds on Node 24; Test 2 renders have not yet been run and inspected |
 
 The first video is a successful proof of concept based on the owner’s confirmation that it rendered and was watched. The prior conversation did not independently inspect its file or render logs, so exact file path, resolution, frame rate, and encoding are not asserted here. The first video did **not** prove Gemini generation, reusable topic-specific animation, Instagram publishing, or scheduling.
 
@@ -59,7 +60,7 @@ Google’s published free-tier model access and limits vary by model and project
 | Backend API | Express + TypeScript | Authenticated API, validation, orchestration, and integrations |
 | Text generation | Gemini API, free tier only | Topic, hook, script, scene JSON, caption, and hashtags |
 | Animation | Remotion + React + TypeScript | Deterministic animated scenes from validated scene data |
-| Video processing | FFmpeg | MP4 encoding/normalization and media inspection |
+| Video processing | Remotion H.264 output; separate FFmpeg checks are planned | Current render saves MP4 and basic metadata; normalization/inspection stage is not implemented |
 | Database | PostgreSQL + Prisma | Brands, knowledge, topics, reels, jobs, assets, and publishing records |
 | Queue/scheduler | Redis + BullMQ | Asynchronous generation/render/publish jobs and daily scheduling |
 | Publishing | Instagram Graph API / Instagram Platform | Publish an approved Reel to an eligible professional account |
@@ -70,7 +71,7 @@ Do not assume a repository layout, package manager, domain, VPS size, exact libr
 
 ## 5. Proposed architecture and pipeline
 
-The browser talks only to the authenticated Express API. PostgreSQL stores durable product data; Redis/BullMQ runs long operations outside the HTTP request. A worker validates Gemini output, invokes the registered Remotion composition, then uses FFmpeg to produce the final file. Nginx serves a controlled HTTPS media URL while Meta fetches the Reel.
+Target architecture: the browser talks to the Express API, PostgreSQL stores product data, and Redis/BullMQ runs long operations. In this checkout, Gemini output is rendered by Remotion directly to H.264 MP4 and stored locally; a separate FFmpeg validation/normalization step and public Nginx media hosting are not set up yet. The daily scheduler drafts scripts; it does not automatically render or publish them.
 
 ```mermaid
 flowchart LR
@@ -94,7 +95,7 @@ flowchart LR
 3. The worker builds a prompt from the brand profile and only the relevant approved knowledge documents.
 4. Gemini returns structured JSON. The backend validates the JSON against a versioned schema and validates each scene against an allowlist of renderer components. Model output is data, never executable code.
 5. The system stores the script and scene list. The owner can inspect and edit it in the dashboard. **Whether approval is mandatory before rendering or publishing is an open product decision; keep an approval gate configurable and default to review during early rollout.**
-6. The renderer creates the topic-specific animation. FFmpeg encodes and inspects the MP4. Duration, dimensions, file size, and codec are checked before it can be published.
+6. Current code renders the topic-specific animation to H.264 MP4 with Remotion and records basic metadata. Add a separate FFmpeg validation/normalization step before production use.
 7. The dashboard shows the preview and status. An authorized action or configured schedule starts publishing.
 8. The worker exposes the final asset over HTTPS for Meta to fetch, creates a media container, polls processing status as required, and publishes it. It stores Meta identifiers and the final result.
 9. The system records success/failure, cleans up temporary files according to the configured retention policy, and shows the result in the dashboard.
@@ -273,10 +274,12 @@ Create a secret-free `.env.example` with names and descriptions only. Actual sec
 | `NEXT_PUBLIC_API_BASE_URL` | Browser-visible API base URL; contains no secret |
 | `DATABASE_URL` | PostgreSQL connection string |
 | `REDIS_URL` | Redis connection string, private to Docker network |
-| `SESSION_SECRET` | Strong random cookie/session signing secret |
+| `SESSION_SECRET` | Secret used for local token encryption; keep it private and stable while encrypted tokens exist |
+| `API_ADMIN_TOKEN` | Production API bearer token; never expose it in browser JavaScript |
 | `GEMINI_API_KEY` | Free-tier Gemini API key; backend only |
 | `GEMINI_MODEL` | Model name selected after checking account free-tier access/quota |
 | `GEMINI_MAX_REQUESTS_PER_DAY` | Local safety cap below verified quota |
+| `REPO_CREDIT_URL` | Optional URL printed as an open-source credit on generated Reel end cards |
 | `META_APP_ID` | Meta app identifier |
 | `META_APP_SECRET` | Meta app secret; backend only |
 | `META_GRAPH_API_VERSION` | Explicit supported API version after verification |
@@ -290,7 +293,7 @@ Create a secret-free `.env.example` with names and descriptions only. Actual sec
 | `WORKER_CONCURRENCY` | Bounded worker concurrency, sized to VPS resources |
 | `MAX_RENDER_SECONDS` | Render timeout based on measured capacity |
 
-These are proposed names, not existing project settings. Never use a `NEXT_PUBLIC_` variable for a credential. Keep PostgreSQL and Redis off the public network. Use distinct credentials per environment and rotate/revoke exposed values immediately.
+The root `.env.example` supplies the current local variable names. In development, API routes allow requests without a token and return a warning header. Production API routes require `API_ADMIN_TOKEN`; the browser dashboard does not yet implement a secure login/token flow, so this checkout is not ready for public production deployment. Never use a `NEXT_PUBLIC_` variable for a credential. Keep PostgreSQL and Redis off the public network.
 
 ## 13. Security and operations
 
@@ -365,3 +368,34 @@ Do not begin production auto-publishing until the Meta account/app checks, quota
 - BullMQ: [Official documentation](https://docs.bullmq.io/)
 
 Always check live provider docs and account dashboards before locking model names, API versions, scopes, quotas, or media constraints.
+
+
+## 18. Run the current checkout locally
+
+Use Node 24 (`.nvmrc` contains `24`). Start from the repository root:
+
+```bash
+npm install
+[ -f .env ] || cp .env.example .env
+# Add a valid GEMINI_API_KEY in .env if you want real script generation.
+docker compose up -d postgres redis
+set -a; source .env; set +a
+npx prisma db push --schema apps/api/prisma/schema.prisma
+npm run prisma:generate
+npm run prisma:seed
+npm run build
+```
+
+`db push` is for a disposable local database. There are no checked-in Prisma migration files yet; add and review migrations before using persistent or production data. The seed creates LearnOps sample brand data and an unconnected Instagram placeholder. It does not connect or publish to Instagram.
+
+Start the API and dashboard in separate terminals:
+
+```bash
+npm run dev:api
+```
+
+```bash
+npm run dev:dashboard
+```
+
+Open `http://localhost:3000`; the API health endpoint is `http://localhost:4000/health`. To generate the three Test 2 MP4s, run `npm run render:test2`. Outputs are written under `renders/test2/`; inspect the files and manifest before calling Test 2 complete. Local media URLs use localhost and cannot be fetched by Meta. Live Instagram publishing still requires an eligible account, verified app permissions, a public HTTPS media URL, and production-safe dashboard authentication.

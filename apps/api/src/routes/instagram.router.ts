@@ -1,14 +1,16 @@
 import { Router } from 'express';
+import { resolveBrand } from '../middleware/resolve-brand.js';
 import { prisma } from '../prisma/client.js';
 import { instagramService } from '../services/instagram.service.js';
 import { encryptToken, sanitizeSocialAccount } from '../utils/crypto.js';
 
 export const instagramRouter = Router({ mergeParams: true });
+instagramRouter.use(resolveBrand);
 
 // GET /api/v1/brands/:brandId/integrations/instagram
 instagramRouter.get('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params as { brandId: string };
+    const brandId = res.locals.brandId as string;
     const account = await prisma.socialAccount.findFirst({
       where: { brandId, platform: 'INSTAGRAM' },
     });
@@ -42,7 +44,7 @@ instagramRouter.get('/', async (req, res, next) => {
 // POST /api/v1/brands/:brandId/integrations/instagram/connect
 instagramRouter.post('/connect', async (req, res, next) => {
   try {
-    const { brandId } = req.params as { brandId: string };
+    const brandId = res.locals.brandId as string;
     const { providerUserId, accountUsername, token } = req.body;
 
     if (!providerUserId || !token) {
@@ -88,7 +90,7 @@ instagramRouter.post('/connect', async (req, res, next) => {
 // DELETE /api/v1/brands/:brandId/integrations/instagram
 instagramRouter.delete('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params as { brandId: string };
+    const brandId = res.locals.brandId as string;
     await prisma.socialAccount.deleteMany({
       where: { brandId, platform: 'INSTAGRAM' },
     });

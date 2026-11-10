@@ -3,14 +3,16 @@ import crypto from 'node:crypto';
 import { prisma } from '../prisma/client.js';
 import { queueService } from '../services/queue.service.js';
 import { REEL_STATUS } from '@learnops/schema';
+import { resolveBrand } from '../middleware/resolve-brand.js';
 
 export const reelsRouter = Router();
 
 // GET /api/v1/brands/:brandId/reels
 export const brandReelsRouter = Router({ mergeParams: true });
+brandReelsRouter.use(resolveBrand);
 brandReelsRouter.get('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params as { brandId: string };
+    const brandId = res.locals.brandId as string;
     const { status } = req.query;
 
     const reels = await prisma.reel.findMany({
@@ -91,6 +93,16 @@ reelsRouter.post('/:reelId/render', async (req, res, next) => {
 // POST /api/v1/reels/:reelId/approve
 reelsRouter.post('/:reelId/approve', async (req, res, next) => {
   try {
+    const current = await prisma.reel.findUniqueOrThrow({
+      where: { id: req.params.reelId },
+      include: { mediaAssets: true },
+    });
+    if (current.status !== REEL_STATUS.NEEDS_REVIEW || current.mediaAssets.length === 0) {
+      return res.status(409).json({
+        error: { message: 'Only a rendered Reel awaiting review can be approved.' },
+      });
+    }
+
     const reel = await prisma.reel.update({
       where: { id: req.params.reelId },
       data: { status: REEL_STATUS.APPROVED },
@@ -105,6 +117,11 @@ reelsRouter.post('/:reelId/approve', async (req, res, next) => {
 reelsRouter.post('/:reelId/publish', async (req, res, next) => {
   try {
     const { reelId } = req.params;
+    const reel = await prisma.reel.findUniqueOrThrow({ where: { id: reelId } });
+    if (reel.status !== REEL_STATUS.APPROVED && reel.status !== REEL_STATUS.SCHEDULED) {
+      return res.status(409).json({ error: { message: 'Approve the rendered Reel before publishing.' } });
+    }
+
     const idempotencyKey =
       (req.headers['idempotency-key'] as string) ||
       `publish_${reelId}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;

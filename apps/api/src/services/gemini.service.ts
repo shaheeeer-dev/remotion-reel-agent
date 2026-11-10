@@ -45,7 +45,7 @@ export class GeminiService {
       );
     }
 
-    const brandName = options.brandName || 'LearnOps';
+    const brandName = options.brandName || 'Brand';
     const brandTone = options.brandTone || 'Clear, technical, authoritative, encouraging';
     const brandAudience = options.brandAudience || 'Beginner to intermediate Linux & DevOps learners';
 
@@ -59,17 +59,47 @@ export class GeminiService {
 Brand Voice & Tone: ${brandTone}
 Target Audience: ${brandAudience}
 
-STRICT GENERATION CONTRACT:
-1. ONLY return valid raw JSON adhering exactly to the requested schema. No markdown formatting, backticks, or commentary.
-2. The total video duration must be between 15 and 18 seconds (target: ${targetDuration}s).
-3. The sum of all scene durations MUST equal durationSeconds exactly.
-4. Allowlisted scene kinds ONLY:
-   - "hook" (duration: 2-3s, props: badge, headline, subtext)
-   - "folder_tree" (duration: 4-6s, props: title, rootPath, highlightPath, tree: [{name, isDirectory, description}], explanation)
-   - "terminal" (duration: 4-5s, props: title, command, outputLines: string[], explanation)
-   - "container_diagram" (duration: 5-7s, props: title, hostOs, containerEngine, containers: [{name, app, binsLibs}], comparisonNote)
-   - "pipeline" (duration: 5-7s, props: title, trigger, stages: [{name, status, details}], takeaway)
-   - "outro" (duration: 2-3s, props: brandName: "${brandName}", tagline, callToAction)
+STRICT JSON OUTPUT CONTRACT:
+You must output a single, raw JSON object strictly adhering to this structure:
+{
+  "schemaVersion": 1,
+  "topic": "${options.topic}",
+  "hook": "A short, engaging hook sentence questioning or introducing the concept (max 120 chars)",
+  "durationSeconds": ${targetDuration},
+  "scenes": [
+    {
+      "kind": "hook",
+      "durationSeconds": 3,
+      "badge": "CATEGORY OR TOPIC BADGE",
+      "headline": "Main Punchy Title",
+      "subtext": "Brief teaser text"
+    },
+    ...
+    {
+      "kind": "outro",
+      "durationSeconds": 3,
+      "brandName": "${brandName}",
+      "tagline": "Master tech daily",
+      "callToAction": "Follow @${brandName.toLowerCase()} for more tips"
+    }
+  ],
+  "caption": "A concise, engaging educational Instagram caption explaining key takeaways.",
+  "hashtags": ["devops", "linux", "cloud"]
+}
+
+SCENE KINDS & FLAT REQUIRED FIELDS:
+- "hook": { "kind": "hook", "durationSeconds": 3, "badge": string, "headline": string, "subtext": string }
+- "folder_tree": { "kind": "folder_tree", "durationSeconds": 5, "title": string, "rootPath": "/", "highlightPath": string, "tree": [{"name": string, "isDirectory": boolean, "highlight": boolean, "description": string}], "explanation": string }
+- "terminal": { "kind": "terminal", "durationSeconds": 5, "title": string, "command": string, "outputLines": [string], "explanation": string }
+- "container_diagram": { "kind": "container_diagram", "durationSeconds": 5, "title": string, "hostOs": "Host Linux Kernel", "containerEngine": "Docker Engine", "containers": [{"name": "app-container", "app": "Node.js API", "binsLibs": "Alpine libc + Node v20"}], "comparisonNote": string }
+- "pipeline": { "kind": "pipeline", "durationSeconds": 5, "title": string, "trigger": "git push origin main", "stages": [{"name": "Build", "status": "success"}, {"name": "Test", "status": "success"}, {"name": "Deploy", "status": "success"}], "takeaway": string }
+- "outro": { "kind": "outro", "durationSeconds": 3, "brandName": "${brandName}", "tagline": "Master tech daily", "callToAction": "Follow @${brandName.toLowerCase()} for more tips" }
+
+STRICT RULES:
+1. ONLY return valid raw JSON. No markdown backticks, no markdown formatting, no conversational text.
+2. Scene fields MUST be flat directly inside each scene object (e.g. { "kind": "hook", "badge": ... }), NEVER inside a nested "props" object.
+3. The sum of scene "durationSeconds" MUST equal "durationSeconds" exactly (${targetDuration}s total).
+4. Hashtags MUST be simple alphanumeric strings without "#".
 5. Do NOT invent unsupported claims or fictional commands. Use verified technical specifications.
 6. The content is for educational demonstration.
 
@@ -82,33 +112,44 @@ Topic: "${options.topic}"
 Category: "${options.category}"
 Target duration: ${targetDuration} seconds`;
 
-    try {
-      dailyRequestsCount++;
-      const response = await this.ai.models.generateContent({
-        model: env.GEMINI_MODEL,
-        contents: [
-          { role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
-        ],
-        config: {
-          responseMimeType: 'application/json',
-          temperature: 0.2,
-        },
-      });
+    const modelsToTry = [env.GEMINI_MODEL, 'gemini-3.5-flash', 'gemini-3.5-flash-lite'];
+    const uniqueModels = [...new Set(modelsToTry)];
 
-      const responseText = response.text || '';
-      if (!responseText.trim()) {
-        throw new Error('Gemini returned an empty response.');
+    let lastError: any = null;
+
+    for (const model of uniqueModels) {
+      try {
+        dailyRequestsCount++;
+        const response = await this.ai.models.generateContent({
+          model,
+          contents: [
+            { role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
+          ],
+          config: {
+            responseMimeType: 'application/json',
+            temperature: 0.2,
+          },
+        });
+
+        const responseText = response.text || '';
+        if (!responseText.trim()) {
+          throw new Error(`Gemini model ${model} returned an empty response.`);
+        }
+
+        const parsedJson = JSON.parse(responseText.trim());
+
+        // Strict validation against versioned Zod schema
+        const validated = ReelScriptSchema.parse(parsedJson);
+        return validated;
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[GeminiService] Model ${model} generation attempt failed:`, err?.message || err);
+        // Continue to fallback model
       }
-
-      const parsedJson = JSON.parse(responseText.trim());
-
-      // Strict validation against versioned Zod schema
-      const validated = ReelScriptSchema.parse(parsedJson);
-      return validated;
-    } catch (err: any) {
-      console.error('[GeminiService] Script generation failed:', err?.message || err);
-      throw new Error(`Gemini script generation failed: ${err?.message || 'Unknown provider error'}`);
     }
+
+    console.error('[GeminiService] All Gemini model generation attempts exhausted:', lastError?.message || lastError);
+    throw new Error(`Gemini script generation failed: ${lastError?.message || 'Unknown provider error'}`);
   }
 }
 

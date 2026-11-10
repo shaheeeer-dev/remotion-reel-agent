@@ -1,12 +1,14 @@
 import { Router } from 'express';
+import { resolveBrand } from '../middleware/resolve-brand.js';
 import { prisma } from '../prisma/client.js';
 
 export const knowledgeRouter = Router({ mergeParams: true });
+knowledgeRouter.use(resolveBrand);
 
 // GET /api/v1/brands/:brandId/knowledge
 knowledgeRouter.get('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params as { brandId: string };
+    const brandId = res.locals.brandId as string;
     const documents = await prisma.knowledgeDocument.findMany({
       where: { brandId },
       orderBy: { createdAt: 'desc' },
@@ -20,7 +22,7 @@ knowledgeRouter.get('/', async (req, res, next) => {
 // POST /api/v1/brands/:brandId/knowledge
 knowledgeRouter.post('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params as { brandId: string };
+    const brandId = res.locals.brandId as string;
     const { title, category, source, content, isApproved } = req.body;
 
     const doc = await prisma.knowledgeDocument.create({

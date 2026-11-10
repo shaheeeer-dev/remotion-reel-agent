@@ -12,6 +12,12 @@ import { jobsRouter } from './routes/jobs.router.js';
 import { instagramRouter } from './routes/instagram.router.js';
 import { requireAuth } from './middleware/auth.js';
 import { env } from './config/env.js';
+import { getMonorepoRoot } from './services/remotion.service.js';
+
+// Enable BigInt serialization in JSON responses for Prisma models
+(BigInt.prototype as any).toJSON = function () {
+  return Number(this);
+};
 
 export const app = express();
 
@@ -21,7 +27,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Static serving for rendered media (Instagram and dashboard preview)
-const storageDir = path.resolve(process.cwd(), env.MEDIA_STORAGE_DIR);
+const storageDir = path.resolve(getMonorepoRoot(), env.MEDIA_STORAGE_DIR);
 app.use('/media', express.static(storageDir));
 
 // Public Routes

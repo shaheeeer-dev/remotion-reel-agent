@@ -8,7 +8,7 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run --workspaces --if-present build",
+    "build": "npm run build --workspace=@learnops/schema && npm run build --workspace=@learnops/renderer && npm run build --workspace=@learnops/api && npm run build --workspace=@learnops/dashboard",
     "dev:api": "npm --workspace=@learnops/api run dev",
     "dev:dashboard": "npm --workspace=@learnops/dashboard run dev",
     "render:test2": "npm --workspace=@learnops/renderer run render:test2",

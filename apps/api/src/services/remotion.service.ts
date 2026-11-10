@@ -1,10 +1,26 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
 import type { ReelRenderInput } from '@learnops/schema';
 import { env } from '../config/env.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export function getMonorepoRoot(): string {
+  let dir = __dirname;
+  while (dir !== path.dirname(dir)) {
+    if (fsSync.existsSync(path.join(dir, 'packages/renderer/src/index.ts'))) {
+      return dir;
+    }
+    dir = path.dirname(dir);
+  }
+  return process.cwd();
+}
 
 let cachedBundleUrl: string | null = null;
 
@@ -14,12 +30,22 @@ export class RemotionService {
       return cachedBundleUrl;
     }
 
-    const rendererEntry = path.resolve(process.cwd(), '../../packages/renderer/src/index.ts');
+    const rootDir = getMonorepoRoot();
+    const rendererEntry = path.join(rootDir, 'packages/renderer/src/index.ts');
     console.log(`Bundling Remotion from ${rendererEntry}...`);
 
     cachedBundleUrl = await bundle({
       entryPoint: rendererEntry,
-      webpackOverride: (config) => config,
+      webpackOverride: (config) => ({
+        ...config,
+        resolve: {
+          ...config.resolve,
+          extensionAlias: {
+            '.js': ['.ts', '.tsx', '.js'],
+            '.jsx': ['.tsx', '.jsx'],
+          },
+        },
+      }),
     });
 
     return cachedBundleUrl;
@@ -34,7 +60,8 @@ export class RemotionService {
     height: number;
     checksumSha256: string;
   }> {
-    const storageDir = path.resolve(process.cwd(), env.MEDIA_STORAGE_DIR);
+    const rootDir = getMonorepoRoot();
+    const storageDir = path.resolve(rootDir, env.MEDIA_STORAGE_DIR);
     await fs.mkdir(storageDir, { recursive: true });
 
     const bundleUrl = await this.getBundle();

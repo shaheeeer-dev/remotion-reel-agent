@@ -18,6 +18,7 @@ dist/
 # Remotion renders
 out/
 renders/
+storage/
 *.mp4
 *.webm
 

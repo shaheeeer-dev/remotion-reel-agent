@@ -55,10 +55,11 @@ brandsRouter.post('/', async (req, res, next) => {
 // GET /api/v1/brands/:brandId
 brandsRouter.get('/:brandId', async (req, res, next) => {
   try {
-    const brand = await prisma.brand.findUniqueOrThrow({
-      where: { id: req.params.brandId },
+    const brand = await prisma.brand.findFirst({
+      where: { OR: [{ id: req.params.brandId }, { slug: req.params.brandId }] },
       include: { profile: true, socialAccounts: true },
     });
+    if (!brand) return res.status(404).json({ error: { message: 'Brand not found.' } });
     res.json({ data: brand });
   } catch (err) {
     next(err);
@@ -69,8 +70,13 @@ brandsRouter.get('/:brandId', async (req, res, next) => {
 brandsRouter.patch('/:brandId', async (req, res, next) => {
   try {
     const { displayName, autoPublish, defaultDuration, profile } = req.body;
+    const existing = await prisma.brand.findFirst({
+      where: { OR: [{ id: req.params.brandId }, { slug: req.params.brandId }] },
+      select: { id: true },
+    });
+    if (!existing) return res.status(404).json({ error: { message: 'Brand not found.' } });
     const brand = await prisma.brand.update({
-      where: { id: req.params.brandId },
+      where: { id: existing.id },
       data: {
         displayName,
         autoPublish,
