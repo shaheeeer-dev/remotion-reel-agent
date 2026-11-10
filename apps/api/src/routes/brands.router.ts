@@ -19,7 +19,16 @@ brandsRouter.get('/', async (req, res, next) => {
 // POST /api/v1/brands
 brandsRouter.post('/', async (req, res, next) => {
   try {
-    const { slug, displayName, timezone, audience, voiceTone, contentPillars, primaryColor } = req.body;
+    const {
+      slug,
+      displayName,
+      timezone,
+      audience,
+      voiceTone,
+      contentPillars,
+      primaryColor,
+      secondaryColor,
+    } = req.body;
     const brand = await prisma.brand.create({
       data: {
         slug,

@@ -1,42 +1,110 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { Film, Play, CheckCircle, UploadCloud, RefreshCw, Eye } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Film, Play, CheckCircle, UploadCloud, Loader2, AlertCircle } from 'lucide-react';
 import { StatusBadge } from '../../components/StatusBadge';
+import { fetchApi } from '../../lib/api-client';
+
+interface ReelItem {
+  id: string;
+  title: string;
+  hook: string;
+  durationSeconds: number;
+  status: string;
+  createdAt: string;
+  scenesCount: number;
+}
+
+const DEFAULT_REELS: ReelItem[] = [
+  {
+    id: 'test2-linux-etc',
+    title: 'Linux: What is the /etc Directory?',
+    hook: 'Where does Linux keep all its configuration?',
+    durationSeconds: 16,
+    status: 'RENDERED',
+    createdAt: '2026-11-10',
+    scenesCount: 4,
+  },
+  {
+    id: 'test2-docker-container',
+    title: 'Docker: What is a Container Really?',
+    hook: 'Is a Docker container just a lightweight VM?',
+    durationSeconds: 16,
+    status: 'NEEDS_REVIEW',
+    createdAt: '2026-11-10',
+    scenesCount: 4,
+  },
+  {
+    id: 'test2-devops-cicd',
+    title: 'DevOps: What is CI/CD?',
+    hook: 'What actually happens when you git push?',
+    durationSeconds: 17,
+    status: 'APPROVED',
+    createdAt: '2026-11-10',
+    scenesCount: 4,
+  },
+];
 
 export default function ReelsPage() {
   const [selectedFilter, setSelectedFilter] = useState('ALL');
+  const [reels, setReels] = useState<ReelItem[]>(DEFAULT_REELS);
+  const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const reels = [
-    {
-      id: 'reel-linux-etc',
-      title: 'Linux: What is the /etc Directory?',
-      hook: 'Where does Linux keep all its configuration?',
-      durationSeconds: 16,
-      status: 'RENDERED',
-      createdAt: '2026-11-10',
-      scenesCount: 4,
-    },
-    {
-      id: 'reel-docker-container',
-      title: 'Docker: What is a Container Really?',
-      hook: 'Is a Docker container just a lightweight VM?',
-      durationSeconds: 16,
-      status: 'NEEDS_REVIEW',
-      createdAt: '2026-11-10',
-      scenesCount: 4,
-    },
-    {
-      id: 'reel-devops-cicd',
-      title: 'DevOps: What is CI/CD?',
-      hook: 'What actually happens when you git push?',
-      durationSeconds: 17,
-      status: 'APPROVED',
-      createdAt: '2026-11-10',
-      scenesCount: 4,
-    },
-  ];
+  useEffect(() => {
+    async function loadReels() {
+      try {
+        const res = await fetchApi<{ data: any[] }>('/api/v1/brands/learnops/reels');
+        if (res.data && res.data.length > 0) {
+          setReels(
+            res.data.map((r: any) => ({
+              id: r.id,
+              title: r.title,
+              hook: r.hook,
+              durationSeconds: r.durationSeconds,
+              status: r.status,
+              createdAt: r.createdAt.slice(0, 10),
+              scenesCount: r.scenes?.length || 4,
+            }))
+          );
+        }
+      } catch {
+        // Fallback to reference reels if backend is offline
+      }
+    }
+
+    loadReels();
+  }, []);
+
+  const handleAction = async (reelId: string, action: 'render' | 'approve' | 'publish') => {
+    setIsProcessing(`${reelId}-${action}`);
+    setToastMessage(null);
+
+    try {
+      const res = await fetchApi<any>(`/api/v1/reels/${reelId}/${action}`, {
+        method: 'POST',
+      });
+
+      setToastMessage(`Success: ${res.message || `Action ${action} enqueued`}`);
+
+      // Optimistic UI state update
+      setReels((prev) =>
+        prev.map((r) => {
+          if (r.id !== reelId) return r;
+          let newStatus = r.status;
+          if (action === 'render') newStatus = 'RENDERING';
+          if (action === 'approve') newStatus = 'APPROVED';
+          if (action === 'publish') newStatus = 'PUBLISHING';
+          return { ...r, status: newStatus };
+        })
+      );
+    } catch (err: any) {
+      setToastMessage(`Notice: ${err.message || `API request submitted (${action})`}`);
+    } finally {
+      setIsProcessing(null);
+      setTimeout(() => setToastMessage(null), 5000);
+    }
+  };
 
   const filteredReels =
     selectedFilter === 'ALL' ? reels : reels.filter((r) => r.status === selectedFilter);
@@ -71,6 +139,13 @@ export default function ReelsPage() {
         </div>
       </div>
 
+      {toastMessage && (
+        <div className="flex items-center gap-2 p-3 px-4 rounded-xl bg-[#151D2A] border border-[#6F41EC]/50 text-sm text-[#C4B5FD]">
+          <AlertCircle className="w-4 h-4 text-[#C4B5FD] shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       <div className="bg-[#151D2A] border border-[#233044] rounded-2xl overflow-hidden shadow-xl">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
@@ -101,22 +176,40 @@ export default function ReelsPage() {
                 <td className="py-4 px-6 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button
-                      title="Render video"
-                      className="p-2 rounded-lg bg-[#233044] hover:bg-[#6F41EC] text-white transition"
+                      onClick={() => handleAction(reel.id, 'render')}
+                      disabled={isProcessing !== null}
+                      title="Render video via Remotion"
+                      className="p-2 rounded-lg bg-[#233044] hover:bg-[#6F41EC] text-white transition disabled:opacity-50"
                     >
-                      <Play className="w-4 h-4" />
+                      {isProcessing === `${reel.id}-render` ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Play className="w-4 h-4" />
+                      )}
                     </button>
                     <button
+                      onClick={() => handleAction(reel.id, 'approve')}
+                      disabled={isProcessing !== null}
                       title="Approve for publishing"
-                      className="p-2 rounded-lg bg-[#233044] hover:bg-emerald-600 text-white transition"
+                      className="p-2 rounded-lg bg-[#233044] hover:bg-emerald-600 text-white transition disabled:opacity-50"
                     >
-                      <CheckCircle className="w-4 h-4" />
+                      {isProcessing === `${reel.id}-approve` ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <CheckCircle className="w-4 h-4" />
+                      )}
                     </button>
                     <button
+                      onClick={() => handleAction(reel.id, 'publish')}
+                      disabled={isProcessing !== null}
                       title="Publish to Instagram"
-                      className="p-2 rounded-lg bg-[#233044] hover:bg-cyan-600 text-white transition"
+                      className="p-2 rounded-lg bg-[#233044] hover:bg-cyan-600 text-white transition disabled:opacity-50"
                     >
-                      <UploadCloud className="w-4 h-4" />
+                      {isProcessing === `${reel.id}-publish` ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <UploadCloud className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </td>
@@ -128,4 +221,3 @@ export default function ReelsPage() {
     </div>
   );
 }
-

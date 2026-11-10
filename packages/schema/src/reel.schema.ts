@@ -33,7 +33,14 @@ export const ReelRenderInputSchema = z.object({
     backgroundColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#0D1117'),
     cardBackground: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#161B22'),
     textColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#E6EDF3'),
-  }).default({}),
+  }).default({
+    name: 'LearnOps',
+    primaryColor: '#6F41EC',
+    secondaryColor: '#C4B5FD',
+    backgroundColor: '#0B0F17',
+    cardBackground: '#161B22',
+    textColor: '#E6EDF3',
+  }),
   script: ReelScriptSchema,
 });
 

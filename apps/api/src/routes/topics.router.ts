@@ -8,7 +8,7 @@ export const topicsRouter = Router({ mergeParams: true });
 // GET /api/v1/brands/:brandId/topics
 topicsRouter.get('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params;
+    const { brandId } = req.params as { brandId: string };
     const topics = await prisma.topic.findMany({
       where: { brandId },
       orderBy: { createdAt: 'desc' },
@@ -22,7 +22,7 @@ topicsRouter.get('/', async (req, res, next) => {
 // POST /api/v1/brands/:brandId/topics
 topicsRouter.post('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params;
+    const { brandId } = req.params as { brandId: string };
     const { title, category, brief } = req.body;
 
     const topic = await prisma.topic.create({
@@ -42,7 +42,7 @@ topicsRouter.post('/', async (req, res, next) => {
 // POST /api/v1/brands/:brandId/topics/:topicId/generate
 topicsRouter.post('/:topicId/generate', async (req, res, next) => {
   try {
-    const { brandId, topicId } = req.params;
+    const { brandId, topicId } = req.params as { brandId: string; topicId: string };
     const idempotencyKey =
       (req.headers['idempotency-key'] as string) ||
       `generate_${brandId}_${topicId}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;

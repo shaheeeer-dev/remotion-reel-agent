@@ -1,55 +1,95 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ListTodo, Plus, Sparkles, Check, Clock } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ListTodo, Plus, Sparkles, Check, Clock, Loader2, AlertCircle } from 'lucide-react';
+import { fetchApi } from '../../lib/api-client';
+
+interface TopicItem {
+  id: string;
+  title: string;
+  category: string;
+  brief: string;
+  isUsed: boolean;
+}
+
+const DEFAULT_TOPICS: TopicItem[] = [
+  {
+    id: 'top-1',
+    title: 'Linux: What is the /etc Directory?',
+    category: 'Linux',
+    brief: 'Explain the role of /etc in Linux, showing the filesystem hierarchy and typical configuration files.',
+    isUsed: true,
+  },
+  {
+    id: 'top-2',
+    title: 'Docker: What is a Container Really?',
+    category: 'Docker',
+    brief: 'Contrast containers with virtual machines. Highlight shared host kernel, namespaces, and cgroups.',
+    isUsed: true,
+  },
+  {
+    id: 'top-3',
+    title: 'DevOps: What is CI/CD?',
+    category: 'DevOps',
+    brief: 'Walk through an automated pipeline from code commit to zero-downtime deployment.',
+    isUsed: true,
+  },
+  {
+    id: 'top-4',
+    title: 'Linux: chmod vs chown',
+    category: 'Linux',
+    brief: 'Clear visual demonstration of permissions (rwx) vs file ownership.',
+    isUsed: false,
+  },
+  {
+    id: 'top-5',
+    title: 'Docker Volumes vs Bind Mounts',
+    category: 'Docker',
+    brief: 'Data persistence in containers: when to use named volumes vs host bind mounts.',
+    isUsed: false,
+  },
+];
 
 export default function TopicsPage() {
-  const [topics, setTopics] = useState([
-    {
-      id: 'top-1',
-      title: 'Linux: What is the /etc Directory?',
-      category: 'Linux',
-      brief: 'Explain the role of /etc in Linux, showing the filesystem hierarchy and typical configuration files.',
-      isUsed: true,
-    },
-    {
-      id: 'top-2',
-      title: 'Docker: What is a Container Really?',
-      category: 'Docker',
-      brief: 'Contrast containers with virtual machines. Highlight shared host kernel, namespaces, and cgroups.',
-      isUsed: true,
-    },
-    {
-      id: 'top-3',
-      title: 'DevOps: What is CI/CD?',
-      category: 'DevOps',
-      brief: 'Walk through an automated pipeline from code commit to zero-downtime deployment.',
-      isUsed: true,
-    },
-    {
-      id: 'top-4',
-      title: 'Linux: chmod vs chown',
-      category: 'Linux',
-      brief: 'Clear visual demonstration of permissions (rwx) vs file ownership.',
-      isUsed: false,
-    },
-    {
-      id: 'top-5',
-      title: 'Docker Volumes vs Bind Mounts',
-      category: 'Docker',
-      brief: 'Data persistence in containers: when to use named volumes vs host bind mounts.',
-      isUsed: false,
-    },
-  ]);
-
+  const [topics, setTopics] = useState<TopicItem[]>(DEFAULT_TOPICS);
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
-  const handleGenerate = (topicId: string) => {
+  useEffect(() => {
+    async function loadTopics() {
+      try {
+        const res = await fetchApi<{ data: TopicItem[] }>('/api/v1/brands/learnops/topics');
+        if (res.data && res.data.length > 0) {
+          setTopics(res.data);
+        }
+      } catch {
+        // Fallback to default topics
+      }
+    }
+    loadTopics();
+  }, []);
+
+  const handleGenerate = async (topicId: string) => {
     setIsGenerating(topicId);
-    setTimeout(() => {
+    setStatusMessage(null);
+
+    try {
+      const res = await fetchApi<{ jobId: string; message: string }>(
+        `/api/v1/brands/learnops/topics/${topicId}/generate`,
+        { method: 'POST' }
+      );
+      setStatusMessage(`Enqueued generation: Job ID ${res.jobId || 'submitted'}`);
+
+      // Optimistically mark topic as used
+      setTopics((prev) =>
+        prev.map((t) => (t.id === topicId ? { ...t, isUsed: true } : t))
+      );
+    } catch (err: any) {
+      setStatusMessage(`API notice: ${err.message || 'Generation request submitted'}`);
+    } finally {
       setIsGenerating(null);
-      alert('Script generation job enqueued with Gemini free-tier!');
-    }, 1200);
+      setTimeout(() => setStatusMessage(null), 5000);
+    }
   };
 
   return (
@@ -65,11 +105,38 @@ export default function TopicsPage() {
           </p>
         </div>
 
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6F41EC] hover:bg-[#825CF0] text-white text-sm font-bold shadow-lg shadow-[#6F41EC]/30 transition">
+        <button
+          onClick={() => {
+            const title = prompt('Enter new topic title:');
+            if (title) {
+              const category = prompt('Enter category (e.g. Linux, Docker, DevOps):') || 'DevOps';
+              const brief = prompt('Enter brief description:') || '';
+              fetchApi('/api/v1/brands/learnops/topics', {
+                method: 'POST',
+                body: JSON.stringify({ title, category, brief }),
+              })
+                .then(() => alert('Topic added!'))
+                .catch(() => {
+                  setTopics((prev) => [
+                    ...prev,
+                    { id: `top-${Date.now()}`, title, category, brief, isUsed: false },
+                  ]);
+                });
+            }
+          }}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6F41EC] hover:bg-[#825CF0] text-white text-sm font-bold shadow-lg shadow-[#6F41EC]/30 transition"
+        >
           <Plus className="w-4 h-4" />
           Add Topic
         </button>
       </div>
+
+      {statusMessage && (
+        <div className="flex items-center gap-2 p-3 px-4 rounded-xl bg-[#151D2A] border border-[#6F41EC]/50 text-sm text-[#C4B5FD]">
+          <AlertCircle className="w-4 h-4 text-[#C4B5FD] shrink-0" />
+          <span>{statusMessage}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {topics.map((t) => (
@@ -97,10 +164,14 @@ export default function TopicsPage() {
             <div className="mt-6 pt-4 border-t border-[#233044] flex items-center justify-end">
               <button
                 onClick={() => handleGenerate(t.id)}
-                disabled={isGenerating === t.id}
+                disabled={isGenerating !== null}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#233044] hover:bg-[#6F41EC] text-white text-xs font-bold transition disabled:opacity-50"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#C4B5FD]" />
+                {isGenerating === t.id ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5 text-[#C4B5FD]" />
+                )}
                 {isGenerating === t.id ? 'Enqueuing...' : 'Generate Reel Script'}
               </button>
             </div>
@@ -110,4 +181,3 @@ export default function TopicsPage() {
     </div>
   );
 }
-

@@ -1,4 +1,6 @@
 import { env } from '../config/env.js';
+import { prisma } from '../prisma/client.js';
+import { decryptToken } from '../utils/crypto.js';
 
 export interface InstagramPublishResult {
   success: boolean;
@@ -17,20 +19,54 @@ export class InstagramService {
     username?: string;
     reasons?: string[];
   }> {
-    if (!env.META_ACCESS_TOKEN && !env.META_APP_ID) {
+    const account = await prisma.socialAccount.findUnique({
+      where: { id: socialAccountId },
+    });
+
+    if (!account) {
       return {
         isEligible: false,
-        reasons: ['Meta App credentials or access token not configured in environment.'],
+        reasons: ['Social account not found in database.'],
       };
     }
 
-    // Return verified simulation or real Graph API response
-    return {
-      isEligible: true,
-      accountType: 'BUSINESS',
-      username: 'learnops.io',
-      reasons: [],
-    };
+    const token = account.encryptedToken
+      ? decryptToken(account.encryptedToken)
+      : env.META_ACCESS_TOKEN;
+
+    if (!token) {
+      return {
+        isEligible: false,
+        reasons: ['No valid Meta access token found. Please connect your Instagram Business account.'],
+      };
+    }
+
+    try {
+      // Validate token with Meta Graph API
+      const res = await fetch(
+        `https://graph.facebook.com/${env.META_GRAPH_API_VERSION}/me?fields=id,name&access_token=${token}`
+      );
+      const data = (await res.json()) as any;
+
+      if (!res.ok || data.error) {
+        return {
+          isEligible: false,
+          reasons: [data.error?.message || 'Meta token validation failed with provider.'],
+        };
+      }
+
+      return {
+        isEligible: true,
+        accountType: 'BUSINESS',
+        username: account.accountUsername,
+        reasons: [],
+      };
+    } catch (err: any) {
+      return {
+        isEligible: false,
+        reasons: [`Could not contact Meta Graph API: ${err.message}`],
+      };
+    }
   }
 
   /**
@@ -40,21 +76,26 @@ export class InstagramService {
     videoUrl: string;
     caption: string;
     idempotencyKey: string;
+    accessToken?: string;
+    igUserId?: string;
   }): Promise<InstagramPublishResult> {
-    console.log(`[InstagramService] Initiating publish container flow for video (idempotency: ${options.idempotencyKey})...`);
+    console.log(`[InstagramService] Initiating publish container flow (idempotency: ${options.idempotencyKey})...`);
 
-    if (!env.META_ACCESS_TOKEN || !env.META_IG_USER_ID) {
-      console.warn('[InstagramService] META_ACCESS_TOKEN or META_IG_USER_ID is not configured. Simulating container publish.');
+    const token = options.accessToken || env.META_ACCESS_TOKEN;
+    const igUserId = options.igUserId || env.META_IG_USER_ID;
+
+    if (!token || !igUserId) {
+      const errMsg = 'META_ACCESS_TOKEN and META_IG_USER_ID are required to publish. Live publishing cannot proceed without verified credentials.';
+      console.error(`[InstagramService] ${errMsg}`);
       return {
-        success: true,
-        containerId: `mock_container_${Date.now()}`,
-        mediaId: `mock_media_${Date.now()}`,
+        success: false,
+        error: errMsg,
       };
     }
 
     try {
       // Step 1: Create Reel Media Container
-      const createContainerUrl = `https://graph.facebook.com/${env.META_GRAPH_API_VERSION}/${env.META_IG_USER_ID}/media`;
+      const createContainerUrl = `https://graph.facebook.com/${env.META_GRAPH_API_VERSION}/${igUserId}/media`;
       const containerResponse = await fetch(createContainerUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,7 +104,7 @@ export class InstagramService {
           video_url: options.videoUrl,
           caption: options.caption,
           share_to_feed: true,
-          access_token: env.META_ACCESS_TOKEN,
+          access_token: token,
         }),
       });
 
@@ -73,15 +114,16 @@ export class InstagramService {
       }
 
       const containerId = containerData.id;
+      console.log(`[InstagramService] Container created: ${containerId}. Polling status...`);
 
       // Step 2: Poll container status until FINISHED or ERROR
       let isReady = false;
       let attempts = 0;
-      while (!isReady && attempts < 20) {
+      while (!isReady && attempts < 25) {
         attempts++;
-        await new Promise((r) => setTimeout(r, 3000));
+        await new Promise((r) => setTimeout(r, 4000));
 
-        const statusUrl = `https://graph.facebook.com/${env.META_GRAPH_API_VERSION}/${containerId}?fields=status_code&access_token=${env.META_ACCESS_TOKEN}`;
+        const statusUrl = `https://graph.facebook.com/${env.META_GRAPH_API_VERSION}/${containerId}?fields=status_code&access_token=${token}`;
         const statusRes = await fetch(statusUrl);
         const statusData = (await statusRes.json()) as any;
 
@@ -89,7 +131,7 @@ export class InstagramService {
           isReady = true;
           break;
         } else if (statusData.status_code === 'ERROR') {
-          throw new Error('Instagram failed to process container video');
+          throw new Error('Instagram failed to process video container');
         }
       }
 
@@ -98,21 +140,22 @@ export class InstagramService {
       }
 
       // Step 3: Publish container
-      const publishUrl = `https://graph.facebook.com/${env.META_GRAPH_API_VERSION}/${env.META_IG_USER_ID}/media_publish`;
+      const publishUrl = `https://graph.facebook.com/${env.META_GRAPH_API_VERSION}/${igUserId}/media_publish`;
       const publishRes = await fetch(publishUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           creation_id: containerId,
-          access_token: env.META_ACCESS_TOKEN,
+          access_token: token,
         }),
       });
 
       const publishData = (await publishRes.json()) as any;
       if (!publishRes.ok || !publishData.id) {
-        throw new Error(publishData.error?.message || 'Failed to publish Instagram media');
+        throw new Error(publishData.error?.message || 'Failed to publish Instagram media container');
       }
 
+      console.log(`[InstagramService] Reel published successfully: Media ID ${publishData.id}`);
       return {
         success: true,
         containerId,
@@ -129,4 +172,3 @@ export class InstagramService {
 }
 
 export const instagramService = new InstagramService();
-

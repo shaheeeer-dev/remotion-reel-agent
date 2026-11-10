@@ -10,6 +10,7 @@ import { topicsRouter } from './routes/topics.router.js';
 import { reelsRouter, brandReelsRouter } from './routes/reels.router.js';
 import { jobsRouter } from './routes/jobs.router.js';
 import { instagramRouter } from './routes/instagram.router.js';
+import { requireAuth } from './middleware/auth.js';
 import { env } from './config/env.js';
 
 export const app = express();
@@ -23,8 +24,11 @@ app.use(morgan('dev'));
 const storageDir = path.resolve(process.cwd(), env.MEDIA_STORAGE_DIR);
 app.use('/media', express.static(storageDir));
 
-// Routes
+// Public Routes
 app.use('/health', healthRouter);
+
+// Protected API Routes
+app.use('/api/v1', requireAuth);
 app.use('/api/v1/brands', brandsRouter);
 app.use('/api/v1/brands/:brandId/knowledge', knowledgeRouter);
 app.use('/api/v1/brands/:brandId/topics', topicsRouter);

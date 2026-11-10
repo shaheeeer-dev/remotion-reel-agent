@@ -6,7 +6,7 @@ import { remotionService } from './remotion.service.js';
 import { instagramService } from './instagram.service.js';
 import { REEL_STATUS, type ReelRenderInput } from '@learnops/schema';
 
-const QUEUE_NAME = 'learnops-reels-queue';
+const QUEUE_NAME = process.env.QUEUE_NAME || 'social-reels-queue';
 
 export class QueueService {
   private queue: Queue | null = null;
@@ -122,8 +122,11 @@ export class QueueService {
           });
 
           const script = await geminiService.generateReelScript({
-            topic: topic?.title || 'Linux Directory Structure',
-            category: topic?.category || 'Linux',
+            topic: topic?.title || 'Core Architecture Overview',
+            category: topic?.category || 'DevOps',
+            brandName: brand?.displayName || 'LearnOps',
+            brandTone: brand?.profile?.voiceTone,
+            brandAudience: brand?.profile?.audience,
             targetDurationSeconds: brand?.defaultDuration || 16,
             approvedKnowledge: approvedDocs.map((d) => ({ title: d.title, content: d.content })),
           });
@@ -278,6 +281,32 @@ export class QueueService {
               publishedAt: publishRes.success ? new Date() : null,
             },
           });
+
+          if (!publishRes.success) {
+            throw new Error(`Instagram publishing failed: ${publishRes.error || 'Provider rejected publish request'}`);
+          }
+          break;
+        }
+
+        case 'DAILY_SCHEDULE': {
+          const brand = await prisma.brand.findUniqueOrThrow({ where: { id: brandId } });
+          const unusedTopic = await prisma.topic.findFirst({
+            where: { brandId, isUsed: false },
+            orderBy: { createdAt: 'asc' },
+          });
+
+          if (!unusedTopic) {
+            console.log(`[Queue] No unused topics found for brand "${brand.displayName}". Daily run completed.`);
+            break;
+          }
+
+          const genIdempotencyKey = `daily_gen_${brandId}_${unusedTopic.id}_${Date.now()}`;
+          await this.enqueueJob(
+            'GENERATE_SCRIPT',
+            { brandId, topicId: unusedTopic.id },
+            genIdempotencyKey
+          );
+          console.log(`[Queue] Enqueued daily script generation for topic "${unusedTopic.title}".`);
           break;
         }
       }

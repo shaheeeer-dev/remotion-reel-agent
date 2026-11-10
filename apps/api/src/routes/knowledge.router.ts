@@ -6,7 +6,7 @@ export const knowledgeRouter = Router({ mergeParams: true });
 // GET /api/v1/brands/:brandId/knowledge
 knowledgeRouter.get('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params;
+    const { brandId } = req.params as { brandId: string };
     const documents = await prisma.knowledgeDocument.findMany({
       where: { brandId },
       orderBy: { createdAt: 'desc' },
@@ -20,7 +20,7 @@ knowledgeRouter.get('/', async (req, res, next) => {
 // POST /api/v1/brands/:brandId/knowledge
 knowledgeRouter.post('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params;
+    const { brandId } = req.params as { brandId: string };
     const { title, category, source, content, isApproved } = req.body;
 
     const doc = await prisma.knowledgeDocument.create({

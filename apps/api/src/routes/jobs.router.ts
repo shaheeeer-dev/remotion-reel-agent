@@ -3,6 +3,20 @@ import { prisma } from '../prisma/client.js';
 
 export const jobsRouter = Router();
 
+// GET /api/v1/jobs
+jobsRouter.get('/', async (req, res, next) => {
+  try {
+    const jobs = await prisma.jobRun.findMany({
+      include: { brand: true, reel: true },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+    res.json({ data: jobs });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/v1/jobs/:jobId
 jobsRouter.get('/:jobId', async (req, res, next) => {
   try {

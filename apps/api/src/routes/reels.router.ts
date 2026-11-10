@@ -10,7 +10,7 @@ export const reelsRouter = Router();
 export const brandReelsRouter = Router({ mergeParams: true });
 brandReelsRouter.get('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params;
+    const { brandId } = req.params as { brandId: string };
     const { status } = req.query;
 
     const reels = await prisma.reel.findMany({
@@ -124,7 +124,10 @@ reelsRouter.post('/:reelId/publish', async (req, res, next) => {
 reelsRouter.post('/:reelId/retry', async (req, res, next) => {
   try {
     const { reelId } = req.params;
-    const reel = await prisma.reel.findUniqueOrThrow({ where: { id: reelId } });
+    const reel = await prisma.reel.findUniqueOrThrow({
+      where: { id: reelId },
+      include: { mediaAssets: true },
+    });
 
     const idempotencyKey = `retry_${reelId}_${Date.now()}`;
     // If it failed at render or publish, re-enqueue appropriate step

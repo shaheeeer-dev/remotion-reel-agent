@@ -96,7 +96,7 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
           {/* Prompt + Command */}
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
             <span style={{ color: defaultTheme.colors.primary, fontWeight: 700 }}>
-              learnops@vps:~$
+              {scene.promptUser || 'devops@cloud-vps:~$'}
             </span>
             <span style={{ color: '#00E5FF', fontWeight: 600 }}>
               {displayedCommand}

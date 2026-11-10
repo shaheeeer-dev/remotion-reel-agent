@@ -1,16 +1,80 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Play, Sparkles, CheckCircle2, Film, Clock, ArrowRight } from 'lucide-react';
+import { Sparkles, CheckCircle2, Clock, ArrowRight, Server, WifiOff } from 'lucide-react';
 import { StatusBadge } from '../components/StatusBadge';
+import { fetchApi } from '../lib/api-client';
 
 export default function OverviewPage() {
+  const [isLiveApi, setIsLiveApi] = useState<boolean | null>(null);
+  const [liveStats, setLiveStats] = useState<{
+    reelsCount: number;
+    topicsCount: number;
+    docsCount: number;
+  }>({
+    reelsCount: 3,
+    topicsCount: 4,
+    docsCount: 3,
+  });
+
+  useEffect(() => {
+    async function checkHealthAndLoad() {
+      try {
+        await fetchApi('/health');
+        setIsLiveApi(true);
+
+        const [brandsRes, topicsRes] = await Promise.allSettled([
+          fetchApi<{ data: any[] }>('/api/v1/brands'),
+          fetchApi<{ data: any[] }>('/api/v1/brands/learnops/topics'),
+        ]);
+
+        let reelsCount = 3;
+        let topicsCount = 4;
+        let docsCount = 3;
+
+        if (brandsRes.status === 'fulfilled' && brandsRes.value.data.length > 0) {
+          const brand = brandsRes.value.data[0];
+          const reelsRes = await fetchApi<{ data: any[] }>(`/api/v1/brands/${brand.id}/reels`).catch(() => null);
+          const docsRes = await fetchApi<{ data: any[] }>(`/api/v1/brands/${brand.id}/knowledge`).catch(() => null);
+          if (reelsRes?.data) reelsCount = reelsRes.data.length;
+          if (docsRes?.data) docsCount = docsRes.data.length;
+        }
+
+        if (topicsRes.status === 'fulfilled' && topicsRes.value.data) {
+          topicsCount = topicsRes.value.data.length;
+        }
+
+        setLiveStats({ reelsCount, topicsCount, docsCount });
+      } catch {
+        setIsLiveApi(false);
+      }
+    }
+
+    checkHealthAndLoad();
+  }, []);
+
   const stats = [
-    { label: 'Educational Reels', value: '3', note: 'Test 2 Compositions ready' },
-    { label: 'Approved Knowledge', value: '3 docs', note: 'Linux, Docker, CI/CD' },
-    { label: 'Topic Pool', value: '4 topics', note: '1 eligible for daily run' },
-    { label: 'Instagram Integration', value: 'Ready', note: 'Graph API container flow' },
+    {
+      label: 'Educational Reels',
+      value: String(liveStats.reelsCount),
+      note: '3 Test 2 Compositions',
+    },
+    {
+      label: 'Approved Knowledge',
+      value: `${liveStats.docsCount} docs`,
+      note: 'Linux, Docker, CI/CD',
+    },
+    {
+      label: 'Topic Pool',
+      value: `${liveStats.topicsCount} topics`,
+      note: 'Curated pool',
+    },
+    {
+      label: 'Instagram Pipeline',
+      value: 'Configured',
+      note: 'Awaiting verified token',
+    },
   ];
 
   const test2Videos = [
@@ -18,7 +82,7 @@ export default function OverviewPage() {
       title: 'Linux: What is the /etc Directory?',
       duration: '16s',
       category: 'Linux',
-      animation: 'Filesystem Tree & Terminal',
+      animation: 'Filesystem Tree & Terminal Demo',
       status: 'RENDERED',
     },
     {
@@ -39,12 +103,33 @@ export default function OverviewPage() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
+      {/* Live / Demo Mode Banner */}
+      <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#151D2A] border border-[#233044] text-xs">
+        <div className="flex items-center gap-2">
+          {isLiveApi ? (
+            <>
+              <Server className="w-4 h-4 text-emerald-400" />
+              <span className="font-semibold text-emerald-400">Live API Connected</span>
+              <span className="text-[#64748B]">— Backend online at http://localhost:4000</span>
+            </>
+          ) : (
+            <>
+              <WifiOff className="w-4 h-4 text-amber-400" />
+              <span className="font-semibold text-amber-400">Demo Preview Mode</span>
+              <span className="text-[#94A3B8]">
+                — API offline. Displaying verified reference data. Start API with <code className="text-white bg-black/40 px-1 py-0.5 rounded">npm run dev:api</code>.
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Top Welcome Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-8 rounded-2xl bg-gradient-to-r from-[#151D2A] to-[#1E293B] border border-[#233044]">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#6F41EC]/15 border border-[#6F41EC]/30 text-xs font-bold text-[#C4B5FD] mb-3">
             <Sparkles className="w-3.5 h-3.5 text-[#C4B5FD]" />
-            LearnOps First Release
+            Multi-Brand Social Reel Agent
           </div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">
             AI Social Media Manager
@@ -94,12 +179,12 @@ export default function OverviewPage() {
             </p>
           </div>
           <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            3 / 3 Implemented
+            3 / 3 Compositions Ready
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {test2Videos.map((video, idx) => (
+          {test2Videos.map((video) => (
             <div
               key={video.title}
               className="p-5 rounded-xl bg-[#0F1623] border border-[#233044] hover:border-[#6F41EC]/60 transition flex flex-col justify-between"
@@ -135,4 +220,3 @@ export default function OverviewPage() {
     </div>
   );
 }
-

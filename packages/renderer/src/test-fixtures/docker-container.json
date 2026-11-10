@@ -62,10 +62,11 @@
         "durationSeconds": 3,
         "brandName": "LearnOps",
         "tagline": "Master Linux & DevOps step by step",
-        "callToAction": "Follow @learnops for daily reels"
+        "callToAction": "Follow @learnops for daily reels",
+        "creatorCredit": "Rendered with Remotion Reel Agent"
       }
     ],
-    "caption": "A container is not a mini virtual machine. It's an isolated process powered by Linux namespaces and cgroups.",
+    "caption": "A container is not a mini virtual machine. It's an isolated process powered by Linux namespaces and cgroups (illustrative educational demonstration).",
     "hashtags": ["Docker", "Containers", "DevOps", "Linux", "LearnOps"]
   }
 }

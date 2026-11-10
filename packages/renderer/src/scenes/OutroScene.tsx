@@ -106,6 +106,21 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
         >
           {scene.callToAction}
         </div>
+
+        {/* Creator / Open Source Project Credit (Optional) */}
+        {scene.creatorCredit && (
+          <div
+            style={{
+              fontSize: '20px',
+              color: defaultTheme.colors.textMuted,
+              fontFamily: defaultTheme.fonts.mono,
+              letterSpacing: '0.04em',
+              marginTop: '4px',
+            }}
+          >
+            {scene.creatorCredit}
+          </div>
+        )}
       </div>
     </div>
   );

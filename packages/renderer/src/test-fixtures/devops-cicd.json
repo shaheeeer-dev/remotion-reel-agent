@@ -50,10 +50,11 @@
         "durationSeconds": 3,
         "brandName": "LearnOps",
         "tagline": "Master Linux & DevOps step by step",
-        "callToAction": "Follow @learnops for daily reels"
+        "callToAction": "Follow @learnops for daily reels",
+        "creatorCredit": "Rendered with Remotion Reel Agent"
       }
     ],
-    "caption": "CI/CD is the backbone of modern engineering. Push code, pass automated checks, ship to production with zero downtime.",
+    "caption": "CI/CD is the backbone of modern engineering. Push code, pass automated checks, ship to production safely (illustrative educational demonstration).",
     "hashtags": ["DevOps", "CICD", "Automation", "GitHubActions", "LearnOps"]
   }
 }

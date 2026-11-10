@@ -49,6 +49,7 @@ export const FolderTreeSceneSchema = BaseSceneSchema.extend({
 export const TerminalSceneSchema = BaseSceneSchema.extend({
   kind: z.literal(SCENE_KINDS.TERMINAL),
   title: z.string().max(60).default('bash — 80x24'),
+  promptUser: z.string().max(40).optional(),
   command: z.string().max(100),
   outputLines: z.array(z.string().max(120)).min(1).max(10),
   explanation: z.string().max(180),
@@ -90,6 +91,7 @@ export const OutroSceneSchema = BaseSceneSchema.extend({
   brandName: z.string().max(50).default('LearnOps'),
   tagline: z.string().max(100).default('Master Linux & DevOps step by step'),
   callToAction: z.string().max(120).default('Follow @learnops for daily reels'),
+  creatorCredit: z.string().max(100).optional(),
 });
 
 export const SceneSchema = z.discriminatedUnion('kind', [
@@ -102,12 +104,94 @@ export const SceneSchema = z.discriminatedUnion('kind', [
   OutroSceneSchema,
 ]);
 
-export type Scene = z.infer<typeof SceneSchema>;
-export type HookScene = z.infer<typeof HookSceneSchema>;
-export type KineticTypeScene = z.infer<typeof KineticTypeSceneSchema>;
-export type FolderTreeScene = z.infer<typeof FolderTreeSceneSchema>;
-export type TerminalScene = z.infer<typeof TerminalSceneSchema>;
-export type ContainerDiagramScene = z.infer<typeof ContainerDiagramSceneSchema>;
-export type PipelineScene = z.infer<typeof PipelineSceneSchema>;
-export type OutroScene = z.infer<typeof OutroSceneSchema>;
+export interface HookScene {
+  id?: string;
+  durationSeconds: number;
+  kind: 'hook';
+  badge: string;
+  headline: string;
+  subtext?: string;
+}
+
+export interface KineticTypeScene {
+  id?: string;
+  durationSeconds: number;
+  kind: 'kinetic_type';
+  phrases: string[];
+  emphasis: string;
+}
+
+export interface FolderTreeScene {
+  id?: string;
+  durationSeconds: number;
+  kind: 'folder_tree';
+  title: string;
+  rootPath: string;
+  highlightPath: string;
+  tree: FolderNode[];
+  explanation: string;
+}
+
+export interface TerminalScene {
+  id?: string;
+  durationSeconds: number;
+  kind: 'terminal';
+  title?: string;
+  promptUser?: string;
+  command: string;
+  outputLines: string[];
+  explanation: string;
+}
+
+export interface ContainerDiagramScene {
+  id?: string;
+  durationSeconds: number;
+  kind: 'container_diagram';
+  title: string;
+  hostOs: string;
+  containerEngine: string;
+  containers: Array<{
+    name: string;
+    app: string;
+    binsLibs: string;
+    color?: string;
+  }>;
+  comparisonNote?: string;
+}
+
+export interface PipelineStage {
+  name: string;
+  status: 'success' | 'running' | 'pending';
+  icon?: string;
+  details?: string;
+}
+
+export interface PipelineScene {
+  id?: string;
+  durationSeconds: number;
+  kind: 'pipeline';
+  title: string;
+  trigger: string;
+  stages: PipelineStage[];
+  takeaway: string;
+}
+
+export interface OutroScene {
+  id?: string;
+  durationSeconds: number;
+  kind: 'outro';
+  brandName: string;
+  tagline: string;
+  callToAction: string;
+  creatorCredit?: string;
+}
+
+export type Scene =
+  | HookScene
+  | KineticTypeScene
+  | FolderTreeScene
+  | TerminalScene
+  | ContainerDiagramScene
+  | PipelineScene
+  | OutroScene;
 

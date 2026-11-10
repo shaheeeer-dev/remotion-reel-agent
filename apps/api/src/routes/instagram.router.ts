@@ -1,31 +1,26 @@
 import { Router } from 'express';
 import { prisma } from '../prisma/client.js';
 import { instagramService } from '../services/instagram.service.js';
+import { encryptToken, sanitizeSocialAccount } from '../utils/crypto.js';
 
 export const instagramRouter = Router({ mergeParams: true });
 
 // GET /api/v1/brands/:brandId/integrations/instagram
 instagramRouter.get('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params;
+    const { brandId } = req.params as { brandId: string };
     const account = await prisma.socialAccount.findFirst({
       where: { brandId, platform: 'INSTAGRAM' },
-      select: {
-        id: true,
-        platform: true,
-        providerUserId: true,
-        accountUsername: true,
-        isConnected: true,
-        tokenExpiresAt: true,
-        createdAt: true,
-      },
     });
 
     if (!account) {
       return res.json({
         data: {
           isConnected: false,
-          eligibility: { isEligible: false, reasons: ['No Instagram account connected'] },
+          eligibility: {
+            isEligible: false,
+            reasons: ['No Instagram account connected for this brand.'],
+          },
         },
       });
     }
@@ -35,7 +30,7 @@ instagramRouter.get('/', async (req, res, next) => {
     res.json({
       data: {
         isConnected: account.isConnected,
-        account,
+        account: sanitizeSocialAccount(account),
         eligibility,
       },
     });
@@ -47,33 +42,44 @@ instagramRouter.get('/', async (req, res, next) => {
 // POST /api/v1/brands/:brandId/integrations/instagram/connect
 instagramRouter.post('/connect', async (req, res, next) => {
   try {
-    const { brandId } = req.params;
+    const { brandId } = req.params as { brandId: string };
     const { providerUserId, accountUsername, token } = req.body;
+
+    if (!providerUserId || !token) {
+      return res.status(400).json({
+        error: { message: 'providerUserId and valid token are required to connect an Instagram account.' },
+      });
+    }
+
+    const encryptedToken = encryptToken(token);
 
     const account = await prisma.socialAccount.upsert({
       where: {
         brandId_platform_providerUserId: {
           brandId,
           platform: 'INSTAGRAM',
-          providerUserId: providerUserId || 'act_1029384756',
+          providerUserId,
         },
       },
       update: {
         isConnected: true,
-        accountUsername: accountUsername || 'learnops.io',
-        encryptedToken: token || 'mock_encrypted_token',
+        accountUsername: accountUsername || 'unnamed_account',
+        encryptedToken,
       },
       create: {
         brandId,
         platform: 'INSTAGRAM',
-        providerUserId: providerUserId || 'act_1029384756',
-        accountUsername: accountUsername || 'learnops.io',
-        encryptedToken: token || 'mock_encrypted_token',
+        providerUserId,
+        accountUsername: accountUsername || 'unnamed_account',
+        encryptedToken,
         isConnected: true,
       },
     });
 
-    res.json({ message: 'Instagram account connected', data: account });
+    res.json({
+      message: 'Instagram account connected securely',
+      data: sanitizeSocialAccount(account),
+    });
   } catch (err) {
     next(err);
   }
@@ -82,7 +88,7 @@ instagramRouter.post('/connect', async (req, res, next) => {
 // DELETE /api/v1/brands/:brandId/integrations/instagram
 instagramRouter.delete('/', async (req, res, next) => {
   try {
-    const { brandId } = req.params;
+    const { brandId } = req.params as { brandId: string };
     await prisma.socialAccount.deleteMany({
       where: { brandId, platform: 'INSTAGRAM' },
     });
@@ -91,4 +97,3 @@ instagramRouter.delete('/', async (req, res, next) => {
     next(err);
   }
 });
-

@@ -111,25 +111,25 @@ async function main() {
   }
   console.log(`✅ ${topics.length} initial topics created.`);
 
-  // 4. Create connected social account placeholder
+  // 4. Create social account entry (unconnected by default until real credentials provided)
   await prisma.socialAccount.upsert({
     where: {
       brandId_platform_providerUserId: {
         brandId: brand.id,
         platform: 'INSTAGRAM',
-        providerUserId: 'learnops_official_ig',
+        providerUserId: 'pending_setup',
       },
     },
     update: {},
     create: {
       brandId: brand.id,
       platform: 'INSTAGRAM',
-      providerUserId: 'learnops_official_ig',
-      accountUsername: 'learnops.io',
-      isConnected: true,
+      providerUserId: 'pending_setup',
+      accountUsername: 'learnops',
+      isConnected: false,
     },
   });
-  console.log('✅ Social account placeholder seeded.');
+  console.log('✅ Social account initialized as unconnected.');
 
   console.log('🎉 Seeding completed successfully.');
 }

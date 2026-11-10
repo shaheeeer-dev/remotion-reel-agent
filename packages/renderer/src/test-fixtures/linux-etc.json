@@ -59,10 +59,11 @@
         "durationSeconds": 3,
         "brandName": "LearnOps",
         "tagline": "Master Linux & DevOps step by step",
-        "callToAction": "Follow @learnops for daily reels"
+        "callToAction": "Follow @learnops for daily reels",
+        "creatorCredit": "Rendered with Remotion Reel Agent"
       }
     ],
-    "caption": "Ever wondered where Linux keeps all its system settings? Meet /etc — the heart of host configuration.",
+    "caption": "Ever wondered where Linux keeps all its system settings? Meet /etc — the heart of host configuration (illustrative educational demonstration).",
     "hashtags": ["Linux", "DevOps", "SysAdmin", "LearnOps", "Terminal"]
   }
 }
