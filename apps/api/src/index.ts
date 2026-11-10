@@ -6,3 +6,4 @@ app.listen(env.API_PORT, () => {
   console.log(`📁 Media assets served at http://localhost:${env.API_PORT}/media`);
   console.log(`🩺 Healthcheck: http://localhost:${env.API_PORT}/health`);
 });
+

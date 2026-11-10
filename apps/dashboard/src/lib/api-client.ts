@@ -17,3 +17,4 @@ export async function fetchApi<T>(endpoint: string, options?: RequestInit): Prom
 
   return res.json();
 }
+

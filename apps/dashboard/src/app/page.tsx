@@ -42,8 +42,8 @@ export default function OverviewPage() {
       {/* Top Welcome Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-8 rounded-2xl bg-gradient-to-r from-[#151D2A] to-[#1E293B] border border-[#233044]">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF6B00]/15 border border-[#FF6B00]/30 text-xs font-bold text-[#FF6B00] mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#6F41EC]/15 border border-[#6F41EC]/30 text-xs font-bold text-[#C4B5FD] mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-[#C4B5FD]" />
             LearnOps First Release
           </div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">
@@ -57,7 +57,7 @@ export default function OverviewPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/topics"
-            className="px-5 py-2.5 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white text-sm font-bold shadow-lg shadow-[#FF6B00]/30 transition"
+            className="px-5 py-2.5 rounded-xl bg-[#6F41EC] hover:bg-[#825CF0] text-white text-sm font-bold shadow-lg shadow-[#6F41EC]/30 transition"
           >
             Generate New Reel
           </Link>
@@ -102,11 +102,11 @@ export default function OverviewPage() {
           {test2Videos.map((video, idx) => (
             <div
               key={video.title}
-              className="p-5 rounded-xl bg-[#0F1623] border border-[#233044] hover:border-[#FF6B00]/50 transition flex flex-col justify-between"
+              className="p-5 rounded-xl bg-[#0F1623] border border-[#233044] hover:border-[#6F41EC]/60 transition flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between text-xs mb-3">
-                  <span className="font-bold text-[#FF6B00] uppercase tracking-wider">{video.category}</span>
+                  <span className="font-bold text-[#C4B5FD] uppercase tracking-wider">{video.category}</span>
                   <StatusBadge status={video.status} />
                 </div>
                 <h3 className="font-bold text-white text-base leading-snug">{video.title}</h3>
@@ -123,7 +123,7 @@ export default function OverviewPage() {
                 </span>
                 <Link
                   href="/reels"
-                  className="text-[#FF6B00] hover:text-[#FF8533] font-bold flex items-center gap-1"
+                  className="text-[#C4B5FD] hover:text-white font-bold flex items-center gap-1"
                 >
                   Inspect <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -135,3 +135,4 @@ export default function OverviewPage() {
     </div>
   );
 }
+

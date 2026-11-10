@@ -30,7 +30,7 @@ export const Sidebar: React.FC = () => {
       <div>
         {/* Brand Header */}
         <div className="h-20 flex items-center px-6 gap-3 border-b border-[#233044]">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#FF6B00] to-[#FF8533] flex items-center justify-center font-black text-white text-lg shadow-lg shadow-[#FF6B00]/30">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#6F41EC] to-[#825CF0] flex items-center justify-center font-black text-white text-lg shadow-lg shadow-[#6F41EC]/30">
             L
           </div>
           <div>
@@ -50,7 +50,7 @@ export const Sidebar: React.FC = () => {
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'bg-[#FF6B00] text-white shadow-md shadow-[#FF6B00]/25'
+                    ? 'bg-[#6F41EC] text-white shadow-md shadow-[#6F41EC]/25'
                     : 'text-[#94A3B8] hover:bg-[#151D2A] hover:text-white'
                 }`}
               >
@@ -64,7 +64,7 @@ export const Sidebar: React.FC = () => {
 
       {/* Footer Info */}
       <div className="p-4 border-t border-[#233044] m-4 rounded-xl bg-[#151D2A]">
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#FF6B00] mb-1">
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#C4B5FD] mb-1">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Gemini Free Tier</span>
         </div>
@@ -75,3 +75,4 @@ export const Sidebar: React.FC = () => {
     </aside>
   );
 };
+

@@ -37,7 +37,7 @@ export default function KnowledgePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-[#FF6B00]" />
+            <BookOpen className="w-6 h-6 text-[#C4B5FD]" />
             Knowledge Base
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1">
@@ -45,7 +45,7 @@ export default function KnowledgePage() {
           </p>
         </div>
 
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white text-sm font-bold shadow-lg shadow-[#FF6B00]/30 transition">
+        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6F41EC] hover:bg-[#825CF0] text-white text-sm font-bold shadow-lg shadow-[#6F41EC]/30 transition">
           <Plus className="w-4 h-4" />
           Add Document
         </button>
@@ -59,7 +59,7 @@ export default function KnowledgePage() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold text-[#FF6B00] uppercase tracking-wider">
+                <span className="text-xs font-bold text-[#C4B5FD] uppercase tracking-wider">
                   {doc.category}
                 </span>
                 <h3 className="text-lg font-bold text-white mt-1">{doc.title}</h3>
@@ -83,3 +83,4 @@ export default function KnowledgePage() {
     </div>
   );
 }
+

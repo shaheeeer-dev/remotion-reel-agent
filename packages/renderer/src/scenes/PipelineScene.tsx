@@ -169,7 +169,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                     backgroundColor: isFinished
                       ? defaultTheme.colors.success
                       : isStarted
-                      ? 'rgba(255, 107, 0, 0.2)'
+                      ? 'rgba(111, 65, 236, 0.25)'
                       : 'rgba(255, 255, 255, 0.05)',
                     border: `2px solid ${statusColor}`,
                     display: 'flex',
@@ -218,7 +218,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                   backgroundColor: isFinished
                     ? 'rgba(16, 185, 129, 0.15)'
                     : isStarted
-                    ? 'rgba(255, 107, 0, 0.15)'
+                    ? 'rgba(111, 65, 236, 0.2)'
                     : 'rgba(255, 255, 255, 0.05)',
                   border: `1.5px solid ${statusColor}`,
                   color: statusColor,

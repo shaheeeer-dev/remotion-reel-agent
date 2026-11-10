@@ -197,8 +197,8 @@ export class QueueService {
             reelId: reel.id,
             brand: {
               name: reel.brand.displayName,
-              primaryColor: reel.brand.profile?.primaryColor || '#FF6B00',
-              secondaryColor: reel.brand.profile?.secondaryColor || '#FFFFFF',
+              primaryColor: reel.brand.profile?.primaryColor || '#6F41EC',
+              secondaryColor: reel.brand.profile?.secondaryColor || '#C4B5FD',
               backgroundColor: reel.brand.profile?.bgColor || '#0B0F17',
               cardBackground: '#151D2A',
               textColor: '#F8FAFC',

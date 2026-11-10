@@ -57,7 +57,7 @@ export default function TopicsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <ListTodo className="w-6 h-6 text-[#FF6B00]" />
+            <ListTodo className="w-6 h-6 text-[#C4B5FD]" />
             Topic Pool
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1">
@@ -65,7 +65,7 @@ export default function TopicsPage() {
           </p>
         </div>
 
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white text-sm font-bold shadow-lg shadow-[#FF6B00]/30 transition">
+        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6F41EC] hover:bg-[#825CF0] text-white text-sm font-bold shadow-lg shadow-[#6F41EC]/30 transition">
           <Plus className="w-4 h-4" />
           Add Topic
         </button>
@@ -75,11 +75,11 @@ export default function TopicsPage() {
         {topics.map((t) => (
           <div
             key={t.id}
-            className="p-6 rounded-2xl bg-[#151D2A] border border-[#233044] flex flex-col justify-between hover:border-[#FF6B00]/40 transition"
+            className="p-6 rounded-2xl bg-[#151D2A] border border-[#233044] flex flex-col justify-between hover:border-[#6F41EC]/50 transition"
           >
             <div>
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-bold text-[#FF6B00] uppercase tracking-wider">{t.category}</span>
+                <span className="font-bold text-[#C4B5FD] uppercase tracking-wider">{t.category}</span>
                 {t.isUsed ? (
                   <span className="flex items-center gap-1 text-emerald-400 font-semibold">
                     <Check className="w-3.5 h-3.5" /> Used in Reel
@@ -98,9 +98,9 @@ export default function TopicsPage() {
               <button
                 onClick={() => handleGenerate(t.id)}
                 disabled={isGenerating === t.id}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#233044] hover:bg-[#FF6B00] text-white text-xs font-bold transition disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#233044] hover:bg-[#6F41EC] text-white text-xs font-bold transition disabled:opacity-50"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#FF6B00]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#C4B5FD]" />
                 {isGenerating === t.id ? 'Enqueuing...' : 'Generate Reel Script'}
               </button>
             </div>
@@ -110,3 +110,4 @@ export default function TopicsPage() {
     </div>
   );
 }
+

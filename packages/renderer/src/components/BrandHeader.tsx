@@ -46,9 +46,9 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
           style={{
             width: `${progress}%`,
             height: '100%',
-            background: `linear-gradient(90deg, ${defaultTheme.colors.primary}, #FFA040)`,
+            background: `linear-gradient(90deg, ${defaultTheme.colors.primary}, ${defaultTheme.colors.secondary})`,
             borderRadius: '999px',
-            boxShadow: `0 0 12px ${defaultTheme.colors.primaryGlow}`,
+            boxShadow: `0 0 16px ${defaultTheme.colors.primaryGlow}`,
           }}
         />
       </div>
@@ -74,7 +74,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
               width: '44px',
               height: '44px',
               borderRadius: '12px',
-              background: `linear-gradient(135deg, ${defaultTheme.colors.primary}, #E05300)`,
+              background: `linear-gradient(135deg, ${defaultTheme.colors.primary}, #5528D4)`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -105,9 +105,9 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
           style={{
             padding: '10px 22px',
             borderRadius: '999px',
-            backgroundColor: 'rgba(255, 107, 0, 0.12)',
+            backgroundColor: 'rgba(111, 65, 236, 0.15)',
             border: `1.5px solid ${defaultTheme.colors.primary}`,
-            color: defaultTheme.colors.primary,
+            color: defaultTheme.colors.secondary,
             fontSize: '22px',
             fontWeight: 700,
             textTransform: 'uppercase',

@@ -42,7 +42,7 @@ export default function JobsPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-          <Layers className="w-6 h-6 text-[#FF6B00]" />
+          <Layers className="w-6 h-6 text-[#C4B5FD]" />
           Job Queue & Execution Log
         </h1>
         <p className="text-sm text-[#94A3B8] mt-1">
@@ -86,3 +86,4 @@ export default function JobsPage() {
     </div>
   );
 }
+

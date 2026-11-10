@@ -46,7 +46,7 @@ export default function ReelsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <Film className="w-6 h-6 text-[#FF6B00]" />
+            <Film className="w-6 h-6 text-[#C4B5FD]" />
             Reels Studio
           </h1>
           <p className="text-sm text-[#94A3B8] mt-1">
@@ -61,7 +61,7 @@ export default function ReelsPage() {
               onClick={() => setSelectedFilter(filter)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 selectedFilter === filter
-                  ? 'bg-[#FF6B00] text-white'
+                  ? 'bg-[#6F41EC] text-white shadow-md shadow-[#6F41EC]/30'
                   : 'bg-[#151D2A] text-[#94A3B8] hover:bg-[#233044]'
               }`}
             >
@@ -102,7 +102,7 @@ export default function ReelsPage() {
                   <div className="flex items-center justify-end gap-2">
                     <button
                       title="Render video"
-                      className="p-2 rounded-lg bg-[#233044] hover:bg-[#FF6B00] text-white transition"
+                      className="p-2 rounded-lg bg-[#233044] hover:bg-[#6F41EC] text-white transition"
                     >
                       <Play className="w-4 h-4" />
                     </button>
@@ -128,3 +128,4 @@ export default function ReelsPage() {
     </div>
   );
 }
+

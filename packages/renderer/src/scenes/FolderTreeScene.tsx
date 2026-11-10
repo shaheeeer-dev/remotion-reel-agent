@@ -129,12 +129,12 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                     padding: '16px 24px',
                     borderRadius: '16px',
                     backgroundColor: isHighlighted
-                      ? 'rgba(255, 107, 0, 0.15)'
+                      ? 'rgba(111, 65, 236, 0.18)'
                       : 'rgba(255, 255, 255, 0.03)',
                     border: isHighlighted
                       ? `2px solid ${defaultTheme.colors.primary}`
                       : '1px solid rgba(255, 255, 255, 0.08)',
-                    boxShadow: isHighlighted ? `0 0 24px ${defaultTheme.colors.primaryGlow}` : 'none',
+                    boxShadow: isHighlighted ? `0 0 28px ${defaultTheme.colors.primaryGlow}` : 'none',
                   }}
                 >
                   <div
@@ -152,7 +152,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                         fontFamily: defaultTheme.fonts.mono,
                         fontSize: '32px',
                         fontWeight: isHighlighted ? 800 : 600,
-                        color: isHighlighted ? defaultTheme.colors.primary : defaultTheme.colors.textPrimary,
+                        color: isHighlighted ? defaultTheme.colors.secondary : defaultTheme.colors.textPrimary,
                       }}
                     >
                       {node.name}
@@ -163,7 +163,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                     <span
                       style={{
                         fontSize: '22px',
-                        color: isHighlighted ? '#FFA040' : defaultTheme.colors.textMuted,
+                        color: isHighlighted ? defaultTheme.colors.secondary : defaultTheme.colors.textMuted,
                         fontFamily: defaultTheme.fonts.body,
                         fontWeight: 600,
                         backgroundColor: 'rgba(0, 0, 0, 0.25)',
@@ -207,8 +207,8 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                             justifyContent: 'space-between',
                             padding: '12px 20px',
                             borderRadius: '12px',
-                            backgroundColor: 'rgba(255, 107, 0, 0.08)',
-                            border: `1px solid rgba(255, 107, 0, 0.3)`,
+                            backgroundColor: 'rgba(111, 65, 236, 0.1)',
+                            border: `1px solid rgba(111, 65, 236, 0.35)`,
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -252,8 +252,11 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
           marginTop: '36px',
           padding: '24px 32px',
           borderRadius: '20px',
-          backgroundColor: 'rgba(255, 107, 0, 0.1)',
+          backgroundColor: 'rgba(111, 65, 236, 0.12)',
           borderLeft: `6px solid ${defaultTheme.colors.primary}`,
+          borderTop: '1px solid rgba(111, 65, 236, 0.25)',
+          borderRight: '1px solid rgba(111, 65, 236, 0.25)',
+          borderBottom: '1px solid rgba(111, 65, 236, 0.25)',
           display: 'flex',
           alignItems: 'center',
           gap: '20px',

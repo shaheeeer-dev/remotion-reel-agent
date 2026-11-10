@@ -11,7 +11,7 @@ export default function BrandPage() {
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-          <Sliders className="w-6 h-6 text-[#FF6B00]" />
+          <Sliders className="w-6 h-6 text-[#C4B5FD]" />
           Brand Profile & Policies
         </h1>
         <p className="text-sm text-[#94A3B8] mt-1">
@@ -47,8 +47,16 @@ export default function BrandPage() {
           <div>
             <label className="block text-xs font-bold text-[#94A3B8] uppercase mb-1">Primary Color</label>
             <div className="flex items-center gap-3 bg-[#0F1623] border border-[#233044] rounded-xl p-2 px-4">
-              <span className="w-6 h-6 rounded-lg bg-[#FF6B00] border border-white/20" />
-              <span className="font-mono text-white">#FF6B00 (LearnOps Vibrant Orange)</span>
+              <span className="w-6 h-6 rounded-lg bg-[#6F41EC] border border-white/20 shadow-sm shadow-[#6F41EC]" />
+              <span className="font-mono text-white">#6F41EC (LearnOps Electric Purple)</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-[#94A3B8] uppercase mb-1">Secondary Accent</label>
+            <div className="flex items-center gap-3 bg-[#0F1623] border border-[#233044] rounded-xl p-2 px-4">
+              <span className="w-6 h-6 rounded-lg bg-[#C4B5FD] border border-white/20" />
+              <span className="font-mono text-white">#C4B5FD (LearnOps Lavender)</span>
             </div>
           </div>
 
@@ -80,7 +88,7 @@ export default function BrandPage() {
           <button
             onClick={() => setAutoPublish(!autoPublish)}
             className={`w-12 h-6 flex items-center rounded-full p-1 transition duration-300 ${
-              autoPublish ? 'bg-[#FF6B00]' : 'bg-[#233044]'
+              autoPublish ? 'bg-[#6F41EC]' : 'bg-[#233044]'
             }`}
           >
             <div
@@ -102,7 +110,7 @@ export default function BrandPage() {
                 onClick={() => setDefaultDuration(dur)}
                 className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
                   defaultDuration === dur
-                    ? 'bg-[#FF6B00] text-white shadow-md shadow-[#FF6B00]/20'
+                    ? 'bg-[#6F41EC] text-white shadow-md shadow-[#6F41EC]/20'
                     : 'bg-[#0F1623] border border-[#233044] text-[#94A3B8] hover:bg-[#1E293B]'
                 }`}
               >
@@ -139,3 +147,4 @@ export default function BrandPage() {
     </div>
   );
 }
+

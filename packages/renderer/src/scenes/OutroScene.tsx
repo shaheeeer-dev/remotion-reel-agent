@@ -51,7 +51,7 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
             width: '100px',
             height: '100px',
             borderRadius: '28px',
-            background: `linear-gradient(135deg, ${defaultTheme.colors.primary}, #E05300)`,
+            background: `linear-gradient(135deg, ${defaultTheme.colors.primary}, #5528D4)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

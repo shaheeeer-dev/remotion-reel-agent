@@ -28,8 +28,8 @@ export const ReelRenderInputSchema = z.object({
   reelId: z.string().optional(),
   brand: z.object({
     name: z.string().default('LearnOps'),
-    primaryColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#FF6B00'),
-    secondaryColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#FFFFFF'),
+    primaryColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#6F41EC'),
+    secondaryColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#C4B5FD'),
     backgroundColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#0D1117'),
     cardBackground: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#161B22'),
     textColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#E6EDF3'),

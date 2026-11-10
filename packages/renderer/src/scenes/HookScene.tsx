@@ -55,9 +55,9 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
           gap: '12px',
           padding: '16px 36px',
           borderRadius: '999px',
-          background: 'rgba(255, 107, 0, 0.15)',
+          background: 'rgba(111, 65, 236, 0.18)',
           border: `2px solid ${defaultTheme.colors.primary}`,
-          boxShadow: `0 0 30px ${defaultTheme.colors.primaryGlow}`,
+          boxShadow: `0 0 35px ${defaultTheme.colors.primaryGlow}`,
           marginBottom: '50px',
         }}
       >
@@ -67,14 +67,14 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
             height: '12px',
             borderRadius: '50%',
             backgroundColor: defaultTheme.colors.primary,
-            boxShadow: `0 0 10px ${defaultTheme.colors.primary}`,
+            boxShadow: `0 0 12px ${defaultTheme.colors.primary}`,
           }}
         />
         <span
           style={{
             fontSize: '28px',
             fontWeight: 800,
-            color: defaultTheme.colors.primary,
+            color: defaultTheme.colors.secondary,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
             fontFamily: defaultTheme.fonts.heading,

@@ -11,8 +11,8 @@ export const BrandProfileSchema = z.object({
   voiceTone: z.string().max(250),
   contentPillars: z.array(z.string().max(60)).min(1).max(10),
   theme: z.object({
-    primaryColor: z.string().default('#FF6B00'),
-    secondaryColor: z.string().default('#FFFFFF'),
+    primaryColor: z.string().default('#6F41EC'),
+    secondaryColor: z.string().default('#C4B5FD'),
     backgroundColor: z.string().default('#0D1117'),
     cardBackground: z.string().default('#161B22'),
     textColor: z.string().default('#E6EDF3'),

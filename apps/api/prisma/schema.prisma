@@ -36,8 +36,8 @@ model BrandProfile {
   audience       String
   voiceTone      String
   contentPillars String[]
-  primaryColor   String   @default("#FF6B00")
-  secondaryColor String   @default("#FFFFFF")
+  primaryColor   String   @default("#6F41EC")
+  secondaryColor String   @default("#C4B5FD")
   bgColor        String   @default("#0B0F17")
   logoUrl        String?
   fontFamily     String   @default("Inter")

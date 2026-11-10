@@ -8,8 +8,10 @@ export const defaultTheme = {
     // Official LearnOps branding
     primary: '#6F41EC',
     primaryHover: '#825CF0',
+    primaryDark: '#5528D4',
     primaryGlow: 'rgba(111, 65, 236, 0.35)',
     secondary: '#C4B5FD',
+    secondaryGlow: 'rgba(196, 181, 253, 0.35)',
 
     // Text
     textPrimary: '#F8FAFC',

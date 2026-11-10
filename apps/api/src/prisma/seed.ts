@@ -21,8 +21,8 @@ async function main() {
           audience: 'Beginner to intermediate Linux & DevOps engineers, sysadmins, and software developers',
           voiceTone: 'Practical, concise, technically rigorous, visually clear, encouraging',
           contentPillars: ['Linux Essentials', 'Docker Architecture', 'CI/CD Automation', 'Kubernetes'],
-          primaryColor: '#FF6B00',
-          secondaryColor: '#FFFFFF',
+          primaryColor: '#6F41EC',
+          secondaryColor: '#C4B5FD',
           bgColor: '#0B0F17',
           fontFamily: 'Inter',
         },
@@ -142,3 +142,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
