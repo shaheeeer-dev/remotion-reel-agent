@@ -1,0 +1,21 @@
+{
+  "name": "remotion-reel-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Social Media Manager for automated educational Instagram Reels",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run --workspaces --if-present build",
+    "dev:api": "npm --workspace=@learnops/api run dev",
+    "dev:dashboard": "npm --workspace=@learnops/dashboard run dev",
+    "render:test2": "npm --workspace=@learnops/renderer run render:test2",
+    "prisma:generate": "npm --workspace=@learnops/api run prisma:generate",
+    "prisma:seed": "npm --workspace=@learnops/api run seed"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
