@@ -1,9 +1,10 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { defaultTheme } from '../styles/theme.js';
+import { useBrandTheme } from '../styles/theme.js';
 import type { ContainerDiagramScene as ContainerDiagramSceneType } from '@learnops/schema';
 
 export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType }> = ({ scene }) => {
+  const theme = useBrandTheme();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -58,7 +59,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
             color: '#00E5FF',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
-            fontFamily: defaultTheme.fonts.heading,
+            fontFamily: theme.fonts.heading,
           }}
         >
           Docker Core Architecture
@@ -67,9 +68,9 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           style={{
             fontSize: '52px',
             fontWeight: 800,
-            color: defaultTheme.colors.textPrimary,
+            color: theme.colors.textPrimary,
             marginTop: '8px',
-            fontFamily: defaultTheme.fonts.heading,
+            fontFamily: theme.fonts.heading,
             letterSpacing: '-0.02em',
           }}
         >
@@ -107,13 +108,13 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                   transform: `translateY(${(1 - containerSpring) * 40}px) scale(${containerSpring})`,
                   opacity: containerSpring,
                   backgroundColor: 'rgba(21, 29, 42, 0.95)',
-                  border: `2px solid ${defaultTheme.colors.primary}`,
+                  border: `2px solid ${theme.colors.primary}`,
                   borderRadius: '20px',
                   padding: '24px 20px',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '14px',
-                  boxShadow: `0 10px 30px ${defaultTheme.colors.primaryGlow}`,
+                  boxShadow: `0 10px 30px ${theme.colors.primaryGlow}`,
                   position: 'relative',
                   overflow: 'hidden',
                 }}
@@ -125,12 +126,12 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                     padding: '4px 12px',
                     borderRadius: '6px',
                     backgroundColor: 'rgba(111, 65, 236, 0.2)',
-                    color: defaultTheme.colors.secondary,
+                    color: theme.colors.secondary,
                     border: `1px solid rgba(111, 65, 236, 0.4)`,
                     fontSize: '18px',
                     fontWeight: 700,
                     textTransform: 'uppercase',
-                    fontFamily: defaultTheme.fonts.mono,
+                    fontFamily: theme.fonts.mono,
                   }}
                 >
                   Isolated
@@ -146,13 +147,13 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                   }}
                 >
-                  <div style={{ fontSize: '20px', color: defaultTheme.colors.textMuted }}>Application</div>
+                  <div style={{ fontSize: '20px', color: theme.colors.textMuted }}>Application</div>
                   <div
                     style={{
                       fontSize: '26px',
                       fontWeight: 800,
                       color: '#FFFFFF',
-                      fontFamily: defaultTheme.fonts.heading,
+                      fontFamily: theme.fonts.heading,
                       marginTop: '4px',
                     }}
                   >
@@ -176,7 +177,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                       fontSize: '22px',
                       fontWeight: 600,
                       color: '#E2E8F0',
-                      fontFamily: defaultTheme.fonts.mono,
+                      fontFamily: theme.fonts.mono,
                       marginTop: '2px',
                     }}
                   >
@@ -189,8 +190,8 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                   style={{
                     textAlign: 'center',
                     fontSize: '20px',
-                    color: defaultTheme.colors.textSecondary,
-                    fontFamily: defaultTheme.fonts.mono,
+                    color: theme.colors.textSecondary,
+                    fontFamily: theme.fonts.mono,
                     fontWeight: 600,
                   }}
                 >
@@ -224,12 +225,12 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                   fontSize: '30px',
                   fontWeight: 800,
                   color: '#FFFFFF',
-                  fontFamily: defaultTheme.fonts.heading,
+                  fontFamily: theme.fonts.heading,
                 }}
               >
                 {scene.containerEngine}
               </div>
-              <div style={{ fontSize: '20px', color: '#00E5FF', fontFamily: defaultTheme.fonts.body }}>
+              <div style={{ fontSize: '20px', color: '#00E5FF', fontFamily: theme.fonts.body }}>
                 Container Runtime & Image Layer Management
               </div>
             </div>
@@ -242,7 +243,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
               color: '#FFFFFF',
               fontSize: '20px',
               fontWeight: 700,
-              fontFamily: defaultTheme.fonts.mono,
+              fontFamily: theme.fonts.mono,
             }}
           >
             ACTIVE
@@ -271,12 +272,12 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                   fontSize: '30px',
                   fontWeight: 800,
                   color: '#FFFFFF',
-                  fontFamily: defaultTheme.fonts.heading,
+                  fontFamily: theme.fonts.heading,
                 }}
               >
                 {scene.hostOs}
               </div>
-              <div style={{ fontSize: '20px', color: defaultTheme.colors.textMuted, fontFamily: defaultTheme.fonts.mono }}>
+              <div style={{ fontSize: '20px', color: theme.colors.textMuted, fontFamily: theme.fonts.mono }}>
                 Shared Linux Kernel • Namespaces (Isolation) • cgroups (Resource Limits)
               </div>
             </div>
@@ -292,7 +293,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
             padding: '24px 32px',
             borderRadius: '20px',
             backgroundColor: 'rgba(111, 65, 236, 0.12)',
-            borderLeft: `6px solid ${defaultTheme.colors.primary}`,
+            borderLeft: `6px solid ${theme.colors.primary}`,
             borderTop: '1px solid rgba(111, 65, 236, 0.25)',
             borderRight: '1px solid rgba(111, 65, 236, 0.25)',
             borderBottom: '1px solid rgba(111, 65, 236, 0.25)',
@@ -306,8 +307,8 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
             style={{
               fontSize: '28px',
               lineHeight: 1.4,
-              color: defaultTheme.colors.textPrimary,
-              fontFamily: defaultTheme.fonts.body,
+              color: theme.colors.textPrimary,
+              fontFamily: theme.fonts.body,
               fontWeight: 500,
             }}
           >

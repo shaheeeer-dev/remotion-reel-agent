@@ -1,8 +1,9 @@
 import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
-import { defaultTheme } from '../styles/theme.js';
+import { useBrandTheme } from '../styles/theme.js';
 
 export const BackgroundGrid: React.FC = () => {
+  const theme = useBrandTheme();
   const frame = useCurrentFrame();
 
   const glowOpacity = interpolate(
@@ -16,7 +17,7 @@ export const BackgroundGrid: React.FC = () => {
       style={{
         position: 'absolute',
         inset: 0,
-        backgroundColor: defaultTheme.colors.bg,
+        backgroundColor: theme.colors.bg,
         overflow: 'hidden',
         zIndex: 0,
       }}
@@ -31,7 +32,7 @@ export const BackgroundGrid: React.FC = () => {
           width: '1200px',
           height: '1200px',
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${defaultTheme.colors.primaryGlow} 0%, transparent 65%)`,
+          background: `radial-gradient(circle, ${theme.colors.primaryGlow} 0%, transparent 65%)`,
           opacity: glowOpacity,
           pointerEvents: 'none',
         }}
@@ -45,7 +46,7 @@ export const BackgroundGrid: React.FC = () => {
           width: '900px',
           height: '900px',
           borderRadius: '50%',
-          background: `radial-gradient(circle, rgba(0, 229, 255, 0.12) 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${theme.colors.secondarySurface} 0%, transparent 70%)`,
           pointerEvents: 'none',
         }}
       />

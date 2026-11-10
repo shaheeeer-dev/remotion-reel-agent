@@ -27,14 +27,15 @@ export type ReelScript = z.infer<typeof ReelScriptSchema>;
 export const ReelRenderInputSchema = z.object({
   reelId: z.string().optional(),
   brand: z.object({
-    name: z.string().default('LearnOps'),
+    name: z.string().default('Brand'),
     primaryColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#6F41EC'),
     secondaryColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#C4B5FD'),
     backgroundColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#0D1117'),
     cardBackground: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#161B22'),
     textColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/).default('#E6EDF3'),
+    creatorCredit: z.string().url().optional(),
   }).default({
-    name: 'LearnOps',
+    name: 'Brand',
     primaryColor: '#6F41EC',
     secondaryColor: '#C4B5FD',
     backgroundColor: '#0B0F17',

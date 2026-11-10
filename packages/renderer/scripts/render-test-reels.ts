@@ -1,19 +1,32 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function main() {
   console.log('🚀 Starting Test 2: Multi-Topic Remotion Renderer Validation\n');
 
-  const entryPoint = path.resolve(process.cwd(), 'src/index.ts');
-  const outputDir = path.resolve(process.cwd(), '../../renders/test2');
+  const entryPoint = path.resolve(__dirname, '../src/index.ts');
+  const rootDir = path.resolve(__dirname, '../../../');
+  const outputDir = path.resolve(rootDir, 'renders/test2');
   await fs.mkdir(outputDir, { recursive: true });
 
   console.log(`📦 Bundling Remotion project from ${entryPoint}...`);
   const bundleLocation = await bundle({
     entryPoint,
-    webpackOverride: (config) => config,
+    webpackOverride: (config) => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        extensionAlias: {
+          '.js': ['.ts', '.tsx', '.js'],
+          '.jsx': ['.tsx', '.jsx'],
+        },
+      },
+    }),
   });
   console.log('✅ Bundle created successfully.\n');
 

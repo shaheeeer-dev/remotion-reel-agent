@@ -1,9 +1,10 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { defaultTheme } from '../styles/theme.js';
+import { useBrandTheme } from '../styles/theme.js';
 import type { HookScene as HookSceneType } from '@learnops/schema';
 
 export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
+  const theme = useBrandTheme();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -56,8 +57,8 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
           padding: '16px 36px',
           borderRadius: '999px',
           background: 'rgba(111, 65, 236, 0.18)',
-          border: `2px solid ${defaultTheme.colors.primary}`,
-          boxShadow: `0 0 35px ${defaultTheme.colors.primaryGlow}`,
+          border: `2px solid ${theme.colors.primary}`,
+          boxShadow: `0 0 35px ${theme.colors.primaryGlow}`,
           marginBottom: '50px',
         }}
       >
@@ -66,18 +67,18 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
             width: '12px',
             height: '12px',
             borderRadius: '50%',
-            backgroundColor: defaultTheme.colors.primary,
-            boxShadow: `0 0 12px ${defaultTheme.colors.primary}`,
+            backgroundColor: theme.colors.primary,
+            boxShadow: `0 0 12px ${theme.colors.primary}`,
           }}
         />
         <span
           style={{
             fontSize: '28px',
             fontWeight: 800,
-            color: defaultTheme.colors.secondary,
+            color: theme.colors.secondary,
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            fontFamily: defaultTheme.fonts.heading,
+            fontFamily: theme.fonts.heading,
           }}
         >
           {scene.badge}
@@ -92,8 +93,8 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
           fontSize: '72px',
           fontWeight: 900,
           lineHeight: 1.15,
-          color: defaultTheme.colors.textPrimary,
-          fontFamily: defaultTheme.fonts.heading,
+          color: theme.colors.textPrimary,
+          fontFamily: theme.fonts.heading,
           letterSpacing: '-0.03em',
           marginBottom: '40px',
           maxWidth: '920px',
@@ -110,13 +111,13 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
             opacity: subtextSpring,
             fontSize: '34px',
             lineHeight: 1.45,
-            color: defaultTheme.colors.textSecondary,
-            fontFamily: defaultTheme.fonts.body,
+            color: theme.colors.textSecondary,
+            fontFamily: theme.fonts.body,
             maxWidth: '820px',
             padding: '28px 40px',
             borderRadius: '20px',
             backgroundColor: 'rgba(21, 29, 42, 0.7)',
-            border: `1px solid ${defaultTheme.colors.bgCardBorder}`,
+            border: `1px solid ${theme.colors.bgCardBorder}`,
             backdropFilter: 'blur(10px)',
           }}
         >

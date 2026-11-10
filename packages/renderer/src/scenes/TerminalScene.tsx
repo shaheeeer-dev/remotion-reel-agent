@@ -1,9 +1,10 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { defaultTheme } from '../styles/theme.js';
+import { useBrandTheme } from '../styles/theme.js';
 import type { TerminalScene as TerminalSceneType } from '@learnops/schema';
 
 export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene }) => {
+  const theme = useBrandTheme();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -45,7 +46,7 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
         style={{
           transform: `scale(${windowSpring})`,
           opacity: windowSpring,
-          backgroundColor: defaultTheme.colors.terminalBg,
+          backgroundColor: theme.colors.terminalBg,
           border: '1.5px solid rgba(255, 255, 255, 0.15)',
           borderRadius: '24px',
           overflow: 'hidden',
@@ -55,7 +56,7 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
         {/* Terminal Title Bar */}
         <div
           style={{
-            backgroundColor: defaultTheme.colors.terminalBar,
+            backgroundColor: theme.colors.terminalBar,
             padding: '20px 24px',
             display: 'flex',
             alignItems: 'center',
@@ -73,11 +74,11 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
           <span
             style={{
               fontSize: '20px',
-              fontFamily: defaultTheme.fonts.mono,
-              color: defaultTheme.colors.textMuted,
+              fontFamily: theme.fonts.mono,
+              color: theme.colors.textMuted,
             }}
           >
-            {scene.title || 'learnops@cloud-vps: ~'}
+            {scene.title || 'user@host: ~'}
           </span>
 
           <div style={{ width: '56px' }} />
@@ -88,15 +89,15 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
           style={{
             padding: '36px',
             minHeight: '480px',
-            fontFamily: defaultTheme.fonts.mono,
+            fontFamily: theme.fonts.mono,
             fontSize: '28px',
             lineHeight: 1.6,
           }}
         >
           {/* Prompt + Command */}
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-            <span style={{ color: defaultTheme.colors.primary, fontWeight: 700 }}>
-              {scene.promptUser || 'devops@cloud-vps:~$'}
+            <span style={{ color: theme.colors.primary, fontWeight: 700 }}>
+              {scene.promptUser || 'user@host:~$'}
             </span>
             <span style={{ color: '#00E5FF', fontWeight: 600 }}>
               {displayedCommand}
@@ -107,7 +108,7 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
                   display: 'inline-block',
                   width: '14px',
                   height: '32px',
-                  backgroundColor: defaultTheme.colors.primary,
+                  backgroundColor: theme.colors.primary,
                   verticalAlign: 'middle',
                 }}
               />
@@ -163,7 +164,7 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
           padding: '24px 32px',
           borderRadius: '20px',
           backgroundColor: 'rgba(21, 29, 42, 0.85)',
-          border: `1.5px solid ${defaultTheme.colors.bgCardBorder}`,
+          border: `1.5px solid ${theme.colors.bgCardBorder}`,
           display: 'flex',
           alignItems: 'center',
           gap: '20px',
@@ -174,8 +175,8 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
           style={{
             fontSize: '28px',
             lineHeight: 1.4,
-            color: defaultTheme.colors.textPrimary,
-            fontFamily: defaultTheme.fonts.body,
+            color: theme.colors.textPrimary,
+            fontFamily: theme.fonts.body,
             fontWeight: 500,
           }}
         >

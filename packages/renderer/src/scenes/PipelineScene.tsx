@@ -1,9 +1,10 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { defaultTheme } from '../styles/theme.js';
+import { useBrandTheme } from '../styles/theme.js';
 import type { PipelineScene as PipelineSceneType } from '@learnops/schema';
 
 export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene }) => {
+  const theme = useBrandTheme();
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -41,10 +42,10 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           style={{
             fontSize: '24px',
             fontWeight: 700,
-            color: defaultTheme.colors.success,
+            color: theme.colors.success,
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
-            fontFamily: defaultTheme.fonts.heading,
+            fontFamily: theme.fonts.heading,
           }}
         >
           DevOps Workflow
@@ -53,9 +54,9 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           style={{
             fontSize: '52px',
             fontWeight: 800,
-            color: defaultTheme.colors.textPrimary,
+            color: theme.colors.textPrimary,
             marginTop: '8px',
-            fontFamily: defaultTheme.fonts.heading,
+            fontFamily: theme.fonts.heading,
             letterSpacing: '-0.02em',
           }}
         >
@@ -67,7 +68,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
       <div
         style={{
           backgroundColor: 'rgba(21, 29, 42, 0.85)',
-          border: `1.5px solid ${defaultTheme.colors.bgCardBorder}`,
+          border: `1.5px solid ${theme.colors.bgCardBorder}`,
           borderRadius: '18px',
           padding: '20px 28px',
           display: 'flex',
@@ -80,9 +81,9 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           <span style={{ fontSize: '28px' }}>🚀</span>
           <span
             style={{
-              fontFamily: defaultTheme.fonts.mono,
+              fontFamily: theme.fonts.mono,
               fontSize: '24px',
-              color: defaultTheme.colors.primary,
+              color: theme.colors.primary,
               fontWeight: 700,
             }}
           >
@@ -94,11 +95,11 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
             padding: '6px 14px',
             borderRadius: '8px',
             backgroundColor: 'rgba(16, 185, 129, 0.15)',
-            border: `1px solid ${defaultTheme.colors.success}`,
-            color: defaultTheme.colors.success,
+            border: `1px solid ${theme.colors.success}`,
+            color: theme.colors.success,
             fontSize: '18px',
             fontWeight: 700,
-            fontFamily: defaultTheme.fonts.mono,
+            fontFamily: theme.fonts.mono,
           }}
         >
           TRIGGERED
@@ -128,10 +129,10 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           });
 
           const statusColor = isFinished
-            ? defaultTheme.colors.success
+            ? theme.colors.success
             : isStarted
-            ? defaultTheme.colors.primary
-            : defaultTheme.colors.textMuted;
+            ? theme.colors.primary
+            : theme.colors.textMuted;
 
           const statusLabel = isFinished
             ? 'PASSED'
@@ -167,7 +168,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                     height: '52px',
                     borderRadius: '50%',
                     backgroundColor: isFinished
-                      ? defaultTheme.colors.success
+                      ? theme.colors.success
                       : isStarted
                       ? 'rgba(111, 65, 236, 0.25)'
                       : 'rgba(255, 255, 255, 0.05)',
@@ -189,8 +190,8 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                     style={{
                       fontSize: '30px',
                       fontWeight: 800,
-                      color: isStarted ? defaultTheme.colors.textPrimary : defaultTheme.colors.textMuted,
-                      fontFamily: defaultTheme.fonts.heading,
+                      color: isStarted ? theme.colors.textPrimary : theme.colors.textMuted,
+                      fontFamily: theme.fonts.heading,
                     }}
                   >
                     {stage.name}
@@ -199,8 +200,8 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                     <div
                       style={{
                         fontSize: '20px',
-                        color: defaultTheme.colors.textSecondary,
-                        fontFamily: defaultTheme.fonts.mono,
+                        color: theme.colors.textSecondary,
+                        fontFamily: theme.fonts.mono,
                         marginTop: '4px',
                       }}
                     >
@@ -224,7 +225,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                   color: statusColor,
                   fontSize: '18px',
                   fontWeight: 700,
-                  fontFamily: defaultTheme.fonts.mono,
+                  fontFamily: theme.fonts.mono,
                   letterSpacing: '0.05em',
                 }}
               >
@@ -242,7 +243,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           padding: '24px 32px',
           borderRadius: '20px',
           backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          borderLeft: `6px solid ${defaultTheme.colors.success}`,
+          borderLeft: `6px solid ${theme.colors.success}`,
           display: 'flex',
           alignItems: 'center',
           gap: '20px',
@@ -253,8 +254,8 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           style={{
             fontSize: '28px',
             lineHeight: 1.4,
-            color: defaultTheme.colors.textPrimary,
-            fontFamily: defaultTheme.fonts.body,
+            color: theme.colors.textPrimary,
+            fontFamily: theme.fonts.body,
             fontWeight: 500,
           }}
         >

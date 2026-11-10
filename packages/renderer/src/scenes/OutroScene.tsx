@@ -1,9 +1,10 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { defaultTheme } from '../styles/theme.js';
+import { useBrandTheme } from '../styles/theme.js';
 import type { OutroScene as OutroSceneType } from '@learnops/schema';
 
 export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
+  const theme = useBrandTheme();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -33,11 +34,11 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
         style={{
           transform: `scale(${cardSpring * pulse})`,
           opacity: cardSpring,
-          backgroundColor: 'rgba(21, 29, 42, 0.9)',
-          border: `2px solid ${defaultTheme.colors.primary}`,
+          backgroundColor: theme.colors.bgCard,
+          border: `2px solid ${theme.colors.primary}`,
           borderRadius: '36px',
           padding: '60px 50px',
-          boxShadow: `0 20px 60px ${defaultTheme.colors.primaryGlow}`,
+          boxShadow: `0 20px 60px ${theme.colors.primaryGlow}`,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -51,18 +52,18 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
             width: '100px',
             height: '100px',
             borderRadius: '28px',
-            background: `linear-gradient(135deg, ${defaultTheme.colors.primary}, #5528D4)`,
+            background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.primaryDark})`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '54px',
             fontWeight: 900,
             color: '#FFFFFF',
-            boxShadow: `0 0 35px ${defaultTheme.colors.primaryGlow}`,
-            fontFamily: defaultTheme.fonts.heading,
+            boxShadow: `0 0 35px ${theme.colors.primaryGlow}`,
+            fontFamily: theme.fonts.heading,
           }}
         >
-          L
+          {scene.brandName.slice(0, 1).toUpperCase()}
         </div>
 
         <div>
@@ -70,8 +71,8 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
             style={{
               fontSize: '64px',
               fontWeight: 900,
-              color: defaultTheme.colors.textPrimary,
-              fontFamily: defaultTheme.fonts.heading,
+              color: theme.colors.textPrimary,
+              fontFamily: theme.fonts.heading,
               letterSpacing: '-0.02em',
             }}
           >
@@ -80,8 +81,8 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
           <p
             style={{
               fontSize: '30px',
-              color: defaultTheme.colors.textSecondary,
-              fontFamily: defaultTheme.fonts.body,
+              color: theme.colors.textSecondary,
+              fontFamily: theme.fonts.body,
               marginTop: '12px',
             }}
           >
@@ -95,13 +96,13 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
             marginTop: '10px',
             padding: '22px 50px',
             borderRadius: '999px',
-            backgroundColor: defaultTheme.colors.primary,
+            backgroundColor: theme.colors.primary,
             color: '#FFFFFF',
             fontSize: '32px',
             fontWeight: 800,
-            fontFamily: defaultTheme.fonts.heading,
+            fontFamily: theme.fonts.heading,
             letterSpacing: '0.02em',
-            boxShadow: `0 10px 30px ${defaultTheme.colors.primaryGlow}`,
+            boxShadow: `0 10px 30px ${theme.colors.primaryGlow}`,
           }}
         >
           {scene.callToAction}
@@ -112,8 +113,8 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
           <div
             style={{
               fontSize: '20px',
-              color: defaultTheme.colors.textMuted,
-              fontFamily: defaultTheme.fonts.mono,
+              color: theme.colors.textMuted,
+              fontFamily: theme.fonts.mono,
               letterSpacing: '0.04em',
               marginTop: '4px',
             }}

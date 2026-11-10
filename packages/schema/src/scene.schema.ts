@@ -88,9 +88,9 @@ export const PipelineSceneSchema = BaseSceneSchema.extend({
 
 export const OutroSceneSchema = BaseSceneSchema.extend({
   kind: z.literal(SCENE_KINDS.OUTRO),
-  brandName: z.string().max(50).default('LearnOps'),
-  tagline: z.string().max(100).default('Master Linux & DevOps step by step'),
-  callToAction: z.string().max(120).default('Follow @learnops for daily reels'),
+  brandName: z.string().max(50).default('Brand'),
+  tagline: z.string().max(100).default('Learn something useful, one step at a time'),
+  callToAction: z.string().max(120).default('Follow for more'),
   creatorCredit: z.string().max(100).optional(),
 });
 

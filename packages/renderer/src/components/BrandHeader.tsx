@@ -1,6 +1,6 @@
 import React from 'react';
 import { interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
-import { defaultTheme } from '../styles/theme.js';
+import { useBrandTheme } from '../styles/theme.js';
 
 interface BrandHeaderProps {
   brandName?: string;
@@ -8,9 +8,10 @@ interface BrandHeaderProps {
 }
 
 export const BrandHeader: React.FC<BrandHeaderProps> = ({
-  brandName = 'LearnOps',
+  brandName = 'Brand',
   topicTag = 'DevOps & Linux',
 }) => {
+  const theme = useBrandTheme();
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
@@ -46,9 +47,9 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
           style={{
             width: `${progress}%`,
             height: '100%',
-            background: `linear-gradient(90deg, ${defaultTheme.colors.primary}, ${defaultTheme.colors.secondary})`,
+            background: `linear-gradient(90deg, ${theme.colors.primary}, ${theme.colors.secondary})`,
             borderRadius: '999px',
-            boxShadow: `0 0 16px ${defaultTheme.colors.primaryGlow}`,
+            boxShadow: `0 0 16px ${theme.colors.primaryGlow}`,
           }}
         />
       </div>
@@ -74,26 +75,26 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
               width: '44px',
               height: '44px',
               borderRadius: '12px',
-              background: `linear-gradient(135deg, ${defaultTheme.colors.primary}, #5528D4)`,
+              background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.primaryDark})`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 800,
               fontSize: '22px',
               color: '#FFFFFF',
-              boxShadow: `0 0 20px ${defaultTheme.colors.primaryGlow}`,
-              fontFamily: defaultTheme.fonts.heading,
+              boxShadow: `0 0 20px ${theme.colors.primaryGlow}`,
+              fontFamily: theme.fonts.heading,
             }}
           >
-            L
+            {brandName.slice(0, 1).toUpperCase()}
           </div>
           <span
             style={{
-              color: defaultTheme.colors.textPrimary,
+              color: theme.colors.textPrimary,
               fontSize: '32px',
               fontWeight: 800,
               letterSpacing: '-0.02em',
-              fontFamily: defaultTheme.fonts.heading,
+              fontFamily: theme.fonts.heading,
             }}
           >
             {brandName}
@@ -105,14 +106,14 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
           style={{
             padding: '10px 22px',
             borderRadius: '999px',
-            backgroundColor: 'rgba(111, 65, 236, 0.15)',
-            border: `1.5px solid ${defaultTheme.colors.primary}`,
-            color: defaultTheme.colors.secondary,
+            backgroundColor: theme.colors.primarySurface,
+            border: `1.5px solid ${theme.colors.primary}`,
+            color: theme.colors.secondary,
             fontSize: '22px',
             fontWeight: 700,
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            fontFamily: defaultTheme.fonts.heading,
+            fontFamily: theme.fonts.heading,
           }}
         >
           {topicTag}
