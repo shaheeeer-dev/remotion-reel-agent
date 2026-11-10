@@ -1,0 +1,69 @@
+{
+  "brand": {
+    "name": "LearnOps",
+    "primaryColor": "#FF6B00",
+    "secondaryColor": "#FFFFFF",
+    "backgroundColor": "#0B0F17"
+  },
+  "script": {
+    "schemaVersion": 1,
+    "topic": "Linux: What is /etc?",
+    "hook": "Where does Linux store all system configurations?",
+    "durationSeconds": 16,
+    "narrationText": null,
+    "scenes": [
+      {
+        "kind": "hook",
+        "durationSeconds": 3,
+        "badge": "Linux Fundamentals",
+        "headline": "Where does Linux keep all its configuration?",
+        "subtext": "Every service, network setting, and user rule lives in one place."
+      },
+      {
+        "kind": "folder_tree",
+        "durationSeconds": 5,
+        "title": "The /etc Hierarchy",
+        "rootPath": "/",
+        "highlightPath": "/etc",
+        "tree": [
+          { "name": "/bin", "isDirectory": true, "description": "User binaries" },
+          {
+            "name": "/etc",
+            "isDirectory": true,
+            "highlight": true,
+            "description": "System config files (Editable Text)",
+            "children": [
+              { "name": "nginx/", "isDirectory": true, "description": "Web server rules" },
+              { "name": "hosts", "isDirectory": false, "description": "IP domain mappings" },
+              { "name": "passwd", "isDirectory": false, "description": "User accounts" }
+            ]
+          },
+          { "name": "/var", "isDirectory": true, "description": "Variable data & logs" }
+        ],
+        "explanation": "/etc holds host-specific, editable configuration files for system daemons and services."
+      },
+      {
+        "kind": "terminal",
+        "durationSeconds": 5,
+        "title": "bash — inspection",
+        "command": "ls -la /etc/nginx",
+        "outputLines": [
+          "drwxr-xr-x 2 root root 4096 conf.d/",
+          "-rw-r--r-- 1 root root 1077 nginx.conf",
+          "-rw-r--r-- 1 root root 5231 mime.types"
+        ],
+        "explanation": "No binaries belong here! /etc is strictly for system-wide configuration."
+      },
+      {
+        "kind": "outro",
+        "durationSeconds": 3,
+        "brandName": "LearnOps",
+        "tagline": "Master Linux & DevOps step by step",
+        "callToAction": "Follow @learnops for daily reels"
+      }
+    ],
+    "caption": "Ever wondered where Linux keeps all its system settings? Meet /etc — the heart of host configuration.",
+    "hashtags": ["Linux", "DevOps", "SysAdmin", "LearnOps", "Terminal"]
+  }
+}
+

@@ -1,0 +1,72 @@
+{
+  "brand": {
+    "name": "LearnOps",
+    "primaryColor": "#FF6B00",
+    "secondaryColor": "#00E5FF",
+    "backgroundColor": "#0B0F17"
+  },
+  "script": {
+    "schemaVersion": 1,
+    "topic": "Docker: What is a Container?",
+    "hook": "Is a Docker container just a lightweight VM?",
+    "durationSeconds": 16,
+    "narrationText": null,
+    "scenes": [
+      {
+        "kind": "hook",
+        "durationSeconds": 3,
+        "badge": "Docker Architecture",
+        "headline": "Is a Docker Container just a lightweight VM?",
+        "subtext": "No! Containers are isolated Linux processes, not virtual machines."
+      },
+      {
+        "kind": "container_diagram",
+        "durationSeconds": 6,
+        "title": "Container vs Virtual Machine",
+        "hostOs": "Host Linux Kernel (cgroups + namespaces)",
+        "containerEngine": "Docker Engine (containerd)",
+        "containers": [
+          {
+            "name": "Frontend",
+            "app": "Next.js 15",
+            "binsLibs": "Node 22 / Alpine"
+          },
+          {
+            "name": "API Service",
+            "app": "Go Fiber",
+            "binsLibs": "Static Binary"
+          },
+          {
+            "name": "Database",
+            "app": "PostgreSQL",
+            "binsLibs": "Debian Slim"
+          }
+        ],
+        "comparisonNote": "Containers share the host kernel. No hypervisor, no guest OS overhead, boots in 50ms!"
+      },
+      {
+        "kind": "terminal",
+        "durationSeconds": 4,
+        "title": "bash — docker inspect",
+        "command": "docker run -d --name web -p 80:80 nginx:alpine",
+        "outputLines": [
+          "Unable to find image 'nginx:alpine' locally",
+          "Pulling from library/nginx: alpine",
+          "Status: Downloaded newer image",
+          "a81efc92134... (Process ID: 4182 on Host Kernel)"
+        ],
+        "explanation": "To the host kernel, a container is simply an isolated process with resource boundaries."
+      },
+      {
+        "kind": "outro",
+        "durationSeconds": 3,
+        "brandName": "LearnOps",
+        "tagline": "Master Linux & DevOps step by step",
+        "callToAction": "Follow @learnops for daily reels"
+      }
+    ],
+    "caption": "A container is not a mini virtual machine. It's an isolated process powered by Linux namespaces and cgroups.",
+    "hashtags": ["Docker", "Containers", "DevOps", "Linux", "LearnOps"]
+  }
+}
+

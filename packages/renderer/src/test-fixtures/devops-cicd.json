@@ -1,0 +1,60 @@
+{
+  "brand": {
+    "name": "LearnOps",
+    "primaryColor": "#FF6B00",
+    "secondaryColor": "#10B981",
+    "backgroundColor": "#0B0F17"
+  },
+  "script": {
+    "schemaVersion": 1,
+    "topic": "DevOps: What is CI/CD?",
+    "hook": "What actually happens when you git push in DevOps?",
+    "durationSeconds": 17,
+    "narrationText": null,
+    "scenes": [
+      {
+        "kind": "hook",
+        "durationSeconds": 3,
+        "badge": "DevOps Pipeline",
+        "headline": "What actually happens when you git push?",
+        "subtext": "From local commit to production deployment in minutes — automatically."
+      },
+      {
+        "kind": "pipeline",
+        "durationSeconds": 7,
+        "title": "Continuous Integration & Delivery",
+        "trigger": "git push origin main",
+        "stages": [
+          { "name": "1. Source & Checkout", "status": "success", "details": "commit e8a3d12 validated" },
+          { "name": "2. Build & Containerize", "status": "success", "details": "Docker image compiled" },
+          { "name": "3. Automated Testing", "status": "running", "details": "428 unit & e2e tests passing" },
+          { "name": "4. Deploy to Kubernetes", "status": "pending", "details": "Zero-downtime rolling update" }
+        ],
+        "takeaway": "CI automates build & testing; CD automates release & deployment safely."
+      },
+      {
+        "kind": "terminal",
+        "durationSeconds": 4,
+        "title": "GitHub Actions — CLI",
+        "command": "gh run watch --exit-status",
+        "outputLines": [
+          "✓ build (completed in 42s)",
+          "✓ test:unit (completed in 18s)",
+          "✓ security-scan (0 vulnerabilities)",
+          "✓ deploy:production (traffic shifted 100%)"
+        ],
+        "explanation": "No manual FTP or SSH into servers! Every change is verified and shipped by code."
+      },
+      {
+        "kind": "outro",
+        "durationSeconds": 3,
+        "brandName": "LearnOps",
+        "tagline": "Master Linux & DevOps step by step",
+        "callToAction": "Follow @learnops for daily reels"
+      }
+    ],
+    "caption": "CI/CD is the backbone of modern engineering. Push code, pass automated checks, ship to production with zero downtime.",
+    "hashtags": ["DevOps", "CICD", "Automation", "GitHubActions", "LearnOps"]
+  }
+}
+
