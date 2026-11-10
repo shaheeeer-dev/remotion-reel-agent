@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Film, Play, CheckCircle, UploadCloud, Loader2, AlertCircle } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Film, Play, CheckCircle, UploadCloud, Loader2, AlertCircle, Eye, X, RefreshCw } from 'lucide-react';
 import { StatusBadge } from '../../components/StatusBadge';
 import { fetchApi } from '../../lib/api-client';
 
@@ -13,6 +13,7 @@ interface ReelItem {
   status: string;
   createdAt: string;
   scenesCount: number;
+  videoUrl?: string | null;
 }
 
 const DEFAULT_REELS: ReelItem[] = [
@@ -24,6 +25,7 @@ const DEFAULT_REELS: ReelItem[] = [
     status: 'RENDERED',
     createdAt: '2026-11-10',
     scenesCount: 4,
+    videoUrl: null,
   },
   {
     id: 'test2-docker-container',
@@ -33,6 +35,7 @@ const DEFAULT_REELS: ReelItem[] = [
     status: 'NEEDS_REVIEW',
     createdAt: '2026-11-10',
     scenesCount: 4,
+    videoUrl: null,
   },
   {
     id: 'test2-devops-cicd',
@@ -42,6 +45,7 @@ const DEFAULT_REELS: ReelItem[] = [
     status: 'APPROVED',
     createdAt: '2026-11-10',
     scenesCount: 4,
+    videoUrl: null,
   },
 ];
 
@@ -50,31 +54,45 @@ export default function ReelsPage() {
   const [reels, setReels] = useState<ReelItem[]>(DEFAULT_REELS);
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [activePreview, setActivePreview] = useState<{ title: string; url: string } | null>(null);
+
+  const loadReels = useCallback(async () => {
+    try {
+      const res = await fetchApi<{ data: any[] }>('/api/v1/brands/learnops/reels');
+      if (res.data && res.data.length > 0) {
+        setReels(
+          res.data.map((r: any) => ({
+            id: r.id,
+            title: r.title,
+            hook: r.hook,
+            durationSeconds: r.durationSeconds,
+            status: r.status,
+            createdAt: r.createdAt.slice(0, 10),
+            scenesCount: r.scenes?.length || (r.scriptJson?.scenes?.length ?? 4),
+            videoUrl: r.mediaAssets?.[0]?.publicUrl || null,
+          }))
+        );
+      }
+    } catch {
+      // Fallback to reference reels if backend is offline
+    }
+  }, []);
 
   useEffect(() => {
-    async function loadReels() {
-      try {
-        const res = await fetchApi<{ data: any[] }>('/api/v1/brands/learnops/reels');
-        if (res.data && res.data.length > 0) {
-          setReels(
-            res.data.map((r: any) => ({
-              id: r.id,
-              title: r.title,
-              hook: r.hook,
-              durationSeconds: r.durationSeconds,
-              status: r.status,
-              createdAt: r.createdAt.slice(0, 10),
-              scenesCount: r.scenes?.length || 4,
-            }))
-          );
-        }
-      } catch {
-        // Fallback to reference reels if backend is offline
-      }
-    }
-
     loadReels();
-  }, []);
+  }, [loadReels]);
+
+  // Periodic polling if any reel is currently rendering
+  useEffect(() => {
+    const hasRendering = reels.some((r) => r.status === 'RENDERING');
+    if (!hasRendering) return;
+
+    const interval = setInterval(() => {
+      loadReels();
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [reels, loadReels]);
 
   const handleAction = async (reelId: string, action: 'render' | 'approve' | 'publish') => {
     setIsProcessing(`${reelId}-${action}`);
@@ -98,11 +116,14 @@ export default function ReelsPage() {
           return { ...r, status: newStatus };
         })
       );
+
+      // Re-fetch after brief delay to catch immediate transitions
+      setTimeout(loadReels, 2000);
     } catch (err: any) {
       setToastMessage(`Notice: ${err.message || `API request submitted (${action})`}`);
     } finally {
       setIsProcessing(null);
-      setTimeout(() => setToastMessage(null), 5000);
+      setTimeout(() => setToastMessage(null), 6000);
     }
   };
 
@@ -123,7 +144,14 @@ export default function ReelsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {['ALL', 'SCRIPT_READY', 'RENDERED', 'NEEDS_REVIEW', 'APPROVED', 'PUBLISHED'].map((filter) => (
+          <button
+            onClick={() => loadReels()}
+            className="p-2 rounded-lg bg-[#151D2A] text-[#94A3B8] hover:text-white hover:bg-[#233044] transition"
+            title="Refresh reels list"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+          {['ALL', 'SCRIPT_READY', 'RENDERING', 'NEEDS_REVIEW', 'APPROVED', 'PUBLISHED'].map((filter) => (
             <button
               key={filter}
               onClick={() => setSelectedFilter(filter)}
@@ -143,6 +171,43 @@ export default function ReelsPage() {
         <div className="flex items-center gap-2 p-3 px-4 rounded-xl bg-[#151D2A] border border-[#6F41EC]/50 text-sm text-[#C4B5FD]">
           <AlertCircle className="w-4 h-4 text-[#C4B5FD] shrink-0" />
           <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Video Player Modal */}
+      {activePreview && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#151D2A] border border-[#233044] rounded-2xl p-6 max-w-md w-full relative space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-white text-base truncate pr-4">{activePreview.title}</h3>
+              <button
+                onClick={() => setActivePreview(null)}
+                className="p-1 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#233044]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="relative aspect-[9/16] w-full max-h-[65vh] rounded-xl overflow-hidden bg-black mx-auto">
+              <video
+                src={activePreview.url}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="flex items-center justify-between text-xs text-[#94A3B8]">
+              <span>Resolution: 1080x1920 (9:16)</span>
+              <a
+                href={activePreview.url}
+                target="_blank"
+                rel="noreferrer"
+                download
+                className="text-[#C4B5FD] hover:underline"
+              >
+                Download MP4
+              </a>
+            </div>
+          </div>
         </div>
       )}
 
@@ -175,21 +240,30 @@ export default function ReelsPage() {
                 </td>
                 <td className="py-4 px-6 text-right">
                   <div className="flex items-center justify-end gap-2">
+                    {reel.videoUrl && (
+                      <button
+                        onClick={() => setActivePreview({ title: reel.title, url: reel.videoUrl! })}
+                        title="Watch rendered MP4"
+                        className="p-2 rounded-lg bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600 hover:text-white transition"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleAction(reel.id, 'render')}
-                      disabled={isProcessing !== null}
+                      disabled={isProcessing !== null || reel.status === 'RENDERING'}
                       title="Render video via Remotion"
                       className="p-2 rounded-lg bg-[#233044] hover:bg-[#6F41EC] text-white transition disabled:opacity-50"
                     >
-                      {isProcessing === `${reel.id}-render` ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                      {isProcessing === `${reel.id}-render` || reel.status === 'RENDERING' ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-[#C4B5FD]" />
                       ) : (
                         <Play className="w-4 h-4" />
                       )}
                     </button>
                     <button
                       onClick={() => handleAction(reel.id, 'approve')}
-                      disabled={isProcessing !== null}
+                      disabled={isProcessing !== null || (reel.status !== 'NEEDS_REVIEW' && !reel.videoUrl)}
                       title="Approve for publishing"
                       className="p-2 rounded-lg bg-[#233044] hover:bg-emerald-600 text-white transition disabled:opacity-50"
                     >
@@ -201,7 +275,7 @@ export default function ReelsPage() {
                     </button>
                     <button
                       onClick={() => handleAction(reel.id, 'publish')}
-                      disabled={isProcessing !== null}
+                      disabled={isProcessing !== null || (reel.status !== 'APPROVED' && reel.status !== 'SCHEDULED')}
                       title="Publish to Instagram"
                       className="p-2 rounded-lg bg-[#233044] hover:bg-cyan-600 text-white transition disabled:opacity-50"
                     >

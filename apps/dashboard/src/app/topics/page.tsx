@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ListTodo, Plus, Sparkles, Check, Clock, Loader2, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { ListTodo, Plus, Sparkles, Check, Clock, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
 import { fetchApi } from '../../lib/api-client';
 
 interface TopicItem {
@@ -132,9 +133,18 @@ export default function TopicsPage() {
       </div>
 
       {statusMessage && (
-        <div className="flex items-center gap-2 p-3 px-4 rounded-xl bg-[#151D2A] border border-[#6F41EC]/50 text-sm text-[#C4B5FD]">
-          <AlertCircle className="w-4 h-4 text-[#C4B5FD] shrink-0" />
-          <span>{statusMessage}</span>
+        <div className="flex items-center justify-between p-3.5 px-4 rounded-xl bg-[#151D2A] border border-[#6F41EC]/50 text-sm text-[#C4B5FD]">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-[#C4B5FD] shrink-0" />
+            <span>{statusMessage}</span>
+          </div>
+          <Link
+            href="/reels"
+            className="flex items-center gap-1 font-bold text-white hover:text-[#C4B5FD] transition text-xs bg-[#6F41EC]/30 px-3 py-1.5 rounded-lg border border-[#6F41EC]/50"
+          >
+            Go to Reels Studio
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       )}
 
