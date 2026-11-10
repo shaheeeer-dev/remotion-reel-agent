@@ -1,0 +1,224 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Brand {
+  id                 String              @id @default(uuid())
+  slug               String              @unique
+  displayName        String
+  isActive           Boolean             @default(true)
+  timezone           String              @default("UTC")
+  defaultDuration    Int                 @default(16)
+  autoPublish        Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  profile            BrandProfile?
+  knowledgeDocuments KnowledgeDocument[]
+  topics             Topic[]
+  reels              Reel[]
+  socialAccounts     SocialAccount[]
+  jobRuns            JobRun[]
+  auditEvents        AuditEvent[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model BrandProfile {
+  id             String   @id @default(uuid())
+  brandId        String   @unique
+  audience       String
+  voiceTone      String
+  contentPillars String[]
+  primaryColor   String   @default("#FF6B00")
+  secondaryColor String   @default("#FFFFFF")
+  bgColor        String   @default("#0B0F17")
+  logoUrl        String?
+  fontFamily     String   @default("Inter")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  brand          Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+}
+
+model KnowledgeDocument {
+  id          String   @id @default(uuid())
+  brandId     String
+  title       String
+  category    String
+  source      String
+  content     String   @db.Text
+  version     Int      @default(1)
+  isApproved  Boolean  @default(false)
+  approvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId, isApproved])
+  @@index([brandId, category])
+}
+
+model Topic {
+  id          String   @id @default(uuid())
+  brandId     String
+  title       String
+  category    String
+  brief       String   @db.Text
+  isUsed      Boolean  @default(false)
+  lastUsedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  reels       Reel[]
+
+  @@index([brandId, isUsed])
+}
+
+model Reel {
+  id              String           @id @default(uuid())
+  brandId         String
+  topicId         String?
+  status          String           @default("DRAFT") // DRAFT, SCRIPT_READY, RENDERING, RENDERED, NEEDS_REVIEW, APPROVED, SCHEDULED, PUBLISHING, PUBLISHED, FAILED
+  title           String
+  hook            String
+  caption         String           @db.Text
+  hashtags        String[]
+  durationSeconds Int              @default(16)
+  scriptJson      Json
+  promptVersion   Int              @default(1)
+  modelName       String           @default("gemini-1.5-flash")
+  scheduledFor    DateTime?
+  publishedAt     DateTime?
+  idempotencyKey  String?          @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  brand           Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  topic           Topic?           @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  scenes          Scene[]
+  mediaAssets     MediaAsset[]
+  publishAttempts PublishAttempt[]
+  jobRuns         JobRun[]
+
+  @@index([brandId, status])
+  @@index([scheduledFor])
+}
+
+model Scene {
+  id              String   @id @default(uuid())
+  reelId          String
+  sequence        Int
+  kind            String   // hook, folder_tree, terminal, container_diagram, pipeline, outro
+  durationSeconds Float
+  propsJson       Json
+  createdAt       DateTime @default(now())
+
+  reel            Reel     @relation(fields: [reelId], references: [id], onDelete: Cascade)
+
+  @@index([reelId, sequence])
+}
+
+model MediaAsset {
+  id              String   @id @default(uuid())
+  reelId          String
+  storagePath     String
+  publicUrl       String?
+  mimeType        String   @default("video/mp4")
+  fileSizeBytes   BigInt
+  width           Int      @default(1080)
+  height          Int      @default(1920)
+  durationSeconds Float
+  checksumSha256  String?
+  createdAt       DateTime @default(now())
+
+  reel            Reel     @relation(fields: [reelId], references: [id], onDelete: Cascade)
+
+  @@index([reelId])
+}
+
+model SocialAccount {
+  id              String           @id @default(uuid())
+  brandId         String
+  platform        String           @default("INSTAGRAM")
+  providerUserId  String
+  accountUsername String
+  encryptedToken  String?          @db.Text
+  tokenExpiresAt  DateTime?
+  isConnected     Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  brand           Brand            @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  publishAttempts PublishAttempt[]
+
+  @@unique([brandId, platform, providerUserId])
+}
+
+model PublishAttempt {
+  id              String         @id @default(uuid())
+  reelId          String
+  socialAccountId String
+  attemptNumber   Int            @default(1)
+  status          String         @default("PENDING") // PENDING, PROCESSING, PUBLISHED, FAILED
+  idempotencyKey  String         @unique
+  remoteMediaId   String?
+  containerId     String?
+  errorMessage    String?
+  publishedAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  reel            Reel           @relation(fields: [reelId], references: [id], onDelete: Cascade)
+  socialAccount   SocialAccount  @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@index([reelId])
+  @@index([status])
+}
+
+model JobRun {
+  id             String    @id @default(uuid())
+  jobType        String    // GENERATE_SCRIPT, RENDER_VIDEO, PUBLISH_REEL, DAILY_SCHEDULE
+  idempotencyKey String    @unique
+  bullMqJobId    String?
+  status         String    @default("QUEUED") // QUEUED, RUNNING, SUCCEEDED, FAILED_FINAL, CANCELLED
+  attempts       Int       @default(0)
+  errorSummary   String?
+  brandId        String?
+  reelId         String?
+  scheduledAt    DateTime  @default(now())
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  brand          Brand?    @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  reel           Reel?     @relation(fields: [reelId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([jobType])
+}
+
+model AuditEvent {
+  id          String   @id @default(uuid())
+  brandId     String?
+  actor       String   @default("system")
+  action      String
+  entityType  String
+  entityId    String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  brand       Brand?   @relation(fields: [brandId], references: [id], onDelete: SetNull)
+
+  @@index([brandId, createdAt])
+}
+
