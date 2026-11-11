@@ -1,50 +1,64 @@
 import React from 'react';
-import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { useBrandTheme } from '../styles/theme.js';
 import type { OutroScene as OutroSceneType } from '@learnops/schema';
 
+export interface OutroSceneProps {
+  scene?: OutroSceneType;
+  brandName?: string;
+  tagline?: string;
+  callToAction?: string;
+}
+
 /**
- * Scene 4: The Outro & CTA (00:14 - 00:17, 2-3 sec)
+ * Scene 5: Outro & CTA (1 second)
  *
- * Rule-based Generalized Dynamic Theming:
- * - Background: Brand Background (Deep dark matte)
- * - Brand Title: Brand Text Primary (White)
- * - Sub-headline: Brand Text Secondary (Muted)
- * - Follow Button: Brand Primary Color fill, Brand Text Primary text
+ * Matching exact specification:
+ * - Background: #110F17 (Brand deep background)
+ * - Brand Title: #FFFFFF, 48px, bold
+ * - Subtitle: #91899C, 24px ("Follow for daily tutorials.")
+ * - Follow Button: #783CEB (Brand primary), white text, rounded pill, bold, border none
+ * - Platform Safe Area: Centered cleanly within the frame
  */
-export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
+export const OutroScene: React.FC<OutroSceneProps> = ({
+  scene,
+  brandName: directBrandName,
+  tagline: directTagline,
+  callToAction: directCta,
+}) => {
   const theme = useBrandTheme();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Entrance spring animation
+  // Entrance spring animation paced for 1s (30 frames)
   const entranceSpring = spring({
     frame,
     fps,
-    config: { damping: 14, stiffness: 120 },
+    config: { damping: 14, stiffness: 140 },
   });
 
   const buttonSpring = spring({
-    frame: frame - 4,
+    frame: frame - 2,
     fps,
-    config: { damping: 12, stiffness: 130 },
+    config: { damping: 12, stiffness: 150 },
   });
 
-  const brandTitle = scene.brandName || 'Brand';
-  const subHeadline = scene.tagline || 'Follow for daily tutorials.';
-  const ctaLabel = scene.callToAction || 'Follow';
+  const brandTitle = directBrandName || scene?.brandName || 'LearnOps';
+  const subHeadline = directTagline || scene?.tagline || 'Follow for daily tutorials.';
+  const ctaLabel = directCta || scene?.callToAction || 'Follow';
 
   return (
     <div
       style={{
         position: 'absolute',
         inset: 0,
-        backgroundColor: theme.colors.bg, // Dynamic Brand Background
+        backgroundColor: theme.colors.bg, // Dynamic Brand Background (#110F17)
         height: '100%',
         width: '100%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'hidden',
         zIndex: 10,
       }}
     >
@@ -61,7 +75,7 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
         <div>
           <h1
             style={{
-              color: theme.colors.textPrimary, // Dynamic Brand Text Primary
+              color: theme.colors.textPrimary, // Dynamic Brand Text Primary (#FFFFFF)
               fontSize: '48px',
               fontWeight: 'bold',
               margin: '0 0 12px 0',
@@ -73,7 +87,7 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
           </h1>
           <p
             style={{
-              color: theme.colors.textSecondary, // Dynamic Brand Text Secondary
+              color: theme.colors.textSecondary, // Dynamic Brand Text Secondary (#91899C)
               fontSize: '24px',
               margin: 0,
               fontFamily: theme.fonts.body,
@@ -85,7 +99,7 @@ export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
 
         <button
           style={{
-            backgroundColor: theme.colors.primary, // Dynamic Brand Primary CTA fill
+            backgroundColor: theme.colors.primary, // Dynamic Brand Primary CTA fill (#783CEB)
             color: theme.colors.textPrimary,
             padding: '16px 36px',
             borderRadius: '50px',
