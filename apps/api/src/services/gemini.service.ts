@@ -77,7 +77,7 @@ You must output a single, raw JSON object strictly adhering to this structure:
     ...
     {
       "kind": "outro",
-      "durationSeconds": 2,
+      "durationSeconds": 1,
       "brandName": "${brandName}",
       "tagline": "Follow for daily tutorials.",
       "callToAction": "Follow"
@@ -93,13 +93,13 @@ SCENE KINDS & FLAT REQUIRED FIELDS:
 - "terminal": { "kind": "terminal", "durationSeconds": 6, "title": string, "promptUser": "learner@linux:~$", "command": string, "outputLines": [string], "explanation": string }
 - "container_diagram": { "kind": "container_diagram", "durationSeconds": 5, "title": string, "hostOs": "Host Linux Kernel", "containerEngine": "Docker Engine", "containers": [{"name": "app-container", "app": "Node.js API", "binsLibs": "Alpine libc + Node v20"}], "comparisonNote": string }
 - "pipeline": { "kind": "pipeline", "durationSeconds": 5, "title": string, "trigger": "git push origin main", "stages": [{"name": "Build", "status": "success"}, {"name": "Test", "status": "success"}, {"name": "Deploy", "status": "success"}], "takeaway": string }
-- "outro": { "kind": "outro", "durationSeconds": 2, "brandName": "${brandName}", "tagline": "Follow for daily tutorials.", "callToAction": "Follow" }
+- "outro": { "kind": "outro", "durationSeconds": 1, "brandName": "${brandName}", "tagline": "Follow for daily tutorials.", "callToAction": "Follow" }
 
 STRICT RULES:
 1. ONLY return valid raw JSON. No markdown backticks, no markdown formatting, no conversational text.
 2. Scene fields MUST be flat directly inside each scene object (e.g. { "kind": "hook", "badge": ... }), NEVER inside a nested "props" object.
-3. The sum of scene "durationSeconds" MUST equal "durationSeconds" exactly (${targetDuration}s total). Standard breakdown: Hook (3s), Core Explanation (5s), Terminal (6s), Outro (2s).
-4. Keyword Highlights: Wrap critical concepts or filenames in asterisks (e.g. *configuration*, */etc*, *Docker*) so the visual renderer emphasizes them in accent Lavender (#B28BFF).
+3. The sum of scene "durationSeconds" MUST equal "durationSeconds" exactly (${targetDuration}s total). Standard breakdown: Hook (3s), Core Explanation / Diagram (5-6s), Terminal (remaining seconds), Outro (1s).
+4. Keyword Highlights: Wrap critical concepts or commands in asterisks (e.g. *Docker*, *container*, *image*) so the visual renderer emphasizes them in bright accent color.
 5. Hashtags MUST be simple alphanumeric strings without "#".
 6. Do NOT invent unsupported claims or fictional commands. Use verified technical specifications.
 7. The content is for educational demonstration.
