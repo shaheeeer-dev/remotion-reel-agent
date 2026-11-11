@@ -5,11 +5,15 @@ import { useBrandTheme } from '../styles/theme.js';
 interface BrandHeaderProps {
   brandName?: string;
   topicTag?: string;
+  hookEndFrame?: number;
+  outroStartFrame?: number;
 }
 
 export const BrandHeader: React.FC<BrandHeaderProps> = ({
   brandName = 'Brand',
   topicTag = 'DevOps & Linux',
+  hookEndFrame: configuredHookEndFrame,
+  outroStartFrame: configuredOutroStartFrame,
 }) => {
   const theme = useBrandTheme();
   const frame = useCurrentFrame();
@@ -21,8 +25,8 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
   });
 
   // Header bar is shown during core explanation scenes (after hook, before outro)
-  const hookEndFrame = 3 * fps;
-  const outroStartFrame = durationInFrames - 2.5 * fps;
+  const hookEndFrame = configuredHookEndFrame ?? 3 * fps;
+  const outroStartFrame = configuredOutroStartFrame ?? durationInFrames - 2.5 * fps;
 
   const headerOpacity = interpolate(
     frame,
@@ -33,6 +37,10 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
       extrapolateRight: 'clamp',
     }
   );
+
+  if (headerOpacity <= 0) {
+    return null;
+  }
 
   return (
     <div
@@ -47,6 +55,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
         flexDirection: 'column',
         gap: '24px',
         pointerEvents: 'none',
+        opacity: headerOpacity,
       }}
     >
       {/* Top Reel Progress Bar */}

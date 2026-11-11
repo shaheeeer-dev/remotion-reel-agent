@@ -10,6 +10,10 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
   const { fps } = useVideoConfig();
 
   const brandName = brand?.name || 'Brand';
+  const hookEndFrame = Math.round((script.scenes[0]?.durationSeconds || 0) * fps);
+  const outroStartFrame = Math.round(
+    script.scenes.slice(0, -1).reduce((total, scene) => total + scene.durationSeconds, 0) * fps
+  );
 
   return (
     <BrandThemeProvider brand={brand}>
@@ -23,7 +27,12 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
         }}
       >
         <BackgroundGrid />
-        <BrandHeader brandName={brandName} topicTag={script.topic} />
+        <BrandHeader
+          brandName={brandName}
+          topicTag={script.topic}
+          hookEndFrame={hookEndFrame}
+          outroStartFrame={outroStartFrame}
+        />
 
         <Series>
           {script.scenes.map((scene, idx) => {
@@ -40,20 +49,36 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
               <Series.Sequence key={scene.id || idx} durationInFrames={sceneFrames}>
                 <div
                   style={{
-                    width: '100%',
-                    height: '1536px', // Platform UI Safe Area: Upper 80% (top 1536px), reserving bottom 384px
                     position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    paddingTop: isHook || isOutro ? '0px' : '150px',
-                    paddingBottom: '40px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxSizing: 'border-box',
+                    inset: 0,
+                    overflow: 'hidden',
+                    backgroundColor: isHook
+                      ? brand?.primaryColor || defaultTheme.colors.brandPrimary
+                      : brand?.backgroundColor || defaultTheme.colors.deepBackground,
                   }}
                 >
-                  <SceneDispatcher scene={sceneForRender} />
+                  {isHook || isOutro ? (
+                    <SceneDispatcher scene={sceneForRender} />
+                  ) : (
+                    <div
+                      style={{
+                        width: '100%',
+                        height: '1536px', // Keep all essential scene content inside the upper 80% safe area.
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        paddingTop: '150px',
+                        paddingBottom: '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxSizing: 'border-box',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <SceneDispatcher scene={sceneForRender} />
+                    </div>
+                  )}
                 </div>
               </Series.Sequence>
             );

@@ -29,6 +29,7 @@ export type JobStatus = (typeof JOB_STATUS)[keyof typeof JOB_STATUS];
 export const SCENE_KINDS = {
   HOOK: 'hook',
   KINETIC_TYPE: 'kinetic_type',
+  COMPARISON: 'comparison',
   FOLDER_TREE: 'folder_tree',
   TERMINAL: 'terminal',
   CONTAINER_DIAGRAM: 'container_diagram',

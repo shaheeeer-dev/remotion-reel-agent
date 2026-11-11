@@ -6,11 +6,17 @@ import { TerminalScene } from './TerminalScene.js';
 import { ContainerDiagramScene } from './ContainerDiagramScene.js';
 import { PipelineScene } from './PipelineScene.js';
 import { OutroScene } from './OutroScene.js';
+import { KineticTypeScene } from './KineticTypeScene.js';
+import { ComparisonScene } from './ComparisonScene.js';
 
 export const SceneDispatcher: React.FC<{ scene: Scene }> = ({ scene }) => {
   switch (scene.kind) {
     case 'hook':
       return <HookScene scene={scene} />;
+    case 'kinetic_type':
+      return <KineticTypeScene scene={scene} />;
+    case 'comparison':
+      return <ComparisonScene scene={scene} />;
     case 'folder_tree':
       return <FolderTreeScene scene={scene} />;
     case 'terminal':

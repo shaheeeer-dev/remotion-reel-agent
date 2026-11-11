@@ -11,12 +11,27 @@ export const HookSceneSchema = BaseSceneSchema.extend({
   badge: z.string().max(40),
   headline: z.string().max(120),
   subtext: z.string().max(160).optional(),
+  visualMetaphor: z.enum(['folder_drawer', 'container_stack', 'pipeline_flow']).optional(),
 });
 
 export const KineticTypeSceneSchema = BaseSceneSchema.extend({
   kind: z.literal(SCENE_KINDS.KINETIC_TYPE),
   phrases: z.array(z.string().max(50)).min(1).max(6),
   emphasis: z.string().max(60),
+});
+
+export const ComparisonSceneSchema = BaseSceneSchema.extend({
+  kind: z.literal(SCENE_KINDS.COMPARISON),
+  title: z.string().max(80),
+  leftLabel: z.string().max(40),
+  leftTitle: z.string().max(50),
+  leftDescription: z.string().max(120),
+  leftIcon: z.enum(['server', 'user', 'layers', 'box', 'git-branch', 'rocket', 'file-text', 'settings']).optional(),
+  rightLabel: z.string().max(40),
+  rightTitle: z.string().max(50),
+  rightDescription: z.string().max(120),
+  rightIcon: z.enum(['server', 'user', 'layers', 'box', 'git-branch', 'rocket', 'file-text', 'settings']).optional(),
+  takeaway: z.string().max(140),
 });
 
 export interface FolderNode {
@@ -97,6 +112,7 @@ export const OutroSceneSchema = BaseSceneSchema.extend({
 export const SceneSchema = z.discriminatedUnion('kind', [
   HookSceneSchema,
   KineticTypeSceneSchema,
+  ComparisonSceneSchema,
   FolderTreeSceneSchema,
   TerminalSceneSchema,
   ContainerDiagramSceneSchema,
@@ -111,6 +127,7 @@ export interface HookScene {
   badge: string;
   headline: string;
   subtext?: string;
+  visualMetaphor?: 'folder_drawer' | 'container_stack' | 'pipeline_flow';
 }
 
 export interface KineticTypeScene {
@@ -119,6 +136,22 @@ export interface KineticTypeScene {
   kind: 'kinetic_type';
   phrases: string[];
   emphasis: string;
+}
+
+export interface ComparisonScene {
+  id?: string;
+  durationSeconds: number;
+  kind: 'comparison';
+  title: string;
+  leftLabel: string;
+  leftTitle: string;
+  leftDescription: string;
+  leftIcon?: 'server' | 'user' | 'layers' | 'box' | 'git-branch' | 'rocket' | 'file-text' | 'settings';
+  rightLabel: string;
+  rightTitle: string;
+  rightDescription: string;
+  rightIcon?: 'server' | 'user' | 'layers' | 'box' | 'git-branch' | 'rocket' | 'file-text' | 'settings';
+  takeaway: string;
 }
 
 export interface FolderTreeScene {
@@ -189,6 +222,7 @@ export interface OutroScene {
 export type Scene =
   | HookScene
   | KineticTypeScene
+  | ComparisonScene
   | FolderTreeScene
   | TerminalScene
   | ContainerDiagramScene

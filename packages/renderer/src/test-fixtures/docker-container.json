@@ -19,6 +19,7 @@
         "durationSeconds": 3,
         "badge": "Docker Architecture",
         "headline": "Is a Docker Container just a lightweight VM?",
+        "visualMetaphor": "container_stack",
         "subtext": "No! Containers are isolated Linux processes, not virtual machines."
       },
       {

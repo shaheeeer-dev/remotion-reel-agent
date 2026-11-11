@@ -5,3 +5,14 @@ Config.setOverwriteOutput(true);
 Config.setPixelFormat('yuv420p');
 Config.setCodec('h264');
 
+Config.overrideWebpackConfig((currentConfig) => ({
+  ...currentConfig,
+  resolve: {
+    ...currentConfig.resolve,
+    extensionAlias: {
+      '.js': ['.ts', '.tsx', '.js'],
+      '.jsx': ['.tsx', '.jsx'],
+    },
+  },
+}));
+
