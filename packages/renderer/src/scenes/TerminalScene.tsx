@@ -1,17 +1,17 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme, LearnOpsTheme, renderHighlightedText } from '../styles/theme.js';
+import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import type { TerminalScene as TerminalSceneType } from '@learnops/schema';
 
 /**
  * Scene 3: Practical Code / Terminal (00:08 - 00:14, 6 sec)
  *
- * Exact Color Mapping:
- * - Background: #110F17 (Dark Amethyst)
- * - Terminal Box: #1C1824 with 1px solid #783CEB border & glow
- * - Prompt String (`learner@linux:~$`): #B28BFF (Lavender)
- * - Command Input (typed): #FFFFFF (White)
- * - Output Lines: #FFFFFF (White), comments/subtext in #91899C
+ * Rule-based Generalized Dynamic Theming:
+ * - Background: Brand Background (Deep dark matte)
+ * - Terminal Box: Brand Card / Terminal Background with Brand Primary border & glow
+ * - Prompt String: Brand Secondary / Accent color
+ * - Command Input: Brand Text Primary (typed)
+ * - Output Lines: Brand Text Primary & Secondary
  */
 export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
@@ -26,7 +26,6 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
   });
 
   // Typing effect calculation
-  // Command starts typing at frame 8 and finishes around frame 32
   const charsToType = scene.command.length;
   const typedCount = Math.floor(
     interpolate(frame, [8, 8 + charsToType * 1.5], [0, charsToType], {
@@ -40,7 +39,6 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
   // Blinking cursor
   const cursorBlink = Math.floor(frame / 8) % 2 === 0;
 
-  // Prompt string formatting: user learner@linux:~$
   const defaultPrompt = 'learner@linux:~$';
   const promptUser = scene.promptUser || defaultPrompt;
 
@@ -53,7 +51,7 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '0 60px',
-        backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 matte
+        backgroundColor: theme.colors.bg, // Dynamic Brand Background
       }}
     >
       {/* Terminal Window */}
@@ -61,9 +59,9 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
         style={{
           transform: `scale(${windowSpring})`,
           opacity: windowSpring,
-          backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-          border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px solid #783CEB
-          boxShadow: '0 0 15px rgba(120, 60, 235, 0.20), 0 30px 70px rgba(0, 0, 0, 0.70)',
+          backgroundColor: theme.colors.terminalBg, // Dynamic Brand Card Surface
+          border: `1px solid ${theme.colors.primary}`, // Dynamic Brand Primary Border
+          boxShadow: `${theme.colors.cardGlow}, 0 30px 70px rgba(0, 0, 0, 0.70)`,
           borderRadius: '24px',
           overflow: 'hidden',
         }}
@@ -71,12 +69,12 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
         {/* Terminal Title Bar */}
         <div
           style={{
-            backgroundColor: '#15131C',
+            backgroundColor: theme.colors.terminalBar,
             padding: '18px 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(120, 60, 235, 0.25)',
+            borderBottom: `1px solid rgba(255, 255, 255, 0.08)`,
           }}
         >
           {/* Mac window dots */}
@@ -90,7 +88,7 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
             style={{
               fontSize: '18px',
               fontFamily: theme.fonts.mono,
-              color: LearnOpsTheme.textMutedPurple, // #91899C
+              color: theme.colors.textSecondary,
             }}
           >
             {scene.title || 'learner@linux: ~'}
@@ -111,13 +109,13 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
         >
           {/* Prompt + Command Input */}
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-            {/* Prompt String (~$): #B28BFF (Lavender) */}
-            <span style={{ color: LearnOpsTheme.accentLavender, fontWeight: 700 }}>
+            {/* Prompt String: Dynamic Brand Secondary / Accent */}
+            <span style={{ color: theme.colors.secondary, fontWeight: 700 }}>
               {promptUser}
             </span>
 
-            {/* Command Input: #FFFFFF (White) */}
-            <span style={{ color: LearnOpsTheme.textWhite, fontWeight: 700 }}>
+            {/* Command Input: Dynamic Brand Text Primary */}
+            <span style={{ color: theme.colors.textPrimary, fontWeight: 700 }}>
               {displayedCommand}
             </span>
 
@@ -127,14 +125,14 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
                 display: 'inline-block',
                 width: '14px',
                 height: '30px',
-                backgroundColor: cursorBlink ? LearnOpsTheme.accentLavender : 'transparent',
+                backgroundColor: cursorBlink ? theme.colors.secondary : 'transparent',
                 marginLeft: '2px',
                 verticalAlign: 'middle',
               }}
             />
           </div>
 
-          {/* Command Output Lines (Appears after command is typed) */}
+          {/* Command Output Lines */}
           {isTypingDone && scene.outputLines && scene.outputLines.length > 0 && (
             <div
               style={{
@@ -160,10 +158,10 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
                     key={idx}
                     style={{
                       color: isComment
-                        ? LearnOpsTheme.textMutedPurple // #91899C
+                        ? theme.colors.textSecondary
                         : isSuccess
-                        ? '#34B1AA'
-                        : LearnOpsTheme.textWhite, // #FFFFFF
+                        ? theme.colors.success
+                        : theme.colors.textPrimary,
                       fontSize: '24px',
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-all',
@@ -185,17 +183,17 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
             marginTop: '22px',
             padding: '18px 26px',
             borderRadius: '16px',
-            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
-            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            backgroundColor: theme.colors.bgCard,
+            border: `1px solid ${theme.colors.primary}`,
+            boxShadow: theme.colors.cardGlow,
             fontSize: '22px',
             lineHeight: 1.45,
-            color: LearnOpsTheme.textWhite,
+            color: theme.colors.textPrimary,
             fontFamily: theme.fonts.body,
             textAlign: 'center',
           }}
         >
-          💡 {renderHighlightedText(scene.explanation, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+          💡 {renderHighlightedText(scene.explanation, theme.colors.textPrimary, theme.colors.secondary)}
         </div>
       )}
     </div>

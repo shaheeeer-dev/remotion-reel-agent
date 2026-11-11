@@ -1,6 +1,6 @@
 import React from 'react';
 import { interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme, LearnOpsTheme } from '../styles/theme.js';
+import { useBrandTheme } from '../styles/theme.js';
 
 interface BrandHeaderProps {
   brandName?: string;
@@ -8,7 +8,7 @@ interface BrandHeaderProps {
 }
 
 export const BrandHeader: React.FC<BrandHeaderProps> = ({
-  brandName = 'LearnOps',
+  brandName = 'Brand',
   topicTag = 'DevOps & Linux',
 }) => {
   const theme = useBrandTheme();
@@ -20,7 +20,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
     extrapolateRight: 'clamp',
   });
 
-  // Header bar (brand & topic badge) is shown during core explanation scenes (after hook, before outro)
+  // Header bar is shown during core explanation scenes (after hook, before outro)
   const hookEndFrame = 3 * fps;
   const outroStartFrame = durationInFrames - 2.5 * fps;
 
@@ -63,9 +63,9 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
           style={{
             width: `${progress}%`,
             height: '100%',
-            background: `linear-gradient(90deg, ${LearnOpsTheme.brandPurple}, ${LearnOpsTheme.accentLavender})`,
+            background: `linear-gradient(90deg, ${theme.colors.primary}, ${theme.colors.secondary})`,
             borderRadius: '999px',
-            boxShadow: '0 0 16px rgba(120, 60, 235, 0.45)',
+            boxShadow: `0 0 16px ${theme.colors.primaryGlow}`,
           }}
         />
       </div>
@@ -93,14 +93,14 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
               width: '44px',
               height: '44px',
               borderRadius: '12px',
-              background: `linear-gradient(135deg, ${LearnOpsTheme.brandPurple}, #5E28C4)`,
+              background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.primaryDark})`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 800,
               fontSize: '22px',
               color: '#FFFFFF',
-              boxShadow: '0 0 20px rgba(120, 60, 235, 0.35)',
+              boxShadow: `0 0 20px ${theme.colors.primaryGlow}`,
               fontFamily: theme.fonts.heading,
             }}
           >
@@ -108,7 +108,7 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
           </div>
           <span
             style={{
-              color: LearnOpsTheme.textWhite,
+              color: theme.colors.textPrimary,
               fontSize: '32px',
               fontWeight: 800,
               letterSpacing: '-0.02em',
@@ -124,10 +124,10 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
           style={{
             padding: '10px 22px',
             borderRadius: '999px',
-            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px solid #783CEB
-            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
-            color: LearnOpsTheme.accentLavender, // #B28BFF
+            backgroundColor: theme.colors.bgCard,
+            border: `1px solid ${theme.colors.primary}`,
+            boxShadow: theme.colors.cardGlow,
+            color: theme.colors.secondary,
             fontSize: '20px',
             fontWeight: 700,
             textTransform: 'uppercase',

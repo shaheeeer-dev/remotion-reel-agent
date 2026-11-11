@@ -1,17 +1,16 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme, LearnOpsTheme, renderHighlightedText } from '../styles/theme.js';
+import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import type { FolderTreeScene as FolderTreeSceneType, FolderNode } from '@learnops/schema';
 
 /**
  * Scene 2: Core Explanation (Folder Tree)
  *
- * Exact Color Mapping:
- * - Background: #110F17 (Dark Amethyst)
- * - Primary Text: #FFFFFF (White)
- * - Highlighted Words: #B28BFF (Lavender)
- * - UI Card Surface: #1C1824 with 1px solid #783CEB border & 0 0 15px rgba(120, 60, 235, 0.2) soft glow
- * - Subtext, Slashes & Borders: #91899C (Muted Purple)
+ * Rule-based Generalized Dynamic Theming:
+ * - Background: Brand Background (Deep dark matte)
+ * - Headline: Brand Text Primary with Brand Secondary highlights
+ * - UI Card: Brand Card Surface with Brand Primary border & glow
+ * - Slashes, subtext & borders: Brand Text Secondary
  */
 export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
@@ -34,7 +33,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '0 60px',
-        backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 matte
+        backgroundColor: theme.colors.bg, // Dynamic Brand Background
       }}
     >
       {/* Scene Header */}
@@ -50,7 +49,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
           style={{
             fontSize: '22px',
             fontWeight: 800,
-            color: LearnOpsTheme.accentLavender, // #B28BFF
+            color: theme.colors.secondary, // Dynamic Brand Secondary
             textTransform: 'uppercase',
             letterSpacing: '0.12em',
             fontFamily: theme.fonts.heading,
@@ -62,22 +61,22 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
           style={{
             fontSize: '52px',
             fontWeight: 900,
-            color: LearnOpsTheme.textWhite, // #FFFFFF
+            color: theme.colors.textPrimary, // Dynamic Brand Text Primary
             marginTop: '8px',
             letterSpacing: '-0.02em',
             fontFamily: theme.fonts.heading,
           }}
         >
-          {renderHighlightedText(scene.title, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+          {renderHighlightedText(scene.title, theme.colors.textPrimary, theme.colors.secondary)}
         </h2>
       </div>
 
-      {/* Main Tree Card: #1C1824 with 1px #783CEB border & glow */}
+      {/* Main Tree Card */}
       <div
         style={{
-          backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-          border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px solid #783CEB
-          boxShadow: '0 0 15px rgba(120, 60, 235, 0.20), 0 25px 60px rgba(0, 0, 0, 0.55)',
+          backgroundColor: theme.colors.bgCard, // Dynamic Brand Card Surface
+          border: `1px solid ${theme.colors.primary}`, // Dynamic Brand Primary Border
+          boxShadow: `${theme.colors.cardGlow}, 0 25px 60px rgba(0, 0, 0, 0.55)`,
           borderRadius: '28px',
           padding: '36px 44px',
           display: 'flex',
@@ -94,13 +93,13 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
             fontSize: '34px',
             fontFamily: theme.fonts.mono,
             fontWeight: 700,
-            color: LearnOpsTheme.textMutedPurple, // #91899C
+            color: theme.colors.textSecondary,
           }}
         >
           <span style={{ fontSize: '36px' }}>📁</span>
-          <span style={{ color: LearnOpsTheme.textWhite }}>
-            <span style={{ color: LearnOpsTheme.accentLavender }}>{scene.rootPath}</span>{' '}
-            <span style={{ color: LearnOpsTheme.textMutedPurple, fontSize: '24px' }}>(root)</span>
+          <span style={{ color: theme.colors.textPrimary }}>
+            <span style={{ color: theme.colors.secondary }}>{scene.rootPath}</span>{' '}
+            <span style={{ color: theme.colors.textSecondary, fontSize: '24px' }}>(root)</span>
           </span>
         </div>
 
@@ -111,11 +110,10 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
             flexDirection: 'column',
             gap: '16px',
             paddingLeft: '32px',
-            borderLeft: `2px solid rgba(120, 60, 235, 0.3)`,
+            borderLeft: `2px solid ${theme.colors.primarySurface}`,
           }}
         >
           {scene.tree.map((node: FolderNode, index: number) => {
-            // Staggered node entrance animation
             const nodeSpring = spring({
               frame: frame - (10 + index * 6),
               fps,
@@ -143,12 +141,12 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                     padding: '14px 20px',
                     borderRadius: '16px',
                     backgroundColor: isHighlighted
-                      ? 'rgba(120, 60, 235, 0.18)'
+                      ? theme.colors.primarySurface
                       : 'rgba(255, 255, 255, 0.02)',
                     border: isHighlighted
-                      ? `1.5px solid ${LearnOpsTheme.accentLavender}`
+                      ? `1.5px solid ${theme.colors.secondary}`
                       : '1px solid transparent',
-                    boxShadow: isHighlighted ? '0 0 15px rgba(120, 60, 235, 0.25)' : 'none',
+                    boxShadow: isHighlighted ? theme.colors.cardGlow : 'none',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -158,7 +156,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                         fontSize: '30px',
                         fontFamily: theme.fonts.mono,
                         fontWeight: isHighlighted ? 800 : 600,
-                        color: isHighlighted ? LearnOpsTheme.accentLavender : LearnOpsTheme.textWhite,
+                        color: isHighlighted ? theme.colors.secondary : theme.colors.textPrimary,
                       }}
                     >
                       {node.name}
@@ -170,7 +168,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                       style={{
                         fontSize: '20px',
                         fontFamily: theme.fonts.body,
-                        color: isHighlighted ? LearnOpsTheme.textWhite : LearnOpsTheme.textMutedPurple,
+                        color: isHighlighted ? theme.colors.textPrimary : theme.colors.textSecondary,
                         fontWeight: isHighlighted ? 600 : 400,
                         maxWidth: '420px',
                         textAlign: 'right',
@@ -189,7 +187,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                       flexDirection: 'column',
                       gap: '10px',
                       paddingLeft: '40px',
-                      borderLeft: `2px dashed rgba(178, 139, 255, 0.35)`,
+                      borderLeft: `2px dashed ${theme.colors.secondarySurface}`,
                       marginTop: '6px',
                     }}
                   >
@@ -221,7 +219,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                                 fontSize: '24px',
                                 fontFamily: theme.fonts.mono,
                                 fontWeight: 600,
-                                color: LearnOpsTheme.textWhite,
+                                color: theme.colors.textPrimary,
                               }}
                             >
                               {child.name}
@@ -231,7 +229,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                             <span
                               style={{
                                 fontSize: '18px',
-                                color: LearnOpsTheme.textMutedPurple,
+                                color: theme.colors.textSecondary,
                                 fontFamily: theme.fonts.body,
                               }}
                             >
@@ -256,17 +254,17 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
             marginTop: '24px',
             padding: '20px 28px',
             borderRadius: '18px',
-            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
-            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            backgroundColor: theme.colors.bgCard,
+            border: `1px solid ${theme.colors.primary}`,
+            boxShadow: theme.colors.cardGlow,
             fontSize: '22px',
             lineHeight: 1.45,
-            color: LearnOpsTheme.textWhite,
+            color: theme.colors.textPrimary,
             fontFamily: theme.fonts.body,
             textAlign: 'center',
           }}
         >
-          {renderHighlightedText(scene.explanation, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+          {renderHighlightedText(scene.explanation, theme.colors.textPrimary, theme.colors.secondary)}
         </div>
       )}
     </div>

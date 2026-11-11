@@ -1,17 +1,17 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme, LearnOpsTheme, renderHighlightedText } from '../styles/theme.js';
+import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import type { PipelineScene as PipelineSceneType } from '@learnops/schema';
 
 /**
  * Scene 2 Variant: CI/CD Automated Pipeline Diagram
  *
- * Exact Color Mapping:
- * - Background: #110F17 (Dark Amethyst)
- * - Stage Cards: #1C1824 with 1px solid #783CEB border & glow
- * - Primary Text: #FFFFFF (White)
- * - Active / Highlights: #B28BFF (Lavender)
- * - Secondary Subtext & Connectors: #91899C (Muted Purple)
+ * Rule-based Generalized Dynamic Theming:
+ * - Background: Brand Background
+ * - Stage Cards: Brand Card Surface with Brand Primary border & glow
+ * - Primary Text: Brand Text Primary
+ * - Active / Highlights: Brand Secondary / Accent
+ * - Secondary Subtext & Connectors: Brand Text Secondary
  */
 export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
@@ -37,7 +37,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '0 60px',
-        backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 matte
+        backgroundColor: theme.colors.bg, // Dynamic Brand Background
       }}
     >
       {/* Title */}
@@ -53,7 +53,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           style={{
             fontSize: '22px',
             fontWeight: 800,
-            color: LearnOpsTheme.accentLavender, // #B28BFF
+            color: theme.colors.secondary, // Dynamic Brand Secondary
             textTransform: 'uppercase',
             letterSpacing: '0.12em',
             fontFamily: theme.fonts.heading,
@@ -65,22 +65,22 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           style={{
             fontSize: '52px',
             fontWeight: 900,
-            color: LearnOpsTheme.textWhite, // #FFFFFF
+            color: theme.colors.textPrimary, // Dynamic Brand Text Primary
             marginTop: '8px',
             fontFamily: theme.fonts.heading,
             letterSpacing: '-0.02em',
           }}
         >
-          {renderHighlightedText(scene.title, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+          {renderHighlightedText(scene.title, theme.colors.textPrimary, theme.colors.secondary)}
         </h2>
       </div>
 
       {/* Trigger Event Banner */}
       <div
         style={{
-          backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-          border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
-          boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+          backgroundColor: theme.colors.bgCard, // Dynamic Brand Card Surface
+          border: `1px solid ${theme.colors.primary}`, // Dynamic Brand Primary Border
+          boxShadow: theme.colors.cardGlow,
           borderRadius: '18px',
           padding: '18px 26px',
           display: 'flex',
@@ -95,7 +95,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
             style={{
               fontFamily: theme.fonts.mono,
               fontSize: '24px',
-              color: LearnOpsTheme.accentLavender, // #B28BFF
+              color: theme.colors.secondary, // Dynamic Brand Secondary
               fontWeight: 700,
             }}
           >
@@ -106,9 +106,9 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           style={{
             padding: '6px 14px',
             borderRadius: '8px',
-            backgroundColor: 'rgba(52, 177, 170, 0.15)',
-            border: '1px solid #34B1AA',
-            color: '#34B1AA',
+            backgroundColor: theme.colors.secondarySurface,
+            border: `1px solid ${theme.colors.secondary}`,
+            color: theme.colors.secondary,
             fontSize: '16px',
             fontWeight: 800,
             letterSpacing: '0.05em',
@@ -147,13 +147,13 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                   flex: 1,
                   transform: `translateY(${(1 - stageSpring) * 30}px)`,
                   opacity: stageSpring,
-                  backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
+                  backgroundColor: theme.colors.bgCard, // Dynamic Brand Card Surface
                   border: isDone || isActive
-                    ? `1.5px solid ${LearnOpsTheme.accentLavender}`
-                    : `1px solid ${LearnOpsTheme.brandPurple}`,
+                    ? `1.5px solid ${theme.colors.secondary}`
+                    : `1px solid ${theme.colors.primary}`,
                   boxShadow: isActive
-                    ? '0 0 20px rgba(178, 139, 255, 0.35)'
-                    : '0 0 15px rgba(120, 60, 235, 0.20)',
+                    ? theme.colors.cardGlow
+                    : 'none',
                   borderRadius: '20px',
                   padding: '24px 18px',
                   display: 'flex',
@@ -169,11 +169,11 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                     height: '48px',
                     borderRadius: '50%',
                     backgroundColor: isDone
-                      ? '#34B1AA'
+                      ? theme.colors.success
                       : isActive
-                      ? LearnOpsTheme.accentLavender
+                      ? theme.colors.secondary
                       : 'rgba(255, 255, 255, 0.05)',
-                    color: isDone || isActive ? '#110F17' : LearnOpsTheme.textMutedPurple,
+                    color: isDone || isActive ? theme.colors.bg : theme.colors.textSecondary,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -188,7 +188,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                   style={{
                     fontSize: '24px',
                     fontWeight: 800,
-                    color: LearnOpsTheme.textWhite,
+                    color: theme.colors.textPrimary,
                     fontFamily: theme.fonts.heading,
                   }}
                 >
@@ -199,7 +199,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                   style={{
                     fontSize: '13px',
                     fontWeight: 700,
-                    color: isDone ? '#34B1AA' : isActive ? LearnOpsTheme.accentLavender : LearnOpsTheme.textMutedPurple,
+                    color: isDone ? theme.colors.success : isActive ? theme.colors.secondary : theme.colors.textSecondary,
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
                   }}
@@ -213,7 +213,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                 <div
                   style={{
                     fontSize: '28px',
-                    color: isDone ? LearnOpsTheme.accentLavender : LearnOpsTheme.textMutedPurple, // #91899C
+                    color: isDone ? theme.colors.secondary : theme.colors.textSecondary,
                     fontWeight: 900,
                   }}
                 >
@@ -232,17 +232,17 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
             marginTop: '26px',
             padding: '18px 26px',
             borderRadius: '16px',
-            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
-            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            backgroundColor: theme.colors.bgCard,
+            border: `1px solid ${theme.colors.primary}`,
+            boxShadow: theme.colors.cardGlow,
             fontSize: '22px',
             lineHeight: 1.45,
-            color: LearnOpsTheme.textWhite,
+            color: theme.colors.textPrimary,
             fontFamily: theme.fonts.body,
             textAlign: 'center',
           }}
         >
-          ✨ {renderHighlightedText(scene.takeaway, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+          ✨ {renderHighlightedText(scene.takeaway, theme.colors.textPrimary, theme.colors.secondary)}
         </div>
       )}
     </div>

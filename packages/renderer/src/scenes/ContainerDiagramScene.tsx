@@ -1,17 +1,17 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme, LearnOpsTheme, renderHighlightedText } from '../styles/theme.js';
+import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import type { ContainerDiagramScene as ContainerDiagramSceneType } from '@learnops/schema';
 
 /**
  * Scene 2 Variant: Docker Container Architecture Diagram
  *
- * Exact Color Mapping:
- * - Background: #110F17 (Dark Amethyst)
- * - Container Surfaces: #1C1824 with 1px solid #783CEB border & glow
- * - Primary Text: #FFFFFF (White)
- * - Highlighted Keywords: #B28BFF (Lavender)
- * - Subtext & Borders: #91899C (Muted Purple)
+ * Rule-based Generalized Dynamic Theming:
+ * - Background: Brand Background
+ * - Container Surfaces: Brand Card Surface with Brand Primary border & glow
+ * - Primary Text: Brand Text Primary
+ * - Highlighted Keywords: Brand Secondary / Accent
+ * - Subtext & Borders: Brand Text Secondary
  */
 export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
@@ -51,7 +51,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '0 60px',
-        backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 matte
+        backgroundColor: theme.colors.bg, // Dynamic Brand Background
       }}
     >
       {/* Title */}
@@ -67,7 +67,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           style={{
             fontSize: '22px',
             fontWeight: 800,
-            color: LearnOpsTheme.accentLavender, // #B28BFF
+            color: theme.colors.secondary, // Dynamic Brand Secondary
             textTransform: 'uppercase',
             letterSpacing: '0.12em',
             fontFamily: theme.fonts.heading,
@@ -79,13 +79,13 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           style={{
             fontSize: '52px',
             fontWeight: 900,
-            color: LearnOpsTheme.textWhite, // #FFFFFF
+            color: theme.colors.textPrimary, // Dynamic Brand Text Primary
             marginTop: '8px',
             fontFamily: theme.fonts.heading,
             letterSpacing: '-0.02em',
           }}
         >
-          {renderHighlightedText(scene.title, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+          {renderHighlightedText(scene.title, theme.colors.textPrimary, theme.colors.secondary)}
         </h2>
       </div>
 
@@ -97,7 +97,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           gap: '18px',
         }}
       >
-        {/* Top Tier: Containers Running in Isolated User Spaces */}
+        {/* Top Tier: Containers */}
         <div
           style={{
             display: 'grid',
@@ -118,9 +118,9 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                 style={{
                   transform: `scale(${containerSpring * pulse}) translateY(${(1 - containerSpring) * 40}px)`,
                   opacity: containerSpring,
-                  backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-                  border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
-                  boxShadow: '0 0 15px rgba(120, 60, 235, 0.20), 0 20px 45px rgba(0, 0, 0, 0.5)',
+                  backgroundColor: theme.colors.bgCard, // Dynamic Brand Card Surface
+                  border: `1px solid ${theme.colors.primary}`, // Dynamic Brand Primary Border
+                  boxShadow: `${theme.colors.cardGlow}, 0 20px 45px rgba(0, 0, 0, 0.5)`,
                   borderRadius: '24px',
                   padding: '28px 24px',
                   display: 'flex',
@@ -134,7 +134,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    borderBottom: '1px solid rgba(120, 60, 235, 0.3)',
+                    borderBottom: `1px solid ${theme.colors.primarySurface}`,
                     paddingBottom: '12px',
                   }}
                 >
@@ -143,7 +143,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                       fontFamily: theme.fonts.mono,
                       fontSize: '22px',
                       fontWeight: 700,
-                      color: LearnOpsTheme.accentLavender, // #B28BFF
+                      color: theme.colors.secondary, // Dynamic Brand Secondary
                     }}
                   >
                     📦 {container.name}
@@ -152,9 +152,9 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                     style={{
                       fontSize: '12px',
                       fontWeight: 800,
-                      backgroundColor: 'rgba(52, 177, 170, 0.15)',
-                      color: '#34B1AA',
-                      border: '1px solid #34B1AA',
+                      backgroundColor: theme.colors.secondarySurface,
+                      color: theme.colors.secondary,
+                      border: `1px solid ${theme.colors.secondary}`,
                       padding: '4px 10px',
                       borderRadius: '8px',
                       letterSpacing: '0.05em',
@@ -176,10 +176,10 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                     gap: '6px',
                   }}
                 >
-                  <span style={{ fontSize: '13px', color: LearnOpsTheme.textMutedPurple, fontWeight: 700, textTransform: 'uppercase' }}>
+                  <span style={{ fontSize: '13px', color: theme.colors.textSecondary, fontWeight: 700, textTransform: 'uppercase' }}>
                     User Application
                   </span>
-                  <span style={{ fontSize: '26px', fontWeight: 800, color: LearnOpsTheme.textWhite }}>
+                  <span style={{ fontSize: '26px', fontWeight: 800, color: theme.colors.textPrimary }}>
                     {container.app}
                   </span>
                 </div>
@@ -194,10 +194,10 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                     gap: '4px',
                   }}
                 >
-                  <span style={{ fontSize: '12px', color: LearnOpsTheme.textMutedPurple, fontWeight: 700, textTransform: 'uppercase' }}>
+                  <span style={{ fontSize: '12px', color: theme.colors.textSecondary, fontWeight: 700, textTransform: 'uppercase' }}>
                     Bundled Bins & Libs
                   </span>
-                  <span style={{ fontSize: '20px', fontFamily: theme.fonts.mono, color: LearnOpsTheme.textMutedPurple }}>
+                  <span style={{ fontSize: '20px', fontFamily: theme.fonts.mono, color: theme.colors.textSecondary }}>
                     {container.binsLibs}
                   </span>
                 </div>
@@ -211,9 +211,9 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           style={{
             transform: `translateY(${(1 - engineSpring) * 30}px)`,
             opacity: engineSpring,
-            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
-            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            backgroundColor: theme.colors.bgCard, // Dynamic Brand Card Surface
+            border: `1px solid ${theme.colors.primary}`, // Dynamic Brand Primary Border
+            boxShadow: theme.colors.cardGlow,
             borderRadius: '20px',
             padding: '20px 28px',
             display: 'flex',
@@ -224,10 +224,10 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <span style={{ fontSize: '32px' }}>🐳</span>
             <div>
-              <div style={{ fontSize: '28px', fontWeight: 800, color: LearnOpsTheme.textWhite }}>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: theme.colors.textPrimary }}>
                 {scene.containerEngine}
               </div>
-              <div style={{ fontSize: '16px', color: LearnOpsTheme.textMutedPurple }}>
+              <div style={{ fontSize: '16px', color: theme.colors.textSecondary }}>
                 cgroups resource isolation • namespaces virtualization
               </div>
             </div>
@@ -236,9 +236,9 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
             style={{
               padding: '6px 14px',
               borderRadius: '8px',
-              backgroundColor: 'rgba(120, 60, 235, 0.2)',
-              border: `1px solid ${LearnOpsTheme.brandPurple}`,
-              color: LearnOpsTheme.accentLavender,
+              backgroundColor: theme.colors.primarySurface,
+              border: `1px solid ${theme.colors.primary}`,
+              color: theme.colors.secondary,
               fontFamily: theme.fonts.mono,
               fontSize: '18px',
               fontWeight: 700,
@@ -253,9 +253,9 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           style={{
             transform: `translateY(${(1 - hostSpring) * 30}px)`,
             opacity: hostSpring,
-            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
-            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            backgroundColor: theme.colors.bgCard, // Dynamic Brand Card Surface
+            border: `1px solid ${theme.colors.primary}`, // Dynamic Brand Primary Border
+            boxShadow: theme.colors.cardGlow,
             borderRadius: '20px',
             padding: '20px 28px',
             display: 'flex',
@@ -266,10 +266,10 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <span style={{ fontSize: '32px' }}>🐧</span>
             <div>
-              <div style={{ fontSize: '28px', fontWeight: 800, color: LearnOpsTheme.textWhite }}>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: theme.colors.textPrimary }}>
                 {scene.hostOs}
               </div>
-              <div style={{ fontSize: '16px', color: LearnOpsTheme.textMutedPurple }}>
+              <div style={{ fontSize: '16px', color: theme.colors.textSecondary }}>
                 Shared host hardware & Linux Kernel syscalls (Zero Hypervisor Overhead)
               </div>
             </div>
@@ -278,9 +278,9 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
             style={{
               padding: '6px 14px',
               borderRadius: '8px',
-              backgroundColor: 'rgba(178, 139, 255, 0.15)',
-              border: `1px solid ${LearnOpsTheme.accentLavender}`,
-              color: LearnOpsTheme.accentLavender,
+              backgroundColor: theme.colors.secondarySurface,
+              border: `1px solid ${theme.colors.secondary}`,
+              color: theme.colors.secondary,
               fontFamily: theme.fonts.mono,
               fontSize: '18px',
               fontWeight: 700,
@@ -298,17 +298,17 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
             marginTop: '22px',
             padding: '18px 26px',
             borderRadius: '16px',
-            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
-            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
-            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            backgroundColor: theme.colors.bgCard,
+            border: `1px solid ${theme.colors.primary}`,
+            boxShadow: theme.colors.cardGlow,
             fontSize: '22px',
             lineHeight: 1.45,
-            color: LearnOpsTheme.textWhite,
+            color: theme.colors.textPrimary,
             fontFamily: theme.fonts.body,
             textAlign: 'center',
           }}
         >
-          💡 {renderHighlightedText(scene.comparisonNote, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+          💡 {renderHighlightedText(scene.comparisonNote, theme.colors.textPrimary, theme.colors.secondary)}
         </div>
       )}
     </div>

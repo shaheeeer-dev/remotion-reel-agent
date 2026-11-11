@@ -4,12 +4,12 @@ import type { ReelRenderInput } from '@learnops/schema';
 import { BackgroundGrid } from '../components/BackgroundGrid.js';
 import { BrandHeader } from '../components/BrandHeader.js';
 import { SceneDispatcher } from '../scenes/SceneDispatcher.js';
-import { BrandThemeProvider, LearnOpsTheme } from '../styles/theme.js';
+import { BrandThemeProvider, defaultTheme } from '../styles/theme.js';
 
 export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
   const { fps } = useVideoConfig();
 
-  const brandName = brand?.name || 'LearnOps';
+  const brandName = brand?.name || 'Brand';
 
   return (
     <BrandThemeProvider brand={brand}>
@@ -18,7 +18,7 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
           width: '100%',
           height: '100%',
           position: 'relative',
-          backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 matte
+          backgroundColor: brand?.backgroundColor || defaultTheme.colors.bg,
           overflow: 'hidden',
         }}
       >

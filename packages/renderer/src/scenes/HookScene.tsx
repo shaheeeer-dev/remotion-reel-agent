@@ -1,16 +1,16 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme, LearnOpsTheme, renderHighlightedText } from '../styles/theme.js';
+import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import type { HookScene as HookSceneType } from '@learnops/schema';
 
 /**
  * Scene 1: The Hook (00:00 - 00:03, 3 sec)
  *
- * Exact Color Mapping:
- * - Background: #783CEB (Brand Purple) full-screen solid
- * - Header Text: #FFFFFF (White)
- * - Card Surface: #1C1824 (Dark Container)
- * - Card Badge: #B28BFF (Lavender) text on #110F17 pill
+ * Rule-based Generalized Dynamic Theming:
+ * - Background: Brand Primary Color (Full-screen solid)
+ * - Header Text: Brand Text Primary (White)
+ * - Card Surface: Brand Card / Container Surface
+ * - Card Badge: Brand Secondary / Accent text on Brand BG pill
  */
 export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
@@ -34,8 +34,6 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
   // Subtle floating scale effect
   const pulse = interpolate(Math.sin(frame / 15), [-1, 1], [0.99, 1.01]);
 
-  const hookBg = theme.colors.primary || LearnOpsTheme.brandPurple; // #783CEB
-
   return (
     <div
       style={{
@@ -43,7 +41,7 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
         inset: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: hookBg, // Solid full-screen Brand Purple
+        backgroundColor: theme.colors.primary, // Dynamic Brand Primary Color (Solid full-screen)
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -58,7 +56,7 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
         style={{
           transform: `scale(${cardSpring * pulse}) translateY(${(1 - cardSpring) * 40}px)`,
           opacity: cardSpring,
-          backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824 (Dark Container)
+          backgroundColor: theme.colors.bgCard, // Dynamic Brand Card Surface
           borderRadius: '32px',
           padding: '56px 48px',
           boxShadow: '0 30px 80px rgba(0, 0, 0, 0.45)',
@@ -69,7 +67,7 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
           width: '100%',
         }}
       >
-        {/* Card Badge: #B28BFF (Lavender) text on #110F17 pill */}
+        {/* Card Badge: Secondary Accent text on Brand BG pill */}
         <div
           style={{
             transform: `translateY(${(1 - badgeSpring) * 20}px)`,
@@ -79,8 +77,8 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
             gap: '12px',
             padding: '12px 28px',
             borderRadius: '999px',
-            backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 pill
-            border: `1.5px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB border
+            backgroundColor: theme.colors.bg, // Dynamic Brand Background pill
+            border: `1.5px solid ${theme.colors.primary}`, // Dynamic Brand Primary border
             marginBottom: '40px',
           }}
         >
@@ -89,15 +87,15 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
               width: '10px',
               height: '10px',
               borderRadius: '50%',
-              backgroundColor: LearnOpsTheme.accentLavender, // #B28BFF
-              boxShadow: `0 0 10px ${LearnOpsTheme.accentLavender}`,
+              backgroundColor: theme.colors.secondary,
+              boxShadow: `0 0 10px ${theme.colors.secondary}`,
             }}
           />
           <span
             style={{
               fontSize: '24px',
               fontWeight: 800,
-              color: LearnOpsTheme.accentLavender, // #B28BFF (Lavender) text
+              color: theme.colors.secondary, // Dynamic Brand Secondary / Accent
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
               fontFamily: theme.fonts.heading,
@@ -107,20 +105,20 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
           </span>
         </div>
 
-        {/* Header Text: #FFFFFF (White) Bold Question/Hook Text */}
+        {/* Header Text: Bold Question/Hook Text */}
         <h1
           style={{
             fontSize: '66px',
             fontWeight: 900,
             lineHeight: 1.15,
-            color: LearnOpsTheme.textWhite, // #FFFFFF (White)
+            color: theme.colors.textPrimary, // Dynamic Brand Text Primary
             fontFamily: theme.fonts.heading,
             letterSpacing: '-0.03em',
             margin: '0 0 28px 0',
             maxWidth: '860px',
           }}
         >
-          {renderHighlightedText(scene.headline, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+          {renderHighlightedText(scene.headline, theme.colors.textPrimary, theme.colors.secondary)}
         </h1>
 
         {/* Card Subtext */}
@@ -129,13 +127,13 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
             style={{
               fontSize: '30px',
               lineHeight: 1.45,
-              color: LearnOpsTheme.textMutedPurple, // #91899C (Muted Purple)
+              color: theme.colors.textSecondary, // Dynamic Brand Secondary Subtext
               fontFamily: theme.fonts.body,
               maxWidth: '800px',
               margin: 0,
             }}
           >
-            {renderHighlightedText(scene.subtext, LearnOpsTheme.textMutedPurple, LearnOpsTheme.accentLavender)}
+            {renderHighlightedText(scene.subtext, theme.colors.textSecondary, theme.colors.secondary)}
           </p>
         )}
       </div>
