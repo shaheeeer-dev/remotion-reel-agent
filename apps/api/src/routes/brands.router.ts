@@ -69,19 +69,75 @@ brandsRouter.get('/:brandId', async (req, res, next) => {
 // PATCH /api/v1/brands/:brandId
 brandsRouter.patch('/:brandId', async (req, res, next) => {
   try {
-    const { displayName, autoPublish, defaultDuration, profile } = req.body;
+    const {
+      slug,
+      displayName,
+      autoPublish,
+      defaultDuration,
+      primaryColor,
+      secondaryColor,
+      bgColor,
+      audience,
+      voiceTone,
+      contentPillars,
+      profile,
+    } = req.body;
+
     const existing = await prisma.brand.findFirst({
       where: { OR: [{ id: req.params.brandId }, { slug: req.params.brandId }] },
-      select: { id: true },
+      select: { id: true, slug: true },
     });
     if (!existing) return res.status(404).json({ error: { message: 'Brand not found.' } });
+
+    // Validate sanitized slug if provided
+    let newSlug: string | undefined = undefined;
+    if (slug && typeof slug === 'string') {
+      const sanitized = slug.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+      if (sanitized && sanitized !== existing.slug) {
+        // Check uniqueness
+        const duplicate = await prisma.brand.findUnique({ where: { slug: sanitized } });
+        if (duplicate && duplicate.id !== existing.id) {
+          return res.status(409).json({ error: { message: `Brand slug "${sanitized}" is already taken.` } });
+        }
+        newSlug = sanitized;
+      }
+    }
+
+    // Merge profile fields
+    const profileData: Record<string, any> = {
+      ...(profile || {}),
+      ...(primaryColor ? { primaryColor } : {}),
+      ...(secondaryColor ? { secondaryColor } : {}),
+      ...(bgColor ? { bgColor } : {}),
+      ...(audience ? { audience } : {}),
+      ...(voiceTone ? { voiceTone } : {}),
+      ...(contentPillars ? { contentPillars } : {}),
+    };
+
     const brand = await prisma.brand.update({
       where: { id: existing.id },
       data: {
-        displayName,
-        autoPublish,
-        defaultDuration,
-        ...(profile ? { profile: { update: profile } } : {}),
+        ...(newSlug ? { slug: newSlug } : {}),
+        ...(displayName ? { displayName } : {}),
+        ...(autoPublish !== undefined ? { autoPublish: Boolean(autoPublish) } : {}),
+        ...(defaultDuration !== undefined ? { defaultDuration: Number(defaultDuration) } : {}),
+        ...(Object.keys(profileData).length > 0
+          ? {
+              profile: {
+                upsert: {
+                  create: {
+                    audience: profileData.audience || 'Tech & developer audience',
+                    voiceTone: profileData.voiceTone || 'Practical, concise, encouraging',
+                    primaryColor: profileData.primaryColor || '#F29F67',
+                    secondaryColor: profileData.secondaryColor || '#34B1AA',
+                    bgColor: profileData.bgColor || '#1E1E2C',
+                    contentPillars: profileData.contentPillars || ['Architecture', 'DevOps', 'Cloud'],
+                  },
+                  update: profileData,
+                },
+              },
+            }
+          : {}),
       },
       include: { profile: true },
     });
