@@ -1,6 +1,7 @@
 import React from 'react';
 import { Composition } from 'remotion';
 import { MainReel } from './composition/MainReel.js';
+import { LinuxEtcMotionReel } from './scenes/educational/LinuxEtcMotionReel.js';
 import type { ReelRenderInput } from '@learnops/schema';
 
 // Test fixtures
@@ -15,6 +16,44 @@ const HEIGHT = 1920;
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      {/* 12-Second Motion Graphics Video: Linux /etc Directory (4 Scenes) */}
+      <Composition
+        id="LinuxEtcMotionGraphics"
+        component={LinuxEtcMotionReel}
+        durationInFrames={360} // 12 seconds @ 30 fps
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+        defaultProps={{
+          brand: {
+            primaryColor: '#FF3B00', // Coral/Orange matching reference video
+            secondaryColor: '#B28BFF',
+            backgroundColor: '#110F17',
+            cardBackground: '#1C1824',
+            textColor: '#FFFFFF',
+          },
+        }}
+      />
+
+      {/* 12-Second Motion Graphics Video (LearnOps Purple Edition) */}
+      <Composition
+        id="LinuxEtcLearnOps"
+        component={LinuxEtcMotionReel}
+        durationInFrames={360} // 12 seconds @ 30 fps
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+        defaultProps={{
+          brand: {
+            primaryColor: '#783CEB', // LearnOps Brand Purple
+            secondaryColor: '#B28BFF',
+            backgroundColor: '#110F17',
+            cardBackground: '#1C1824',
+            textColor: '#FFFFFF',
+          },
+        }}
+      />
+
       {/* Dynamic Main Reel Composition */}
       <Composition
         id="MainReel"
