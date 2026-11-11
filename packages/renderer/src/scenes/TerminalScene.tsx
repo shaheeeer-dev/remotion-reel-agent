@@ -1,5 +1,6 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { Sparkles } from 'lucide-react';
 import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import type { TerminalScene as TerminalSceneType } from '@learnops/schema';
 
@@ -193,7 +194,10 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
             textAlign: 'center',
           }}
         >
-          💡 {renderHighlightedText(scene.explanation, theme.colors.textPrimary, theme.colors.secondary)}
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <Sparkles size={20} color={theme.colors.secondary} />
+            <span>{renderHighlightedText(scene.explanation, theme.colors.textPrimary, theme.colors.secondary)}</span>
+          </div>
         </div>
       )}
     </div>

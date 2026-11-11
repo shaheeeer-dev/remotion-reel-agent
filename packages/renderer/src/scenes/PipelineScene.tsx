@@ -1,5 +1,6 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { GitBranch, Check, Sparkles } from 'lucide-react';
 import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import type { PipelineScene as PipelineSceneType } from '@learnops/schema';
 
@@ -90,7 +91,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <span style={{ fontSize: '28px' }}>🚀</span>
+          <GitBranch size={26} color={theme.colors.secondary} strokeWidth={2.2} />
           <span
             style={{
               fontFamily: theme.fonts.mono,
@@ -181,7 +182,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                     fontWeight: 900,
                   }}
                 >
-                  {isDone ? '✓' : index + 1}
+                  {isDone ? <Check size={22} color="#FFFFFF" strokeWidth={3} /> : index + 1}
                 </div>
 
                 <div
@@ -240,9 +241,14 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
             color: theme.colors.textPrimary,
             fontFamily: theme.fonts.body,
             textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
           }}
         >
-          ✨ {renderHighlightedText(scene.takeaway, theme.colors.textPrimary, theme.colors.secondary)}
+          <Sparkles size={22} color={theme.colors.secondary} />
+          <span>{renderHighlightedText(scene.takeaway, theme.colors.textPrimary, theme.colors.secondary)}</span>
         </div>
       )}
     </div>

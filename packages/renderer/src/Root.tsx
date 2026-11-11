@@ -16,26 +16,34 @@ const HEIGHT = 1920;
 export const RemotionRoot: React.FC = () => {
   return (
     <>
-      {/* 12-Second Motion Graphics Video: Linux /etc Directory (4 Scenes) */}
+      {/* Dynamic Motion Graphics Video: Linux /etc Directory (4 Educational Scenes) */}
       <Composition
         id="LinuxEtcMotionGraphics"
         component={LinuxEtcMotionReel}
-        durationInFrames={360} // 12 seconds @ 30 fps
+        durationInFrames={360} // fallback 12 seconds @ 30 fps
         fps={FPS}
         width={WIDTH}
         height={HEIGHT}
         defaultProps={{
+          durationSeconds: 12,
           brand: {
-            primaryColor: '#FF3B00', // Coral/Orange matching reference video
-            secondaryColor: '#B28BFF',
-            backgroundColor: '#110F17',
-            cardBackground: '#1C1824',
+            name: 'LearnOps',
+            primaryColor: '#F29F67', // Peach / Coral
+            secondaryColor: '#34B1AA', // Teal Mint
+            backgroundColor: '#1E1E2C', // Obsidian Navy
+            cardBackground: '#262638',
             textColor: '#FFFFFF',
           },
         }}
+        calculateMetadata={async ({ props }) => {
+          const duration = (props as any)?.durationSeconds || 12;
+          return {
+            durationInFrames: Math.round(duration * FPS),
+          };
+        }}
       />
 
-      {/* 12-Second Motion Graphics Video (LearnOps Purple Edition) */}
+      {/* 12-Second Motion Graphics Video (LearnOps Edition) */}
       <Composition
         id="LinuxEtcLearnOps"
         component={LinuxEtcMotionReel}
@@ -44,13 +52,21 @@ export const RemotionRoot: React.FC = () => {
         width={WIDTH}
         height={HEIGHT}
         defaultProps={{
+          durationSeconds: 12,
           brand: {
+            name: 'LearnOps',
             primaryColor: '#783CEB', // LearnOps Brand Purple
             secondaryColor: '#B28BFF',
             backgroundColor: '#110F17',
             cardBackground: '#1C1824',
             textColor: '#FFFFFF',
           },
+        }}
+        calculateMetadata={async ({ props }) => {
+          const duration = (props as any)?.durationSeconds || 12;
+          return {
+            durationInFrames: Math.round(duration * FPS),
+          };
         }}
       />
 

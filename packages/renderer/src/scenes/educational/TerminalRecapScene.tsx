@@ -1,14 +1,21 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { Terminal, Folder } from 'lucide-react';
 import { useBrandTheme } from '../../styles/theme.js';
 
+interface TerminalRecapSceneProps {
+  brandName?: string;
+}
+
 /**
- * Scene 4: Recap (00:09 - 00:12, 3 sec / 90 frames @ 30fps)
+ * Scene 4: Recap
  *
- * Learning Point: Practical command to inspect the directory: `ls /etc`.
- * Visual Metaphor: Interactive terminal window revealing the real configuration files.
+ * Single learning point: Practical command to inspect the directory: `ls /etc`.
+ * Visual metaphor: Interactive terminal window revealing the real configuration files.
+ * Platform UI Safe Area: Essential content is kept within the upper 80% (top 1536px).
+ * Bottom 20% (384px) is strictly reserved for platform UI overlays.
  */
-export const TerminalRecapScene: React.FC = () => {
+export const TerminalRecapScene: React.FC<TerminalRecapSceneProps> = ({ brandName = 'LearnOps' }) => {
   const theme = useBrandTheme();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -36,7 +43,6 @@ export const TerminalRecapScene: React.FC = () => {
     })
   );
   const displayedCommand = fullCommand.slice(0, typedCount);
-  const isTypingDone = typedCount === fullCommand.length;
 
   // Blinking cursor
   const cursorBlink = Math.floor(frame / 6) % 2 === 0;
@@ -61,216 +67,238 @@ export const TerminalRecapScene: React.FC = () => {
         inset: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: theme.colors.bg, // Dark matte (#110F17)
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        padding: '120px 80px',
-        boxSizing: 'border-box',
+        backgroundColor: theme.colors.deepBackground, // Deep dark matte background
         overflow: 'hidden',
       }}
     >
-      {/* Top Section: Kicker with Accent Mark & Headline */}
+      {/* 
+        Platform Safe Area Container:
+        Height: 1536px (Upper 4/5ths, 80% of 1920px)
+        Leaves the bottom 384px completely unobstructed for platform UI overlays.
+      */}
       <div
         style={{
-          transform: `translateY(${(1 - headerSpring) * 35}px)`,
-          opacity: headerSpring,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '1080px',
+          height: '1536px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '110px 80px 40px 80px',
+          boxSizing: 'border-box',
         }}
       >
+        {/* Top Section: Kicker with Accent Mark & Headline */}
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '32px',
+            transform: `translateY(${(1 - headerSpring) * 35}px)`,
+            opacity: headerSpring,
           }}
         >
-          <span
-            style={{
-              fontSize: '22px',
-              fontFamily: theme.fonts.mono,
-              fontWeight: 800,
-              letterSpacing: '0.12em',
-              color: 'rgba(255, 255, 255, 0.45)',
-              textTransform: 'uppercase',
-            }}
-          >
-            TAKE A LOOK
-          </span>
-
           <div
             style={{
-              width: '48px',
-              height: '6px',
-              borderRadius: '999px',
-              backgroundColor: theme.colors.primary,
-            }}
-          />
-        </div>
-
-        <h1
-          style={{
-            fontSize: '80px',
-            fontWeight: 900,
-            lineHeight: 1.1,
-            color: '#FFFFFF',
-            letterSpacing: '-0.04em',
-            margin: 0,
-            fontFamily: theme.fonts.heading,
-          }}
-        >
-          Open the drawer.
-        </h1>
-      </div>
-
-      {/* Middle Section: Clean macOS/Linux Terminal Window */}
-      <div
-        style={{
-          transform: `scale(${terminalSpring}) translateY(${(1 - terminalSpring) * 40}px)`,
-          opacity: terminalSpring,
-          backgroundColor: theme.colors.bgCard, // #1C1824
-          borderRadius: '28px',
-          border: '1.5px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 30px 80px rgba(0, 0, 0, 0.65)',
-          overflow: 'hidden',
-          margin: 'auto 0',
-          width: '100%',
-        }}
-      >
-        {/* Terminal Header Bar */}
-        <div
-          style={{
-            padding: '20px 28px',
-            backgroundColor: 'rgba(0, 0, 0, 0.35)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '14px',
-          }}
-        >
-          <span style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#FF5F56' }} />
-          <span style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#FFBD2E' }} />
-          <span style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#27C93F' }} />
-
-          <span
-            style={{
-              fontSize: '16px',
-              fontFamily: theme.fonts.mono,
-              fontWeight: 800,
-              letterSpacing: '0.1em',
-              color: 'rgba(255, 255, 255, 0.4)',
-              marginLeft: '12px',
-              textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '28px',
             }}
           >
-            TERMINAL
-          </span>
-        </div>
-
-        {/* Terminal Body */}
-        <div
-          style={{
-            padding: '44px',
-            fontFamily: theme.fonts.mono,
-            fontSize: '32px',
-            lineHeight: 1.8,
-            minHeight: '260px',
-          }}
-        >
-          {/* Prompt + Command */}
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
-            <span style={{ color: theme.colors.secondary, fontWeight: 800 }}>
-              learner@linux:~$
-            </span>
-            <span style={{ color: '#FFFFFF', fontWeight: 800 }}>
-              {displayedCommand.startsWith('ls') ? (
-                <>
-                  <span style={{ color: '#FFFFFF' }}>ls </span>
-                  <span style={{ color: theme.colors.primary, fontWeight: 900 }}>
-                    {displayedCommand.slice(3)}
-                  </span>
-                </>
-              ) : (
-                displayedCommand
-              )}
-            </span>
-
-            {/* Blinking Cursor */}
             <span
               style={{
-                display: 'inline-block',
-                width: '14px',
-                height: '32px',
-                backgroundColor: cursorBlink ? theme.colors.primary : 'transparent',
-                marginLeft: '2px',
-                verticalAlign: 'middle',
+                fontSize: '22px',
+                fontFamily: theme.fonts.mono,
+                fontWeight: 800,
+                letterSpacing: '0.12em',
+                color: theme.colors.mutedText,
+                textTransform: 'uppercase',
+              }}
+            >
+              TAKE A LOOK
+            </span>
+
+            <div
+              style={{
+                width: '48px',
+                height: '6px',
+                borderRadius: '999px',
+                backgroundColor: theme.colors.brandPrimary,
               }}
             />
           </div>
 
-          {/* Directory Listing Output */}
-          <div
+          <h1
             style={{
-              opacity: outputOpacity,
-              marginTop: '28px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-              color: '#FFFFFF',
-              fontWeight: 700,
+              fontSize: '80px',
+              fontWeight: 900,
+              lineHeight: 1.1,
+              color: theme.colors.primaryText,
+              letterSpacing: '-0.04em',
+              margin: 0,
+              fontFamily: theme.fonts.heading,
             }}
           >
-            <div style={{ display: 'flex', gap: '36px', alignItems: 'center' }}>
-              <span>hosts</span>
-              <span style={{ color: theme.colors.primary }}>fstab</span>
-              <span style={{ color: theme.colors.secondary }}>ssh/</span>
+            Open the drawer.
+          </h1>
+        </div>
+
+        {/* Middle Section: Clean macOS/Linux Terminal Window */}
+        <div
+          style={{
+            transform: `scale(${terminalSpring}) translateY(${(1 - terminalSpring) * 40}px)`,
+            opacity: terminalSpring,
+            backgroundColor: theme.colors.cardSurface,
+            borderRadius: '28px',
+            border: '1.5px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.65)',
+            overflow: 'hidden',
+            margin: 'auto 0',
+            width: '100%',
+          }}
+        >
+          {/* Terminal Header Bar */}
+          <div
+            style={{
+              padding: '18px 26px',
+              backgroundColor: 'rgba(0, 0, 0, 0.35)',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ width: '13px', height: '13px', borderRadius: '50%', backgroundColor: '#FF5F56' }} />
+              <span style={{ width: '13px', height: '13px', borderRadius: '50%', backgroundColor: '#FFBD2E' }} />
+              <span style={{ width: '13px', height: '13px', borderRadius: '50%', backgroundColor: '#27C93F' }} />
             </div>
-            <div style={{ display: 'flex', gap: '36px', alignItems: 'center', color: 'rgba(255, 255, 255, 0.8)' }}>
-              <span>hostname</span>
-              <span>resolv.conf</span>
-              <span style={{ color: 'rgba(255, 255, 255, 0.4)' }}>...</span>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Terminal size={17} color="rgba(255, 255, 255, 0.5)" />
+              <span
+                style={{
+                  fontSize: '15px',
+                  fontFamily: theme.fonts.mono,
+                  fontWeight: 800,
+                  letterSpacing: '0.1em',
+                  color: 'rgba(255, 255, 255, 0.45)',
+                  textTransform: 'uppercase',
+                }}
+              >
+                TERMINAL
+              </span>
+            </div>
+          </div>
+
+          {/* Terminal Body */}
+          <div
+            style={{
+              padding: '40px',
+              fontFamily: theme.fonts.mono,
+              fontSize: '30px',
+              lineHeight: 1.8,
+              minHeight: '250px',
+            }}
+          >
+            {/* Prompt + Command */}
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+              <span style={{ color: theme.colors.brightAccent, fontWeight: 800 }}>
+                learner@linux:~$
+              </span>
+              <span style={{ color: '#FFFFFF', fontWeight: 800 }}>
+                {displayedCommand.startsWith('ls') ? (
+                  <>
+                    <span style={{ color: '#FFFFFF' }}>ls </span>
+                    <span style={{ color: theme.colors.brandPrimary, fontWeight: 900 }}>
+                      {displayedCommand.slice(3)}
+                    </span>
+                  </>
+                ) : (
+                  displayedCommand
+                )}
+              </span>
+
+              {/* Blinking Cursor */}
+              <span
+                style={{
+                  display: 'inline-block',
+                  width: '13px',
+                  height: '30px',
+                  backgroundColor: cursorBlink ? theme.colors.brightAccent : 'transparent',
+                  marginLeft: '2px',
+                  verticalAlign: 'middle',
+                }}
+              />
+            </div>
+
+            {/* Directory Listing Output with Lucide Folder Icon (NO EMOJIS) */}
+            <div
+              style={{
+                opacity: outputOpacity,
+                marginTop: '26px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                color: theme.colors.primaryText,
+                fontWeight: 700,
+              }}
+            >
+              <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+                <span>hosts</span>
+                <span style={{ color: theme.colors.brandPrimary }}>fstab</span>
+                <span style={{ color: theme.colors.brightAccent, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <Folder size={22} color={theme.colors.brightAccent} strokeWidth={2.2} />
+                  ssh/
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '32px', alignItems: 'center', color: 'rgba(255, 255, 255, 0.8)' }}>
+                <span>hostname</span>
+                <span>resolv.conf</span>
+                <span style={{ color: 'rgba(255, 255, 255, 0.4)' }}>...</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Bottom Section: Takeaway & Directory Badge */}
-      <div
-        style={{
-          transform: `translateY(${(1 - takeawaySpring) * 30}px)`,
-          opacity: takeawaySpring,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '18px',
-          textAlign: 'center',
-        }}
-      >
-        <p
+        {/* Bottom Section: Takeaway & Dynamic Brand Badge */}
+        <div
           style={{
-            fontSize: '40px',
-            fontWeight: 900,
-            color: '#FFFFFF',
-            margin: 0,
-            fontFamily: theme.fonts.heading,
-            letterSpacing: '-0.02em',
+            transform: `translateY(${(1 - takeawaySpring) * 25}px)`,
+            opacity: takeawaySpring,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '16px',
+            textAlign: 'center',
           }}
         >
-          Look inside. Learn what the system reads.
-        </p>
+          <p
+            style={{
+              fontSize: '40px',
+              fontWeight: 900,
+              color: theme.colors.primaryText,
+              margin: 0,
+              fontFamily: theme.fonts.heading,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Look inside. Learn what the system reads.
+          </p>
 
-        <span
-          style={{
-            fontSize: '18px',
-            fontFamily: theme.fonts.mono,
-            fontWeight: 800,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: theme.colors.primary,
-          }}
-        >
-          LINUX • /ETC DIRECTORY
-        </span>
+          <span
+            style={{
+              fontSize: '18px',
+              fontFamily: theme.fonts.mono,
+              fontWeight: 800,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: theme.colors.brightAccent,
+            }}
+          >
+            {brandName.toUpperCase()} • /ETC DIRECTORY
+          </span>
+        </div>
       </div>
     </div>
   );

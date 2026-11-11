@@ -2,88 +2,185 @@ import { createContext, createElement, useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
 
 /**
- * LearnOps Official Brand Palette Specification
+ * Semantic Theme Roles:
+ * - brandPrimary: Brand primary color (for hook full BG, CTA buttons, active accents, card borders)
+ * - brightAccent: High-luminance highlight color (for keyword highlights, active pills, terminal prompt)
+ * - deepBackground: Deep dark canvas background (for explanation, comparison, recap scenes)
+ * - cardSurface: Elevated container background for cards, terminal, code blocks
+ * - primaryText: High contrast text (default #FFFFFF)
+ * - mutedText: Secondary subtext, borders, path slashes
  */
-export const LearnOpsTheme = {
-  // Core Brand
-  brandPurple: '#783CEB', // Opening Hook BG, Primary CTA Button, Accent Marks
-  accentLavender: '#B28BFF', // High-Luminance Highlight Text, Active UI Badges, Commands
+export interface SemanticThemeTokens {
+  // Primary Semantic Roles
+  brandPrimary: string;
+  brightAccent: string;
+  deepBackground: string;
+  cardSurface: string;
+  primaryText: string;
+  mutedText: string;
 
-  // Surfaces & Backdrops
-  bgDarkAmethyst: '#110F17', // Main Video Background (Scenes 2 & 3)
-  surfaceAmethyst: '#1C1824', // Terminal Window & UI Card Containers
+  // Remotion Scene Aliases & Derived Utilities
+  primary: string;
+  primaryHover: string;
+  primaryDark: string;
+  primaryGlow: string;
+  primarySurface: string;
+  cardGlow: string;
 
-  // Typography & Subtext
-  textWhite: '#FFFFFF', // Main Titles & Body Text
-  textMutedPurple: '#91899C', // Secondary Subtext, Path Slashes & Borders
-};
+  secondary: string;
+  secondaryGlow: string;
+  secondarySurface: string;
 
-export const defaultTheme = {
-  colors: {
-    bg: LearnOpsTheme.bgDarkAmethyst,
-    bgHook: LearnOpsTheme.brandPurple,
-    bgCard: LearnOpsTheme.surfaceAmethyst,
-    bgCardBorder: LearnOpsTheme.brandPurple,
-    bgHeader: 'rgba(17, 15, 23, 0.94)',
+  bg: string;
+  bgHook: string;
+  bgCard: string;
+  bgCardBorder: string;
+  bgHeader: string;
 
-    primary: LearnOpsTheme.brandPurple,
-    primaryHover: '#8E55F5',
-    primaryDark: '#5E28C4',
-    primaryGlow: 'rgba(120, 60, 235, 0.35)',
-    primarySurface: 'rgba(120, 60, 235, 0.15)',
-    cardGlow: '0 0 15px rgba(120, 60, 235, 0.20)',
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  textHighlight: string;
 
-    secondary: LearnOpsTheme.accentLavender,
-    secondaryGlow: 'rgba(178, 139, 255, 0.35)',
-    secondarySurface: 'rgba(178, 139, 255, 0.15)',
+  terminalBg: string;
+  terminalBar: string;
+  terminalPrompt: string;
+  terminalText: string;
 
-    accentLavender: LearnOpsTheme.accentLavender,
-    accentPurple: LearnOpsTheme.brandPurple,
-
-    textPrimary: LearnOpsTheme.textWhite,
-    textSecondary: LearnOpsTheme.textMutedPurple,
-    textMuted: LearnOpsTheme.textMutedPurple,
-    textHighlight: LearnOpsTheme.accentLavender,
-
-    success: '#34B1AA',
-    successGlow: 'rgba(52, 177, 170, 0.35)',
-    warning: '#E0B50F',
-    error: '#EF4444',
-
-    terminalBg: LearnOpsTheme.surfaceAmethyst,
-    terminalBar: '#15131C',
-    terminalPrompt: LearnOpsTheme.accentLavender,
-    terminalText: LearnOpsTheme.textWhite,
-  },
-  fonts: {
-    heading: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
-    mono: '"JetBrains Mono", "Fira Code", "Courier New", Courier, monospace',
-    body: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
-  },
-};
+  success: string;
+  successGlow: string;
+  warning: string;
+  error: string;
+}
 
 export type Theme = {
-  colors: { [K in keyof typeof defaultTheme.colors]: string };
-  fonts: typeof defaultTheme.fonts;
+  colors: SemanticThemeTokens;
+  fonts: {
+    heading: string;
+    mono: string;
+    body: string;
+  };
 };
 
 export type BrandThemeOverrides = {
+  name?: string;
   primaryColor?: string;
   secondaryColor?: string;
   backgroundColor?: string;
   cardBackground?: string;
   textColor?: string;
+  mutedTextColor?: string;
+  fontFamily?: string;
 };
 
-function rgbaFromHex(hex: string, alpha: number, fallback: string): string {
+export function rgbaFromHex(hex: string, alpha: number, fallback = 'rgba(255, 255, 255, 0.2)'): string {
+  if (!hex) return fallback;
   let value = hex.replace(/^#/, '');
   if (/^[\da-f]{3}$/i.test(value)) {
     value = value.split('').map((part) => `${part}${part}`).join('');
   }
   if (!/^[\da-f]{6}$/i.test(value)) return fallback;
-  const [red, green, blue] = value.match(/[\da-f]{2}/gi)!.map((part) => parseInt(part, 16));
+  const match = value.match(/[\da-f]{2}/gi);
+  if (!match || match.length < 3) return fallback;
+  const [red, green, blue] = match.map((part) => parseInt(part, 16));
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
+
+/**
+ * Calculates a slightly elevated surface hex tone from a deep background color.
+ */
+export function elevateHex(hex: string, amount = 14): string {
+  if (!hex) return '#1C1824';
+  let value = hex.replace(/^#/, '');
+  if (/^[\da-f]{3}$/i.test(value)) {
+    value = value.split('').map((part) => `${part}${part}`).join('');
+  }
+  if (!/^[\da-f]{6}$/i.test(value)) return '#1C1824';
+  const match = value.match(/[\da-f]{2}/gi);
+  if (!match || match.length < 3) return '#1C1824';
+  const r = Math.min(255, Math.max(0, parseInt(match[0], 16) + amount));
+  const g = Math.min(255, Math.max(0, parseInt(match[1], 16) + amount));
+  const b = Math.min(255, Math.max(0, parseInt(match[2], 16) + amount));
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+export function buildSemanticTheme(brand?: BrandThemeOverrides): Theme {
+  // If brand is provided, ensure required settings exist
+  if (brand) {
+    const missing: string[] = [];
+    if (!brand.primaryColor) missing.push('primaryColor');
+    if (!brand.secondaryColor) missing.push('secondaryColor');
+    if (!brand.backgroundColor) missing.push('backgroundColor');
+
+    if (missing.length > 0) {
+      console.warn(
+        `[Theme Warning] Brand "${brand.name || 'Current'}" is missing settings for: ${missing.join(', ')}. ` +
+        `Please ensure Brand Profile colors are properly configured.`
+      );
+    }
+  }
+
+  const brandPrimary = brand?.primaryColor || '#783CEB';
+  const brightAccent = brand?.secondaryColor || '#B28BFF';
+  const deepBackground = brand?.backgroundColor || '#110F17';
+  const cardSurface = brand?.cardBackground || elevateHex(deepBackground, 12);
+  const primaryText = brand?.textColor || '#FFFFFF';
+  const mutedText = brand?.mutedTextColor || rgbaFromHex(primaryText, 0.65, '#94A3B8');
+
+  const headingFont = brand?.fontFamily
+    ? `"${brand.fontFamily}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
+    : '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif';
+
+  return {
+    colors: {
+      brandPrimary,
+      brightAccent,
+      deepBackground,
+      cardSurface,
+      primaryText,
+      mutedText,
+
+      primary: brandPrimary,
+      primaryHover: brandPrimary,
+      primaryDark: brandPrimary,
+      primaryGlow: rgbaFromHex(brandPrimary, 0.35, 'rgba(120, 60, 235, 0.35)'),
+      primarySurface: rgbaFromHex(brandPrimary, 0.15, 'rgba(120, 60, 235, 0.15)'),
+      cardGlow: `0 0 20px ${rgbaFromHex(brandPrimary, 0.25, 'rgba(120, 60, 235, 0.25)')}`,
+
+      secondary: brightAccent,
+      secondaryGlow: rgbaFromHex(brightAccent, 0.35, 'rgba(178, 139, 255, 0.35)'),
+      secondarySurface: rgbaFromHex(brightAccent, 0.15, 'rgba(178, 139, 255, 0.15)'),
+
+      bg: deepBackground,
+      bgHook: brandPrimary,
+      bgCard: cardSurface,
+      bgCardBorder: brandPrimary,
+      bgHeader: rgbaFromHex(deepBackground, 0.94, 'rgba(17, 15, 23, 0.94)'),
+
+      textPrimary: primaryText,
+      textSecondary: mutedText,
+      textMuted: mutedText,
+      textHighlight: brightAccent,
+
+      terminalBg: cardSurface,
+      terminalBar: elevateHex(deepBackground, 4),
+      terminalPrompt: brightAccent,
+      terminalText: primaryText,
+
+      success: '#34B1AA',
+      successGlow: 'rgba(52, 177, 170, 0.35)',
+      warning: '#E0B50F',
+      error: '#EF4444',
+    },
+    fonts: {
+      heading: headingFont,
+      mono: '"JetBrains Mono", "Fira Code", "Courier New", Courier, monospace',
+      body: headingFont,
+    },
+  };
+}
+
+export const defaultTheme: Theme = buildSemanticTheme();
 
 const BrandThemeContext = createContext<Theme>(defaultTheme);
 
@@ -91,36 +188,16 @@ export const BrandThemeProvider = ({
   brand,
   children,
 }: { brand?: BrandThemeOverrides; children: ReactNode }) => {
-  const theme = useMemo<Theme>(() => {
-    const primary = brand?.primaryColor || defaultTheme.colors.primary;
-    const secondary = brand?.secondaryColor || defaultTheme.colors.secondary;
-    const bg = brand?.backgroundColor || defaultTheme.colors.bg;
-    const bgCard = brand?.cardBackground || defaultTheme.colors.bgCard;
-    const textPrimary = brand?.textColor || defaultTheme.colors.textPrimary;
-
-    return {
-      ...defaultTheme,
-      colors: {
-        ...defaultTheme.colors,
-        primary,
-        primaryHover: primary,
-        primaryDark: primary,
-        primaryGlow: rgbaFromHex(primary, 0.35, defaultTheme.colors.primaryGlow),
-        primarySurface: rgbaFromHex(primary, 0.15, defaultTheme.colors.primarySurface),
-        cardGlow: `0 0 15px ${rgbaFromHex(primary, 0.2, 'rgba(120, 60, 235, 0.20)')}`,
-        secondary,
-        secondaryGlow: rgbaFromHex(secondary, 0.35, defaultTheme.colors.secondaryGlow),
-        secondarySurface: rgbaFromHex(secondary, 0.12, defaultTheme.colors.secondarySurface),
-        bg,
-        bgCard,
-        bgCardBorder: primary,
-        textPrimary,
-        textHighlight: secondary,
-        terminalBg: bgCard,
-        terminalPrompt: secondary,
-      },
-    };
-  }, [brand?.primaryColor, brand?.secondaryColor, brand?.backgroundColor, brand?.cardBackground, brand?.textColor]);
+  const theme = useMemo<Theme>(() => buildSemanticTheme(brand), [
+    brand?.name,
+    brand?.primaryColor,
+    brand?.secondaryColor,
+    brand?.backgroundColor,
+    brand?.cardBackground,
+    brand?.textColor,
+    brand?.mutedTextColor,
+    brand?.fontFamily,
+  ]);
 
   return createElement(BrandThemeContext.Provider, { value: theme }, children);
 };
@@ -128,18 +205,16 @@ export const BrandThemeProvider = ({
 export const useBrandTheme = () => useContext(BrandThemeContext);
 
 /**
- * Helper to render kinetic text with keyword emphasis.
- * Words surrounded by asterisks like *word* or backticks `word` are rendered in accentLavender (#B28BFF).
- * Rule: Standard words are #FFFFFF. Never use #783CEB for text on dark backgrounds.
+ * Kinetic text keyword emphasis renderer.
+ * Asterisks *word* or backticks `word` are rendered using the bright accent color.
  */
 export function renderHighlightedText(
   text: string,
   defaultColor = '#FFFFFF',
-  highlightColor = LearnOpsTheme.accentLavender
+  highlightColor?: string
 ): ReactNode[] {
   if (!text) return [];
 
-  // Match words between *...* or `...`
   const parts = text.split(/(\*[^*]+\*|`[^`]+`)/g);
 
   return parts.map((part, idx) => {
@@ -153,7 +228,7 @@ export function renderHighlightedText(
         {
           key: idx,
           style: {
-            color: highlightColor,
+            color: highlightColor || defaultColor,
             fontWeight: 800,
           },
         },

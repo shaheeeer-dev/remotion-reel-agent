@@ -41,13 +41,16 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
                 <div
                   style={{
                     width: '100%',
-                    height: '100%',
-                    position: 'relative',
-                    paddingTop: isHook || isOutro ? '0px' : '160px',
-                    paddingBottom: isHook || isOutro ? '0px' : '60px',
+                    height: '1536px', // Platform UI Safe Area: Upper 80% (top 1536px), reserving bottom 384px
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    paddingTop: isHook || isOutro ? '0px' : '150px',
+                    paddingBottom: '40px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    boxSizing: 'border-box',
                   }}
                 >
                   <SceneDispatcher scene={sceneForRender} />

@@ -197,6 +197,17 @@ export class QueueService {
             include: { brand: { include: { profile: true } } },
           });
 
+          const profile = reel.brand.profile;
+          if (!profile?.primaryColor || !profile?.secondaryColor || !profile?.bgColor) {
+            throw new Error(
+              `Cannot render reel "${reel.title}": Brand profile for "${reel.brand.displayName}" is missing required theme colors (` +
+              `primaryColor: ${profile?.primaryColor ?? 'missing'}, ` +
+              `secondaryColor: ${profile?.secondaryColor ?? 'missing'}, ` +
+              `bgColor: ${profile?.bgColor ?? 'missing'}). ` +
+              `Please configure Reel Colors in Brand Profile settings before generating videos.`
+            );
+          }
+
           await prisma.reel.update({
             where: { id: reel.id },
             data: { status: REEL_STATUS.RENDERING },
@@ -206,11 +217,11 @@ export class QueueService {
             reelId: reel.id,
             brand: {
               name: reel.brand.displayName,
-              primaryColor: reel.brand.profile?.primaryColor || '#6F41EC',
-              secondaryColor: reel.brand.profile?.secondaryColor || '#C4B5FD',
-              backgroundColor: reel.brand.profile?.bgColor || '#0B0F17',
-              cardBackground: '#151D2A',
-              textColor: '#F8FAFC',
+              primaryColor: profile.primaryColor,
+              secondaryColor: profile.secondaryColor,
+              backgroundColor: profile.bgColor,
+              textColor: '#FFFFFF',
+              fontFamily: profile.fontFamily || undefined,
               creatorCredit: env.REPO_CREDIT_URL,
             },
             script: reel.scriptJson as any,

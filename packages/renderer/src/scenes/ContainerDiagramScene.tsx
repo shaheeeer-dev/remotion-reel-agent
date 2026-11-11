@@ -1,5 +1,6 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { Box, Layers, Cpu, Sparkles } from 'lucide-react';
 import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import type { ContainerDiagramScene as ContainerDiagramSceneType } from '@learnops/schema';
 
@@ -144,9 +145,13 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                       fontSize: '22px',
                       fontWeight: 700,
                       color: theme.colors.secondary, // Dynamic Brand Secondary
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
                     }}
                   >
-                    📦 {container.name}
+                    <Box size={20} color={theme.colors.secondary} strokeWidth={2.2} />
+                    <span>{container.name}</span>
                   </span>
                   <span
                     style={{
@@ -222,7 +227,19 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ fontSize: '32px' }}>🐳</span>
+            <div
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                backgroundColor: theme.colors.primarySurface,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Layers size={28} color={theme.colors.secondary} strokeWidth={2.2} />
+            </div>
             <div>
               <div style={{ fontSize: '28px', fontWeight: 800, color: theme.colors.textPrimary }}>
                 {scene.containerEngine}
@@ -264,7 +281,19 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ fontSize: '32px' }}>🐧</span>
+            <div
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                backgroundColor: theme.colors.secondarySurface,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Cpu size={28} color={theme.colors.secondary} strokeWidth={2.2} />
+            </div>
             <div>
               <div style={{ fontSize: '28px', fontWeight: 800, color: theme.colors.textPrimary }}>
                 {scene.hostOs}
@@ -306,9 +335,14 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
             color: theme.colors.textPrimary,
             fontFamily: theme.fonts.body,
             textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
           }}
         >
-          💡 {renderHighlightedText(scene.comparisonNote, theme.colors.textPrimary, theme.colors.secondary)}
+          <Sparkles size={22} color={theme.colors.secondary} />
+          <span>{renderHighlightedText(scene.comparisonNote, theme.colors.textPrimary, theme.colors.secondary)}</span>
         </div>
       )}
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
+import { Folder, FileText } from 'lucide-react';
 import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import type { FolderTreeScene as FolderTreeSceneType, FolderNode } from '@learnops/schema';
 
@@ -96,7 +97,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
             color: theme.colors.textSecondary,
           }}
         >
-          <span style={{ fontSize: '36px' }}>📁</span>
+          <Folder size={34} color={theme.colors.secondary} strokeWidth={2.2} />
           <span style={{ color: theme.colors.textPrimary }}>
             <span style={{ color: theme.colors.secondary }}>{scene.rootPath}</span>{' '}
             <span style={{ color: theme.colors.textSecondary, fontSize: '24px' }}>(root)</span>
@@ -150,7 +151,11 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                    <span style={{ fontSize: '28px' }}>{node.isDirectory ? '📁' : '📄'}</span>
+                    {node.isDirectory ? (
+                      <Folder size={26} color={isHighlighted ? theme.colors.secondary : theme.colors.textSecondary} strokeWidth={2.2} />
+                    ) : (
+                      <FileText size={26} color={theme.colors.textSecondary} strokeWidth={2} />
+                    )}
                     <span
                       style={{
                         fontSize: '30px',
@@ -213,7 +218,11 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ fontSize: '20px' }}>{child.isDirectory ? '📁' : '📄'}</span>
+                            {child.isDirectory ? (
+                              <Folder size={18} color={theme.colors.secondary} strokeWidth={2} />
+                            ) : (
+                              <FileText size={18} color={theme.colors.textSecondary} strokeWidth={2} />
+                            )}
                             <span
                               style={{
                                 fontSize: '24px',
