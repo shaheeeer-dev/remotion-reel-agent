@@ -8,16 +8,21 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        learnops: {
-          primary: '#6F41EC',
-          primaryHover: '#825CF0',
-          secondary: '#C4B5FD',
-          orange: '#6F41EC',
-          orangeHover: '#825CF0',
-          dark: '#0B0F17',
-          card: '#151D2A',
-          cardBorder: '#233044',
-          cyan: '#00E5FF',
+        brand: {
+          peach: '#F29F67',
+          peachLight: '#FDEEE3',
+          peachHover: '#E28E54',
+          navy: '#1E1E2C',
+          navyCard: '#272738',
+          navyBorder: '#36364D',
+          blue: '#3B8FF3',
+          teal: '#34B1AA',
+          yellow: '#E0B50F',
+          canvas: '#F4F5F7',
+          surface: '#FFFFFF',
+          border: '#E2E8F0',
+          muted: '#64748B',
+          subtle: '#94A3B8',
         },
       },
     },
