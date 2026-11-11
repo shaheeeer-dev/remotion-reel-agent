@@ -27,12 +27,6 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
         }}
       >
         <BackgroundGrid />
-        <BrandHeader
-          brandName={brandName}
-          topicTag={script.topic}
-          hookEndFrame={hookEndFrame}
-          outroStartFrame={outroStartFrame}
-        />
 
         <Series>
           {script.scenes.map((scene, idx) => {
@@ -57,28 +51,7 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
                       : brand?.backgroundColor || defaultTheme.colors.deepBackground,
                   }}
                 >
-                  {isHook || isOutro ? (
-                    <SceneDispatcher scene={sceneForRender} />
-                  ) : (
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '1536px', // Keep all essential scene content inside the upper 80% safe area.
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        paddingTop: '150px',
-                        paddingBottom: '40px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxSizing: 'border-box',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      <SceneDispatcher scene={sceneForRender} />
-                    </div>
-                  )}
+                  <SceneDispatcher scene={sceneForRender} />
                 </div>
               </Series.Sequence>
             );
