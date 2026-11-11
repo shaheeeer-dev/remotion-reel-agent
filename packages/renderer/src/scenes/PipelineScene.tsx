@@ -1,8 +1,18 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme } from '../styles/theme.js';
+import { useBrandTheme, LearnOpsTheme, renderHighlightedText } from '../styles/theme.js';
 import type { PipelineScene as PipelineSceneType } from '@learnops/schema';
 
+/**
+ * Scene 2 Variant: CI/CD Automated Pipeline Diagram
+ *
+ * Exact Color Mapping:
+ * - Background: #110F17 (Dark Amethyst)
+ * - Stage Cards: #1C1824 with 1px solid #783CEB border & glow
+ * - Primary Text: #FFFFFF (White)
+ * - Active / Highlights: #B28BFF (Lavender)
+ * - Secondary Subtext & Connectors: #91899C (Muted Purple)
+ */
 export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
   const frame = useCurrentFrame();
@@ -15,7 +25,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
     config: { damping: 14, stiffness: 120 },
   });
 
-  // Calculate dynamic active stage based on current frame progression
+  // Calculate dynamic active stage based on frame progression
   const stageDurationFrames = durationInFrames / scene.stages.length;
 
   return (
@@ -27,6 +37,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '0 60px',
+        backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 matte
       }}
     >
       {/* Title */}
@@ -35,16 +46,16 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           transform: `translateY(${(1 - headerSpring) * 30}px)`,
           opacity: headerSpring,
           textAlign: 'center',
-          marginBottom: '32px',
+          marginBottom: '28px',
         }}
       >
         <span
           style={{
-            fontSize: '24px',
-            fontWeight: 700,
-            color: theme.colors.success,
+            fontSize: '22px',
+            fontWeight: 800,
+            color: LearnOpsTheme.accentLavender, // #B28BFF
             textTransform: 'uppercase',
-            letterSpacing: '0.1em',
+            letterSpacing: '0.12em',
             fontFamily: theme.fonts.heading,
           }}
         >
@@ -53,28 +64,29 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
         <h2
           style={{
             fontSize: '52px',
-            fontWeight: 800,
-            color: theme.colors.textPrimary,
+            fontWeight: 900,
+            color: LearnOpsTheme.textWhite, // #FFFFFF
             marginTop: '8px',
             fontFamily: theme.fonts.heading,
             letterSpacing: '-0.02em',
           }}
         >
-          {scene.title}
+          {renderHighlightedText(scene.title, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
         </h2>
       </div>
 
       {/* Trigger Event Banner */}
       <div
         style={{
-          backgroundColor: 'rgba(21, 29, 42, 0.85)',
-          border: `1.5px solid ${theme.colors.bgCardBorder}`,
+          backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
+          border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
+          boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
           borderRadius: '18px',
-          padding: '20px 28px',
+          padding: '18px 26px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '28px',
+          marginBottom: '26px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -83,7 +95,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
             style={{
               fontFamily: theme.fonts.mono,
               fontSize: '24px',
-              color: theme.colors.primary,
+              color: LearnOpsTheme.accentLavender, // #B28BFF
               fontWeight: 700,
             }}
           >
@@ -94,175 +106,145 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           style={{
             padding: '6px 14px',
             borderRadius: '8px',
-            backgroundColor: 'rgba(16, 185, 129, 0.15)',
-            border: `1px solid ${theme.colors.success}`,
-            color: theme.colors.success,
-            fontSize: '18px',
-            fontWeight: 700,
-            fontFamily: theme.fonts.mono,
+            backgroundColor: 'rgba(52, 177, 170, 0.15)',
+            border: '1px solid #34B1AA',
+            color: '#34B1AA',
+            fontSize: '16px',
+            fontWeight: 800,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
           }}
         >
-          TRIGGERED
+          Triggered
         </span>
       </div>
 
-      {/* Pipeline Stage Cards */}
+      {/* Pipeline Stages Row */}
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          gap: '16px',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
           position: 'relative',
         }}
       >
-        {scene.stages.map((stage, idx) => {
-          const stageStartFrame = idx * stageDurationFrames;
-          const stageFinishedFrame = stageStartFrame + stageDurationFrames * 0.75;
-
-          const isStarted = frame >= stageStartFrame;
-          const isFinished = frame >= stageFinishedFrame;
-
+        {scene.stages.map((stage, index) => {
           const stageSpring = spring({
-            frame: frame - (10 + idx * 8),
+            frame: frame - (15 + index * 10),
             fps,
             config: { damping: 14, stiffness: 120 },
           });
 
-          const statusColor = isFinished
-            ? theme.colors.success
-            : isStarted
-            ? theme.colors.primary
-            : theme.colors.textMuted;
-
-          const statusLabel = isFinished
-            ? 'PASSED'
-            : isStarted
-            ? 'RUNNING...'
-            : 'PENDING';
+          const isActive = frame >= index * stageDurationFrames;
+          const isDone = frame >= (index + 1) * stageDurationFrames;
 
           return (
-            <div
-              key={stage.name}
-              style={{
-                transform: `translateX(${(1 - stageSpring) * 30}px)`,
-                opacity: stageSpring,
-                backgroundColor: isStarted
-                  ? 'rgba(21, 29, 42, 0.95)'
-                  : 'rgba(15, 23, 42, 0.5)',
-                border: isStarted
-                  ? `2px solid ${statusColor}`
-                  : '1.5px solid rgba(255, 255, 255, 0.08)',
-                borderRadius: '20px',
-                padding: '24px 30px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                boxShadow: isStarted ? `0 8px 30px rgba(0, 0, 0, 0.4)` : 'none',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                {/* Stage Number / Status Icon */}
+            <React.Fragment key={stage.name}>
+              {/* Pipeline Step Card */}
+              <div
+                style={{
+                  flex: 1,
+                  transform: `translateY(${(1 - stageSpring) * 30}px)`,
+                  opacity: stageSpring,
+                  backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
+                  border: isDone || isActive
+                    ? `1.5px solid ${LearnOpsTheme.accentLavender}`
+                    : `1px solid ${LearnOpsTheme.brandPurple}`,
+                  boxShadow: isActive
+                    ? '0 0 20px rgba(178, 139, 255, 0.35)'
+                    : '0 0 15px rgba(120, 60, 235, 0.20)',
+                  borderRadius: '20px',
+                  padding: '24px 18px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '12px',
+                  textAlign: 'center',
+                }}
+              >
                 <div
                   style={{
-                    width: '52px',
-                    height: '52px',
+                    width: '48px',
+                    height: '48px',
                     borderRadius: '50%',
-                    backgroundColor: isFinished
-                      ? theme.colors.success
-                      : isStarted
-                      ? 'rgba(111, 65, 236, 0.25)'
+                    backgroundColor: isDone
+                      ? '#34B1AA'
+                      : isActive
+                      ? LearnOpsTheme.accentLavender
                       : 'rgba(255, 255, 255, 0.05)',
-                    border: `2px solid ${statusColor}`,
+                    color: isDone || isActive ? '#110F17' : LearnOpsTheme.textMutedPurple,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '24px',
-                    fontWeight: 800,
-                    color: isFinished ? '#FFFFFF' : statusColor,
-                    boxShadow: isStarted ? `0 0 15px ${statusColor}` : 'none',
+                    fontSize: '22px',
+                    fontWeight: 900,
                   }}
                 >
-                  {isFinished ? '✓' : idx + 1}
+                  {isDone ? '✓' : index + 1}
                 </div>
 
-                <div>
-                  <div
-                    style={{
-                      fontSize: '30px',
-                      fontWeight: 800,
-                      color: isStarted ? theme.colors.textPrimary : theme.colors.textMuted,
-                      fontFamily: theme.fonts.heading,
-                    }}
-                  >
-                    {stage.name}
-                  </div>
-                  {stage.details && (
-                    <div
-                      style={{
-                        fontSize: '20px',
-                        color: theme.colors.textSecondary,
-                        fontFamily: theme.fonts.mono,
-                        marginTop: '4px',
-                      }}
-                    >
-                      {stage.details}
-                    </div>
-                  )}
+                <div
+                  style={{
+                    fontSize: '24px',
+                    fontWeight: 800,
+                    color: LearnOpsTheme.textWhite,
+                    fontFamily: theme.fonts.heading,
+                  }}
+                >
+                  {stage.name}
                 </div>
+
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: isDone ? '#34B1AA' : isActive ? LearnOpsTheme.accentLavender : LearnOpsTheme.textMutedPurple,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {isDone ? 'Passed' : isActive ? 'Running...' : 'Pending'}
+                </span>
               </div>
 
-              {/* Status Pill */}
-              <div
-                style={{
-                  padding: '8px 18px',
-                  borderRadius: '999px',
-                  backgroundColor: isFinished
-                    ? 'rgba(16, 185, 129, 0.15)'
-                    : isStarted
-                    ? 'rgba(111, 65, 236, 0.2)'
-                    : 'rgba(255, 255, 255, 0.05)',
-                  border: `1.5px solid ${statusColor}`,
-                  color: statusColor,
-                  fontSize: '18px',
-                  fontWeight: 700,
-                  fontFamily: theme.fonts.mono,
-                  letterSpacing: '0.05em',
-                }}
-              >
-                {statusLabel}
-              </div>
-            </div>
+              {/* Connecting arrow if not last */}
+              {index < scene.stages.length - 1 && (
+                <div
+                  style={{
+                    fontSize: '28px',
+                    color: isDone ? LearnOpsTheme.accentLavender : LearnOpsTheme.textMutedPurple, // #91899C
+                    fontWeight: 900,
+                  }}
+                >
+                  →
+                </div>
+              )}
+            </React.Fragment>
           );
         })}
       </div>
 
-      {/* Takeaway / Summary Banner */}
-      <div
-        style={{
-          marginTop: '36px',
-          padding: '24px 32px',
-          borderRadius: '20px',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          borderLeft: `6px solid ${theme.colors.success}`,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '20px',
-        }}
-      >
-        <span style={{ fontSize: '36px' }}>⚡</span>
-        <span
+      {/* Takeaway Card */}
+      {scene.takeaway && (
+        <div
           style={{
-            fontSize: '28px',
-            lineHeight: 1.4,
-            color: theme.colors.textPrimary,
+            marginTop: '26px',
+            padding: '18px 26px',
+            borderRadius: '16px',
+            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
+            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
+            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            fontSize: '22px',
+            lineHeight: 1.45,
+            color: LearnOpsTheme.textWhite,
             fontFamily: theme.fonts.body,
-            fontWeight: 500,
+            textAlign: 'center',
           }}
         >
-          {scene.takeaway}
-        </span>
-      </div>
+          ✨ {renderHighlightedText(scene.takeaway, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+        </div>
+      )}
     </div>
   );
 };
-

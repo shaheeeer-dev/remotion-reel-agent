@@ -1,9 +1,11 @@
 {
   "brand": {
     "name": "LearnOps",
-    "primaryColor": "#6F41EC",
-    "secondaryColor": "#C4B5FD",
-    "backgroundColor": "#0B0F17"
+    "primaryColor": "#783CEB",
+    "secondaryColor": "#B28BFF",
+    "backgroundColor": "#110F17",
+    "cardBackground": "#1C1824",
+    "textColor": "#FFFFFF"
   },
   "script": {
     "schemaVersion": 1,

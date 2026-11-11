@@ -1,8 +1,17 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme } from '../styles/theme.js';
+import { useBrandTheme, LearnOpsTheme, renderHighlightedText } from '../styles/theme.js';
 import type { HookScene as HookSceneType } from '@learnops/schema';
 
+/**
+ * Scene 1: The Hook (00:00 - 00:03, 3 sec)
+ *
+ * Exact Color Mapping:
+ * - Background: #783CEB (Brand Purple) full-screen solid
+ * - Header Text: #FFFFFF (White)
+ * - Card Surface: #1C1824 (Dark Container)
+ * - Card Badge: #B28BFF (Lavender) text on #110F17 pill
+ */
 export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
   const frame = useCurrentFrame();
@@ -15,16 +24,9 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
     config: { damping: 14, stiffness: 120 },
   });
 
-  // Headline entrance spring (staggered by 6 frames)
-  const headlineSpring = spring({
-    frame: frame - 6,
-    fps,
-    config: { damping: 15, stiffness: 100 },
-  });
-
-  // Subtext entrance spring (staggered by 14 frames)
-  const subtextSpring = spring({
-    frame: frame - 14,
+  // Card container entrance spring
+  const cardSpring = spring({
+    frame: frame - 4,
     fps,
     config: { damping: 15, stiffness: 100 },
   });
@@ -32,99 +34,111 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
   // Subtle floating scale effect
   const pulse = interpolate(Math.sin(frame / 15), [-1, 1], [0.99, 1.01]);
 
+  const hookBg = theme.colors.primary || LearnOpsTheme.brandPurple; // #783CEB
+
   return (
     <div
       style={{
+        position: 'absolute',
+        inset: 0,
         width: '100%',
         height: '100%',
+        backgroundColor: hookBg, // Solid full-screen Brand Purple
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: '0 80px',
+        padding: '0 60px',
         textAlign: 'center',
-        transform: `scale(${pulse})`,
+        zIndex: 10,
       }}
     >
-      {/* Category Pill / Badge */}
+      {/* Central UI Card Container with subtle shadow */}
       <div
         style={{
-          transform: `translateY(${(1 - badgeSpring) * 40}px)`,
-          opacity: badgeSpring,
-          display: 'inline-flex',
+          transform: `scale(${cardSpring * pulse}) translateY(${(1 - cardSpring) * 40}px)`,
+          opacity: cardSpring,
+          backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824 (Dark Container)
+          borderRadius: '32px',
+          padding: '56px 48px',
+          boxShadow: '0 30px 80px rgba(0, 0, 0, 0.45)',
+          display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          gap: '12px',
-          padding: '16px 36px',
-          borderRadius: '999px',
-          background: 'rgba(111, 65, 236, 0.18)',
-          border: `2px solid ${theme.colors.primary}`,
-          boxShadow: `0 0 35px ${theme.colors.primaryGlow}`,
-          marginBottom: '50px',
+          maxWidth: '960px',
+          width: '100%',
         }}
       >
-        <span
-          style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '50%',
-            backgroundColor: theme.colors.primary,
-            boxShadow: `0 0 12px ${theme.colors.primary}`,
-          }}
-        />
-        <span
-          style={{
-            fontSize: '28px',
-            fontWeight: 800,
-            color: theme.colors.secondary,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            fontFamily: theme.fonts.heading,
-          }}
-        >
-          {scene.badge}
-        </span>
-      </div>
-
-      {/* Main Hook Headline */}
-      <div
-        style={{
-          transform: `translateY(${(1 - headlineSpring) * 60}px)`,
-          opacity: headlineSpring,
-          fontSize: '72px',
-          fontWeight: 900,
-          lineHeight: 1.15,
-          color: theme.colors.textPrimary,
-          fontFamily: theme.fonts.heading,
-          letterSpacing: '-0.03em',
-          marginBottom: '40px',
-          maxWidth: '920px',
-        }}
-      >
-        {scene.headline}
-      </div>
-
-      {/* Subtext description */}
-      {scene.subtext && (
+        {/* Card Badge: #B28BFF (Lavender) text on #110F17 pill */}
         <div
           style={{
-            transform: `translateY(${(1 - subtextSpring) * 40}px)`,
-            opacity: subtextSpring,
-            fontSize: '34px',
-            lineHeight: 1.45,
-            color: theme.colors.textSecondary,
-            fontFamily: theme.fonts.body,
-            maxWidth: '820px',
-            padding: '28px 40px',
-            borderRadius: '20px',
-            backgroundColor: 'rgba(21, 29, 42, 0.7)',
-            border: `1px solid ${theme.colors.bgCardBorder}`,
-            backdropFilter: 'blur(10px)',
+            transform: `translateY(${(1 - badgeSpring) * 20}px)`,
+            opacity: badgeSpring,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 28px',
+            borderRadius: '999px',
+            backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 pill
+            border: `1.5px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB border
+            marginBottom: '40px',
           }}
         >
-          {scene.subtext}
+          <span
+            style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: LearnOpsTheme.accentLavender, // #B28BFF
+              boxShadow: `0 0 10px ${LearnOpsTheme.accentLavender}`,
+            }}
+          />
+          <span
+            style={{
+              fontSize: '24px',
+              fontWeight: 800,
+              color: LearnOpsTheme.accentLavender, // #B28BFF (Lavender) text
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              fontFamily: theme.fonts.heading,
+            }}
+          >
+            {scene.badge}
+          </span>
         </div>
-      )}
+
+        {/* Header Text: #FFFFFF (White) Bold Question/Hook Text */}
+        <h1
+          style={{
+            fontSize: '66px',
+            fontWeight: 900,
+            lineHeight: 1.15,
+            color: LearnOpsTheme.textWhite, // #FFFFFF (White)
+            fontFamily: theme.fonts.heading,
+            letterSpacing: '-0.03em',
+            margin: '0 0 28px 0',
+            maxWidth: '860px',
+          }}
+        >
+          {renderHighlightedText(scene.headline, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+        </h1>
+
+        {/* Card Subtext */}
+        {scene.subtext && (
+          <p
+            style={{
+              fontSize: '30px',
+              lineHeight: 1.45,
+              color: LearnOpsTheme.textMutedPurple, // #91899C (Muted Purple)
+              fontFamily: theme.fonts.body,
+              maxWidth: '800px',
+              margin: 0,
+            }}
+          >
+            {renderHighlightedText(scene.subtext, LearnOpsTheme.textMutedPurple, LearnOpsTheme.accentLavender)}
+          </p>
+        )}
+      </div>
     </div>
   );
 };
-

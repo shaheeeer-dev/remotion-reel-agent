@@ -4,10 +4,12 @@ import type { ReelRenderInput } from '@learnops/schema';
 import { BackgroundGrid } from '../components/BackgroundGrid.js';
 import { BrandHeader } from '../components/BrandHeader.js';
 import { SceneDispatcher } from '../scenes/SceneDispatcher.js';
-import { BrandThemeProvider } from '../styles/theme.js';
+import { BrandThemeProvider, LearnOpsTheme } from '../styles/theme.js';
 
 export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
   const { fps } = useVideoConfig();
+
+  const brandName = brand?.name || 'LearnOps';
 
   return (
     <BrandThemeProvider brand={brand}>
@@ -16,12 +18,12 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
           width: '100%',
           height: '100%',
           position: 'relative',
-          backgroundColor: brand?.backgroundColor || '#0B0F17',
+          backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 matte
           overflow: 'hidden',
         }}
       >
         <BackgroundGrid />
-        <BrandHeader brandName={brand?.name || 'Brand'} topicTag={script.topic} />
+        <BrandHeader brandName={brandName} topicTag={script.topic} />
 
         <Series>
           {script.scenes.map((scene, idx) => {
@@ -31,6 +33,9 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
                 ? { ...scene, creatorCredit: brand.creatorCredit }
                 : scene;
 
+            const isHook = scene.kind === 'hook';
+            const isOutro = scene.kind === 'outro';
+
             return (
               <Series.Sequence key={scene.id || idx} durationInFrames={sceneFrames}>
                 <div
@@ -38,8 +43,8 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
                     width: '100%',
                     height: '100%',
                     position: 'relative',
-                    paddingTop: '160px',
-                    paddingBottom: '80px',
+                    paddingTop: isHook || isOutro ? '0px' : '160px',
+                    paddingBottom: isHook || isOutro ? '0px' : '60px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',

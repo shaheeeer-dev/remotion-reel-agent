@@ -1,8 +1,18 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme } from '../styles/theme.js';
+import { useBrandTheme, LearnOpsTheme, renderHighlightedText } from '../styles/theme.js';
 import type { TerminalScene as TerminalSceneType } from '@learnops/schema';
 
+/**
+ * Scene 3: Practical Code / Terminal (00:08 - 00:14, 6 sec)
+ *
+ * Exact Color Mapping:
+ * - Background: #110F17 (Dark Amethyst)
+ * - Terminal Box: #1C1824 with 1px solid #783CEB border & glow
+ * - Prompt String (`learner@linux:~$`): #B28BFF (Lavender)
+ * - Command Input (typed): #FFFFFF (White)
+ * - Output Lines: #FFFFFF (White), comments/subtext in #91899C
+ */
 export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
   const frame = useCurrentFrame();
@@ -16,10 +26,10 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
   });
 
   // Typing effect calculation
-  // Command starts typing at frame 10 and finishes around frame 35
+  // Command starts typing at frame 8 and finishes around frame 32
   const charsToType = scene.command.length;
   const typedCount = Math.floor(
-    interpolate(frame, [10, 10 + charsToType * 1.5], [0, charsToType], {
+    interpolate(frame, [8, 8 + charsToType * 1.5], [0, charsToType], {
       extrapolateLeft: 'clamp',
       extrapolateRight: 'clamp',
     })
@@ -30,6 +40,10 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
   // Blinking cursor
   const cursorBlink = Math.floor(frame / 8) % 2 === 0;
 
+  // Prompt string formatting: user learner@linux:~$
+  const defaultPrompt = 'learner@linux:~$';
+  const promptUser = scene.promptUser || defaultPrompt;
+
   return (
     <div
       style={{
@@ -39,6 +53,7 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '0 60px',
+        backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 matte
       }}
     >
       {/* Terminal Window */}
@@ -46,39 +61,39 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
         style={{
           transform: `scale(${windowSpring})`,
           opacity: windowSpring,
-          backgroundColor: theme.colors.terminalBg,
-          border: '1.5px solid rgba(255, 255, 255, 0.15)',
+          backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
+          border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px solid #783CEB
+          boxShadow: '0 0 15px rgba(120, 60, 235, 0.20), 0 30px 70px rgba(0, 0, 0, 0.70)',
           borderRadius: '24px',
           overflow: 'hidden',
-          boxShadow: '0 30px 70px rgba(0, 0, 0, 0.7)',
         }}
       >
         {/* Terminal Title Bar */}
         <div
           style={{
-            backgroundColor: theme.colors.terminalBar,
-            padding: '20px 24px',
+            backgroundColor: '#15131C',
+            padding: '18px 24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+            borderBottom: '1px solid rgba(120, 60, 235, 0.25)',
           }}
         >
           {/* Mac window dots */}
           <div style={{ display: 'flex', gap: '10px' }}>
-            <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#FF5F56' }} />
-            <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#FFBD2E' }} />
-            <span style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#27C93F' }} />
+            <span style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#FF5F56' }} />
+            <span style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#FFBD2E' }} />
+            <span style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#27C93F' }} />
           </div>
 
           <span
             style={{
-              fontSize: '20px',
+              fontSize: '18px',
               fontFamily: theme.fonts.mono,
-              color: theme.colors.textMuted,
+              color: LearnOpsTheme.textMutedPurple, // #91899C
             }}
           >
-            {scene.title || 'user@host: ~'}
+            {scene.title || 'learner@linux: ~'}
           </span>
 
           <div style={{ width: '56px' }} />
@@ -88,102 +103,101 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
         <div
           style={{
             padding: '36px',
-            minHeight: '480px',
+            minHeight: '440px',
             fontFamily: theme.fonts.mono,
             fontSize: '28px',
             lineHeight: 1.6,
           }}
         >
-          {/* Prompt + Command */}
+          {/* Prompt + Command Input */}
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-            <span style={{ color: theme.colors.primary, fontWeight: 700 }}>
-              {scene.promptUser || 'user@host:~$'}
+            {/* Prompt String (~$): #B28BFF (Lavender) */}
+            <span style={{ color: LearnOpsTheme.accentLavender, fontWeight: 700 }}>
+              {promptUser}
             </span>
-            <span style={{ color: '#00E5FF', fontWeight: 600 }}>
+
+            {/* Command Input: #FFFFFF (White) */}
+            <span style={{ color: LearnOpsTheme.textWhite, fontWeight: 700 }}>
               {displayedCommand}
             </span>
-            {(!isTypingDone || cursorBlink) && (
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: '14px',
-                  height: '32px',
-                  backgroundColor: theme.colors.primary,
-                  verticalAlign: 'middle',
-                }}
-              />
-            )}
+
+            {/* Blinking Cursor */}
+            <span
+              style={{
+                display: 'inline-block',
+                width: '14px',
+                height: '30px',
+                backgroundColor: cursorBlink ? LearnOpsTheme.accentLavender : 'transparent',
+                marginLeft: '2px',
+                verticalAlign: 'middle',
+              }}
+            />
           </div>
 
-          {/* Output Lines appearing sequentially */}
-          <div
-            style={{
-              marginTop: '28px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-            }}
-          >
-            {scene.outputLines.map((line, idx) => {
-              const lineStartFrame = 15 + charsToType * 1.5 + idx * 8;
-              const lineSpring = spring({
-                frame: frame - lineStartFrame,
-                fps,
-                config: { damping: 14, stiffness: 140 },
-              });
+          {/* Command Output Lines (Appears after command is typed) */}
+          {isTypingDone && scene.outputLines && scene.outputLines.length > 0 && (
+            <div
+              style={{
+                marginTop: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                paddingTop: '16px',
+                borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+              }}
+            >
+              {scene.outputLines.map((line, idx) => {
+                const lineDelay = 8 + charsToType * 1.5 + idx * 4;
+                const isLineVisible = frame >= lineDelay;
 
-              if (frame < lineStartFrame) return null;
+                if (!isLineVisible) return null;
 
-              return (
-                <div
-                  key={idx}
-                  style={{
-                    opacity: lineSpring,
-                    transform: `translateY(${(1 - lineSpring) * 10}px)`,
-                    color: line.startsWith('drwx') || line.endsWith('/')
-                      ? '#60A5FA'
-                      : line.includes('error')
-                      ? '#F87171'
-                      : '#E2E8F0',
-                    fontSize: '26px',
-                    wordBreak: 'break-all',
-                  }}
-                >
-                  {line}
-                </div>
-              );
-            })}
-          </div>
+                const isComment = line.trim().startsWith('#');
+                const isSuccess = line.toLowerCase().includes('ok') || line.toLowerCase().includes('success');
+
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      color: isComment
+                        ? LearnOpsTheme.textMutedPurple // #91899C
+                        : isSuccess
+                        ? '#34B1AA'
+                        : LearnOpsTheme.textWhite, // #FFFFFF
+                      fontSize: '24px',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all',
+                    }}
+                  >
+                    {line}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Explanation Banner */}
-      <div
-        style={{
-          marginTop: '40px',
-          padding: '24px 32px',
-          borderRadius: '20px',
-          backgroundColor: 'rgba(21, 29, 42, 0.85)',
-          border: `1.5px solid ${theme.colors.bgCardBorder}`,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '20px',
-        }}
-      >
-        <span style={{ fontSize: '36px' }}>⚡</span>
-        <span
+      {/* Explanation Callout */}
+      {scene.explanation && (
+        <div
           style={{
-            fontSize: '28px',
-            lineHeight: 1.4,
-            color: theme.colors.textPrimary,
+            marginTop: '22px',
+            padding: '18px 26px',
+            borderRadius: '16px',
+            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
+            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
+            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            fontSize: '22px',
+            lineHeight: 1.45,
+            color: LearnOpsTheme.textWhite,
             fontFamily: theme.fonts.body,
-            fontWeight: 500,
+            textAlign: 'center',
           }}
         >
-          {scene.explanation}
-        </span>
-      </div>
+          💡 {renderHighlightedText(scene.explanation, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
+        </div>
+      )}
     </div>
   );
 };
-

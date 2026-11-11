@@ -1,8 +1,18 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme } from '../styles/theme.js';
+import { useBrandTheme, LearnOpsTheme, renderHighlightedText } from '../styles/theme.js';
 import type { ContainerDiagramScene as ContainerDiagramSceneType } from '@learnops/schema';
 
+/**
+ * Scene 2 Variant: Docker Container Architecture Diagram
+ *
+ * Exact Color Mapping:
+ * - Background: #110F17 (Dark Amethyst)
+ * - Container Surfaces: #1C1824 with 1px solid #783CEB border & glow
+ * - Primary Text: #FFFFFF (White)
+ * - Highlighted Keywords: #B28BFF (Lavender)
+ * - Subtext & Borders: #91899C (Muted Purple)
+ */
 export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
   const frame = useCurrentFrame();
@@ -30,7 +40,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
   });
 
   // Ambient pulse on container isolation
-  const pulse = interpolate(Math.sin(frame / 12), [-1, 1], [0.95, 1.05]);
+  const pulse = interpolate(Math.sin(frame / 12), [-1, 1], [0.98, 1.02]);
 
   return (
     <div
@@ -41,6 +51,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '0 60px',
+        backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17 matte
       }}
     >
       {/* Title */}
@@ -49,16 +60,16 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           transform: `translateY(${(1 - headerSpring) * 30}px)`,
           opacity: headerSpring,
           textAlign: 'center',
-          marginBottom: '36px',
+          marginBottom: '32px',
         }}
       >
         <span
           style={{
-            fontSize: '24px',
-            fontWeight: 700,
-            color: '#00E5FF',
+            fontSize: '22px',
+            fontWeight: 800,
+            color: LearnOpsTheme.accentLavender, // #B28BFF
             textTransform: 'uppercase',
-            letterSpacing: '0.1em',
+            letterSpacing: '0.12em',
             fontFamily: theme.fonts.heading,
           }}
         >
@@ -67,14 +78,14 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
         <h2
           style={{
             fontSize: '52px',
-            fontWeight: 800,
-            color: theme.colors.textPrimary,
+            fontWeight: 900,
+            color: LearnOpsTheme.textWhite, // #FFFFFF
             marginTop: '8px',
             fontFamily: theme.fonts.heading,
             letterSpacing: '-0.02em',
           }}
         >
-          {scene.title}
+          {renderHighlightedText(scene.title, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
         </h2>
       </div>
 
@@ -83,7 +94,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '20px',
+          gap: '18px',
         }}
       >
         {/* Top Tier: Containers Running in Isolated User Spaces */}
@@ -98,225 +109,208 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
             const containerSpring = spring({
               frame: frame - (20 + index * 8),
               fps,
-              config: { damping: 14, stiffness: 120 },
+              config: { damping: 14, stiffness: 110 },
             });
 
             return (
               <div
                 key={container.name}
                 style={{
-                  transform: `translateY(${(1 - containerSpring) * 40}px) scale(${containerSpring})`,
+                  transform: `scale(${containerSpring * pulse}) translateY(${(1 - containerSpring) * 40}px)`,
                   opacity: containerSpring,
-                  backgroundColor: 'rgba(21, 29, 42, 0.95)',
-                  border: `2px solid ${theme.colors.primary}`,
-                  borderRadius: '20px',
-                  padding: '24px 20px',
+                  backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
+                  border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
+                  boxShadow: '0 0 15px rgba(120, 60, 235, 0.20), 0 20px 45px rgba(0, 0, 0, 0.5)',
+                  borderRadius: '24px',
+                  padding: '28px 24px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '14px',
-                  boxShadow: `0 10px 30px ${theme.colors.primaryGlow}`,
-                  position: 'relative',
-                  overflow: 'hidden',
+                  gap: '16px',
                 }}
               >
-                {/* Isolation Pill */}
+                {/* Container Badge */}
                 <div
                   style={{
-                    alignSelf: 'flex-start',
-                    padding: '4px 12px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(111, 65, 236, 0.2)',
-                    color: theme.colors.secondary,
-                    border: `1px solid rgba(111, 65, 236, 0.4)`,
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    fontFamily: theme.fonts.mono,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid rgba(120, 60, 235, 0.3)',
+                    paddingBottom: '12px',
                   }}
                 >
-                  Isolated
-                </div>
-
-                {/* App Box */}
-                <div
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                    borderRadius: '12px',
-                    padding: '16px 12px',
-                    textAlign: 'center',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                  }}
-                >
-                  <div style={{ fontSize: '20px', color: theme.colors.textMuted }}>Application</div>
-                  <div
+                  <span
                     style={{
-                      fontSize: '26px',
-                      fontWeight: 800,
-                      color: '#FFFFFF',
-                      fontFamily: theme.fonts.heading,
-                      marginTop: '4px',
-                    }}
-                  >
-                    {container.app}
-                  </div>
-                </div>
-
-                {/* Bins / Libs Box */}
-                <div
-                  style={{
-                    backgroundColor: 'rgba(0, 229, 255, 0.08)',
-                    borderRadius: '12px',
-                    padding: '12px',
-                    textAlign: 'center',
-                    border: '1px solid rgba(0, 229, 255, 0.2)',
-                  }}
-                >
-                  <div style={{ fontSize: '18px', color: '#00E5FF' }}>Bins & Libs</div>
-                  <div
-                    style={{
-                      fontSize: '22px',
-                      fontWeight: 600,
-                      color: '#E2E8F0',
                       fontFamily: theme.fonts.mono,
-                      marginTop: '2px',
+                      fontSize: '22px',
+                      fontWeight: 700,
+                      color: LearnOpsTheme.accentLavender, // #B28BFF
                     }}
                   >
-                    {container.binsLibs}
-                  </div>
+                    📦 {container.name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      backgroundColor: 'rgba(52, 177, 170, 0.15)',
+                      color: '#34B1AA',
+                      border: '1px solid #34B1AA',
+                      padding: '4px 10px',
+                      borderRadius: '8px',
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Isolated
+                  </span>
                 </div>
 
-                {/* Container Name */}
+                {/* Container Payload */}
                 <div
                   style={{
-                    textAlign: 'center',
-                    fontSize: '20px',
-                    color: theme.colors.textSecondary,
-                    fontFamily: theme.fonts.mono,
-                    fontWeight: 600,
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    borderRadius: '14px',
+                    padding: '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
                   }}
                 >
-                  {container.name}
+                  <span style={{ fontSize: '13px', color: LearnOpsTheme.textMutedPurple, fontWeight: 700, textTransform: 'uppercase' }}>
+                    User Application
+                  </span>
+                  <span style={{ fontSize: '26px', fontWeight: 800, color: LearnOpsTheme.textWhite }}>
+                    {container.app}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                    borderRadius: '14px',
+                    padding: '14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                  }}
+                >
+                  <span style={{ fontSize: '12px', color: LearnOpsTheme.textMutedPurple, fontWeight: 700, textTransform: 'uppercase' }}>
+                    Bundled Bins & Libs
+                  </span>
+                  <span style={{ fontSize: '20px', fontFamily: theme.fonts.mono, color: LearnOpsTheme.textMutedPurple }}>
+                    {container.binsLibs}
+                  </span>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Middle Tier: Docker Engine (Daemon) */}
+        {/* Middle Tier: Docker Engine */}
         <div
           style={{
-            transform: `translateY(${(1 - engineSpring) * 20}px)`,
+            transform: `translateY(${(1 - engineSpring) * 30}px)`,
             opacity: engineSpring,
-            backgroundColor: 'rgba(0, 229, 255, 0.12)',
-            border: '2px solid #00E5FF',
-            borderRadius: '18px',
-            padding: '24px 32px',
+            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
+            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
+            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            borderRadius: '20px',
+            padding: '20px 28px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            boxShadow: '0 0 25px rgba(0, 229, 255, 0.2)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ fontSize: '36px' }}>🐳</span>
+            <span style={{ fontSize: '32px' }}>🐳</span>
             <div>
-              <div
-                style={{
-                  fontSize: '30px',
-                  fontWeight: 800,
-                  color: '#FFFFFF',
-                  fontFamily: theme.fonts.heading,
-                }}
-              >
+              <div style={{ fontSize: '28px', fontWeight: 800, color: LearnOpsTheme.textWhite }}>
                 {scene.containerEngine}
               </div>
-              <div style={{ fontSize: '20px', color: '#00E5FF', fontFamily: theme.fonts.body }}>
-                Container Runtime & Image Layer Management
+              <div style={{ fontSize: '16px', color: LearnOpsTheme.textMutedPurple }}>
+                cgroups resource isolation • namespaces virtualization
               </div>
             </div>
           </div>
           <span
             style={{
-              padding: '8px 16px',
+              padding: '6px 14px',
               borderRadius: '8px',
-              backgroundColor: 'rgba(0, 229, 255, 0.2)',
-              color: '#FFFFFF',
-              fontSize: '20px',
-              fontWeight: 700,
+              backgroundColor: 'rgba(120, 60, 235, 0.2)',
+              border: `1px solid ${LearnOpsTheme.brandPurple}`,
+              color: LearnOpsTheme.accentLavender,
               fontFamily: theme.fonts.mono,
+              fontSize: '18px',
+              fontWeight: 700,
             }}
           >
-            ACTIVE
+            daemon
           </span>
         </div>
 
-        {/* Bottom Tier: Host OS & Linux Kernel */}
+        {/* Bottom Tier: Host OS & Shared Kernel */}
         <div
           style={{
-            transform: `translateY(${(1 - hostSpring) * 20}px)`,
+            transform: `translateY(${(1 - hostSpring) * 30}px)`,
             opacity: hostSpring,
-            backgroundColor: 'rgba(30, 41, 59, 0.85)',
-            border: '1.5px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: '18px',
-            padding: '24px 32px',
+            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
+            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
+            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            borderRadius: '20px',
+            padding: '20px 28px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ fontSize: '36px' }}>🐧</span>
+            <span style={{ fontSize: '32px' }}>🐧</span>
             <div>
-              <div
-                style={{
-                  fontSize: '30px',
-                  fontWeight: 800,
-                  color: '#FFFFFF',
-                  fontFamily: theme.fonts.heading,
-                }}
-              >
+              <div style={{ fontSize: '28px', fontWeight: 800, color: LearnOpsTheme.textWhite }}>
                 {scene.hostOs}
               </div>
-              <div style={{ fontSize: '20px', color: theme.colors.textMuted, fontFamily: theme.fonts.mono }}>
-                Shared Linux Kernel • Namespaces (Isolation) • cgroups (Resource Limits)
+              <div style={{ fontSize: '16px', color: LearnOpsTheme.textMutedPurple }}>
+                Shared host hardware & Linux Kernel syscalls (Zero Hypervisor Overhead)
               </div>
             </div>
           </div>
+          <span
+            style={{
+              padding: '6px 14px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(178, 139, 255, 0.15)',
+              border: `1px solid ${LearnOpsTheme.accentLavender}`,
+              color: LearnOpsTheme.accentLavender,
+              fontFamily: theme.fonts.mono,
+              fontSize: '18px',
+              fontWeight: 700,
+            }}
+          >
+            Kernel 6.x
+          </span>
         </div>
       </div>
 
-      {/* Comparison Note / Footer */}
+      {/* Comparison Note / Takeaway */}
       {scene.comparisonNote && (
         <div
           style={{
-            marginTop: '36px',
-            padding: '24px 32px',
-            borderRadius: '20px',
-            backgroundColor: 'rgba(111, 65, 236, 0.12)',
-            borderLeft: `6px solid ${theme.colors.primary}`,
-            borderTop: '1px solid rgba(111, 65, 236, 0.25)',
-            borderRight: '1px solid rgba(111, 65, 236, 0.25)',
-            borderBottom: '1px solid rgba(111, 65, 236, 0.25)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '20px',
+            marginTop: '22px',
+            padding: '18px 26px',
+            borderRadius: '16px',
+            backgroundColor: LearnOpsTheme.surfaceAmethyst, // #1C1824
+            border: `1px solid ${LearnOpsTheme.brandPurple}`, // 1px #783CEB
+            boxShadow: '0 0 15px rgba(120, 60, 235, 0.20)',
+            fontSize: '22px',
+            lineHeight: 1.45,
+            color: LearnOpsTheme.textWhite,
+            fontFamily: theme.fonts.body,
+            textAlign: 'center',
           }}
         >
-          <span style={{ fontSize: '36px' }}>💡</span>
-          <span
-            style={{
-              fontSize: '28px',
-              lineHeight: 1.4,
-              color: theme.colors.textPrimary,
-              fontFamily: theme.fonts.body,
-              fontWeight: 500,
-            }}
-          >
-            {scene.comparisonNote}
-          </span>
+          💡 {renderHighlightedText(scene.comparisonNote, LearnOpsTheme.textWhite, LearnOpsTheme.accentLavender)}
         </div>
       )}
     </div>
   );
 };
-

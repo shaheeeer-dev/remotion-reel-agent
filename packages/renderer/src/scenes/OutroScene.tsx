@@ -1,129 +1,106 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { useBrandTheme } from '../styles/theme.js';
+import { useBrandTheme, LearnOpsTheme } from '../styles/theme.js';
 import type { OutroScene as OutroSceneType } from '@learnops/schema';
 
+/**
+ * Scene 4: The Outro & CTA (00:14 - 00:17, 2-3 sec)
+ *
+ * Exact Color Mapping & Layout per specification:
+ * - Background: #110F17 (Dark Amethyst)
+ * - Brand Title: #FFFFFF (White)
+ * - Sub-headline: #91899C (Muted Purple-Gray)
+ * - Button Fill: #783CEB (Brand Purple)
+ * - Button Text: #FFFFFF (White)
+ */
 export const OutroScene: React.FC<{ scene: OutroSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const cardSpring = spring({
+  // Entrance spring animation
+  const entranceSpring = spring({
     frame,
     fps,
     config: { damping: 14, stiffness: 120 },
   });
 
-  const pulse = interpolate(Math.sin(frame / 10), [-1, 1], [0.98, 1.02]);
+  const buttonSpring = spring({
+    frame: frame - 4,
+    fps,
+    config: { damping: 12, stiffness: 130 },
+  });
+
+  const brandTitle = scene.brandName || 'LearnOps';
+  const subHeadline = scene.tagline || 'Follow for daily tutorials.';
+  const ctaLabel = scene.callToAction || 'Follow';
 
   return (
     <div
       style={{
-        width: '100%',
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: LearnOpsTheme.bgDarkAmethyst, // #110F17
         height: '100%',
+        width: '100%',
         display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
         alignItems: 'center',
-        padding: '0 80px',
-        textAlign: 'center',
+        justifyContent: 'center',
+        zIndex: 10,
       }}
     >
-      {/* Brand Card */}
       <div
         style={{
-          transform: `scale(${cardSpring * pulse})`,
-          opacity: cardSpring,
-          backgroundColor: theme.colors.bgCard,
-          border: `2px solid ${theme.colors.primary}`,
-          borderRadius: '36px',
-          padding: '60px 50px',
-          boxShadow: `0 20px 60px ${theme.colors.primaryGlow}`,
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '30px',
-          maxWidth: '880px',
+          justifyContent: 'space-between',
+          width: '80%',
+          transform: `scale(${entranceSpring})`,
+          opacity: entranceSpring,
         }}
       >
-        {/* Logo Badge */}
-        <div
-          style={{
-            width: '100px',
-            height: '100px',
-            borderRadius: '28px',
-            background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.primaryDark})`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '54px',
-            fontWeight: 900,
-            color: '#FFFFFF',
-            boxShadow: `0 0 35px ${theme.colors.primaryGlow}`,
-            fontFamily: theme.fonts.heading,
-          }}
-        >
-          {scene.brandName.slice(0, 1).toUpperCase()}
-        </div>
-
         <div>
           <h1
             style={{
-              fontSize: '64px',
-              fontWeight: 900,
-              color: theme.colors.textPrimary,
+              color: LearnOpsTheme.textWhite, // #FFFFFF
+              fontSize: '48px',
+              fontWeight: 'bold',
+              margin: '0 0 12px 0',
               fontFamily: theme.fonts.heading,
               letterSpacing: '-0.02em',
             }}
           >
-            {scene.brandName}
+            {brandTitle}
           </h1>
           <p
             style={{
-              fontSize: '30px',
-              color: theme.colors.textSecondary,
+              color: LearnOpsTheme.textMutedPurple, // #91899C
+              fontSize: '24px',
+              margin: 0,
               fontFamily: theme.fonts.body,
-              marginTop: '12px',
             }}
           >
-            {scene.tagline}
+            {subHeadline}
           </p>
         </div>
 
-        {/* CTA Button */}
-        <div
+        <button
           style={{
-            marginTop: '10px',
-            padding: '22px 50px',
-            borderRadius: '999px',
-            backgroundColor: theme.colors.primary,
-            color: '#FFFFFF',
-            fontSize: '32px',
-            fontWeight: 800,
-            fontFamily: theme.fonts.heading,
-            letterSpacing: '0.02em',
-            boxShadow: `0 10px 30px ${theme.colors.primaryGlow}`,
+            backgroundColor: LearnOpsTheme.brandPurple, // #783CEB
+            color: LearnOpsTheme.textWhite, // #FFFFFF
+            padding: '16px 36px',
+            borderRadius: '50px',
+            fontWeight: 'bold',
+            fontSize: '24px',
+            border: 'none',
+            boxShadow: '0 0 25px rgba(120, 60, 235, 0.45)',
+            transform: `scale(${buttonSpring})`,
+            cursor: 'pointer',
           }}
         >
-          {scene.callToAction}
-        </div>
-
-        {/* Creator / Open Source Project Credit (Optional) */}
-        {scene.creatorCredit && (
-          <div
-            style={{
-              fontSize: '20px',
-              color: theme.colors.textMuted,
-              fontFamily: theme.fonts.mono,
-              letterSpacing: '0.04em',
-              marginTop: '4px',
-            }}
-          >
-            {scene.creatorCredit}
-          </div>
-        )}
+          {ctaLabel}
+        </button>
       </div>
     </div>
   );
 };
-
