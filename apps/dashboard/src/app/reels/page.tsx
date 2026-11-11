@@ -134,11 +134,11 @@ export default function ReelsPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <Film className="w-6 h-6 text-[#C4B5FD]" />
+          <h1 className="text-2xl font-black text-[#1E1E2C] tracking-tight flex items-center gap-2">
+            <Film className="w-6 h-6 text-[#F29F67]" />
             Reels Studio
           </h1>
-          <p className="text-sm text-[#94A3B8] mt-1">
+          <p className="text-sm text-[#64748B] mt-1">
             Review generated scripts, inspect scene compositions, render MP4s, and publish to Instagram.
           </p>
         </div>
@@ -146,7 +146,7 @@ export default function ReelsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => loadReels()}
-            className="p-2 rounded-lg bg-[#151D2A] text-[#94A3B8] hover:text-white hover:bg-[#233044] transition"
+            className="p-2 rounded-xl bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#1E1E2C] hover:bg-slate-50 transition shadow-sm"
             title="Refresh reels list"
           >
             <RefreshCw className="w-4 h-4" />
@@ -155,10 +155,10 @@ export default function ReelsPage() {
             <button
               key={filter}
               onClick={() => setSelectedFilter(filter)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
                 selectedFilter === filter
-                  ? 'bg-[#6F41EC] text-white shadow-md shadow-[#6F41EC]/30'
-                  : 'bg-[#151D2A] text-[#94A3B8] hover:bg-[#233044]'
+                  ? 'bg-[#FDEEE3] text-[#F29F67] border border-[#F29F67]/40 shadow-sm'
+                  : 'bg-white border border-[#E2E8F0] text-[#64748B] hover:bg-slate-50'
               }`}
             >
               {filter}
@@ -168,26 +168,26 @@ export default function ReelsPage() {
       </div>
 
       {toastMessage && (
-        <div className="flex items-center gap-2 p-3 px-4 rounded-xl bg-[#151D2A] border border-[#6F41EC]/50 text-sm text-[#C4B5FD]">
-          <AlertCircle className="w-4 h-4 text-[#C4B5FD] shrink-0" />
+        <div className="flex items-center gap-2 p-3.5 px-4 rounded-xl bg-white border border-[#F29F67]/50 text-sm text-[#1E1E2C] shadow-sm">
+          <AlertCircle className="w-4 h-4 text-[#F29F67] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Video Player Modal */}
       {activePreview && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#151D2A] border border-[#233044] rounded-2xl p-6 max-w-md w-full relative space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-white text-base truncate pr-4">{activePreview.title}</h3>
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#E2E8F0] rounded-3xl p-6 max-w-md w-full relative space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+              <h3 className="font-bold text-[#1E1E2C] text-base truncate pr-4">{activePreview.title}</h3>
               <button
                 onClick={() => setActivePreview(null)}
-                className="p-1 rounded-lg text-[#94A3B8] hover:text-white hover:bg-[#233044]"
+                className="p-1 rounded-lg text-[#64748B] hover:text-[#1E1E2C] hover:bg-slate-100 transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="relative aspect-[9/16] w-full max-h-[65vh] rounded-xl overflow-hidden bg-black mx-auto">
+            <div className="relative aspect-[9/16] w-full max-h-[65vh] rounded-2xl overflow-hidden bg-black mx-auto shadow-inner">
               <video
                 src={activePreview.url}
                 controls
@@ -195,14 +195,14 @@ export default function ReelsPage() {
                 className="w-full h-full object-contain"
               />
             </div>
-            <div className="flex items-center justify-between text-xs text-[#94A3B8]">
+            <div className="flex items-center justify-between text-xs text-[#64748B] pt-1">
               <span>Resolution: 1080x1920 (9:16)</span>
               <a
                 href={activePreview.url}
                 target="_blank"
                 rel="noreferrer"
                 download
-                className="text-[#C4B5FD] hover:underline"
+                className="text-[#F29F67] font-bold hover:underline"
               >
                 Download MP4
               </a>
@@ -211,10 +211,10 @@ export default function ReelsPage() {
         </div>
       )}
 
-      <div className="bg-[#151D2A] border border-[#233044] rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-white border border-[#E2E8F0] rounded-3xl overflow-hidden shadow-sm">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
-            <tr className="border-b border-[#233044] bg-[#0F1623]/60 text-xs uppercase font-bold text-[#64748B]">
+            <tr className="border-b border-[#E2E8F0] bg-[#F8F9FA] text-[11px] uppercase font-bold text-[#64748B]">
               <th className="py-4 px-6">Reel & Hook</th>
               <th className="py-4 px-6">Duration</th>
               <th className="py-4 px-6">Scenes</th>
@@ -222,19 +222,19 @@ export default function ReelsPage() {
               <th className="py-4 px-6 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#233044]/60">
+          <tbody className="divide-y divide-[#E2E8F0]">
             {filteredReels.map((reel) => (
-              <tr key={reel.id} className="hover:bg-[#1E293B]/40 transition">
+              <tr key={reel.id} className="hover:bg-slate-50/70 transition">
                 <td className="py-4 px-6">
-                  <div className="font-bold text-white text-base">{reel.title}</div>
-                  <div className="text-xs text-[#94A3B8] mt-0.5 line-clamp-1 italic">
+                  <div className="font-bold text-[#1E1E2C] text-sm">{reel.title}</div>
+                  <div className="text-xs text-[#64748B] mt-0.5 line-clamp-1 italic">
                     "{reel.hook}"
                   </div>
                 </td>
-                <td className="py-4 px-6 font-mono text-[#94A3B8]">
+                <td className="py-4 px-6 font-mono text-xs font-semibold text-[#64748B]">
                   {reel.durationSeconds}s
                 </td>
-                <td className="py-4 px-6 text-[#94A3B8]">{reel.scenesCount} scenes</td>
+                <td className="py-4 px-6 text-xs text-[#64748B]">{reel.scenesCount} scenes</td>
                 <td className="py-4 px-6">
                   <StatusBadge status={reel.status} />
                 </td>
@@ -244,7 +244,7 @@ export default function ReelsPage() {
                       <button
                         onClick={() => setActivePreview({ title: reel.title, url: reel.videoUrl! })}
                         title="Watch rendered MP4"
-                        className="p-2 rounded-lg bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600 hover:text-white transition"
+                        className="p-2 rounded-xl bg-[#34B1AA]/15 text-[#18857E] hover:bg-[#34B1AA] hover:text-white transition"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -253,10 +253,10 @@ export default function ReelsPage() {
                       onClick={() => handleAction(reel.id, 'render')}
                       disabled={isProcessing !== null || reel.status === 'RENDERING'}
                       title="Render video via Remotion"
-                      className="p-2 rounded-lg bg-[#233044] hover:bg-[#6F41EC] text-white transition disabled:opacity-50"
+                      className="p-2 rounded-xl bg-[#1E1E2C] hover:bg-[#F29F67] text-white transition disabled:opacity-50"
                     >
                       {isProcessing === `${reel.id}-render` || reel.status === 'RENDERING' ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-[#C4B5FD]" />
+                        <Loader2 className="w-4 h-4 animate-spin text-[#F29F67]" />
                       ) : (
                         <Play className="w-4 h-4" />
                       )}
@@ -265,7 +265,7 @@ export default function ReelsPage() {
                       onClick={() => handleAction(reel.id, 'approve')}
                       disabled={isProcessing !== null || (reel.status !== 'NEEDS_REVIEW' && !reel.videoUrl)}
                       title="Approve for publishing"
-                      className="p-2 rounded-lg bg-[#233044] hover:bg-emerald-600 text-white transition disabled:opacity-50"
+                      className="p-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition disabled:opacity-50"
                     >
                       {isProcessing === `${reel.id}-approve` ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -277,7 +277,7 @@ export default function ReelsPage() {
                       onClick={() => handleAction(reel.id, 'publish')}
                       disabled={isProcessing !== null || (reel.status !== 'APPROVED' && reel.status !== 'SCHEDULED')}
                       title="Publish to Instagram"
-                      className="p-2 rounded-lg bg-[#233044] hover:bg-cyan-600 text-white transition disabled:opacity-50"
+                      className="p-2 rounded-xl bg-[#3B8FF3]/15 text-[#2475D6] hover:bg-[#3B8FF3] hover:text-white transition disabled:opacity-50"
                     >
                       {isProcessing === `${reel.id}-publish` ? (
                         <Loader2 className="w-4 h-4 animate-spin" />

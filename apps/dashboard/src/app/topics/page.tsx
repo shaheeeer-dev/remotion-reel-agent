@@ -97,12 +97,12 @@ export default function TopicsPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <ListTodo className="w-6 h-6 text-[#C4B5FD]" />
+          <h1 className="text-2xl font-black text-[#1E1E2C] tracking-tight flex items-center gap-2">
+            <ListTodo className="w-6 h-6 text-[#F29F67]" />
             Topic Pool
           </h1>
-          <p className="text-sm text-[#94A3B8] mt-1">
-            Curated list of educational concepts. The daily queue picks an unused topic to generate and render.
+          <p className="text-sm text-[#64748B] mt-1">
+            Curated list of educational concepts. Gemini generates deterministic Remotion scene scripts from this pool.
           </p>
         </div>
 
@@ -125,22 +125,22 @@ export default function TopicsPage() {
                 });
             }
           }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6F41EC] hover:bg-[#825CF0] text-white text-sm font-bold shadow-lg shadow-[#6F41EC]/30 transition"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E1E2C] hover:bg-[#272738] text-white text-xs font-bold shadow-md shadow-[#1E1E2C]/20 transition"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 text-[#F29F67]" />
           Add Topic
         </button>
       </div>
 
       {statusMessage && (
-        <div className="flex items-center justify-between p-3.5 px-4 rounded-xl bg-[#151D2A] border border-[#6F41EC]/50 text-sm text-[#C4B5FD]">
+        <div className="flex items-center justify-between p-3.5 px-4 rounded-xl bg-white border border-[#F29F67]/50 text-sm text-[#1E1E2C] shadow-sm">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-[#C4B5FD] shrink-0" />
+            <AlertCircle className="w-4 h-4 text-[#F29F67] shrink-0" />
             <span>{statusMessage}</span>
           </div>
           <Link
             href="/reels"
-            className="flex items-center gap-1 font-bold text-white hover:text-[#C4B5FD] transition text-xs bg-[#6F41EC]/30 px-3 py-1.5 rounded-lg border border-[#6F41EC]/50"
+            className="flex items-center gap-1 font-bold text-[#F29F67] hover:underline transition text-xs bg-[#FDEEE3] px-3 py-1.5 rounded-lg border border-[#F29F67]/30"
           >
             Go to Reels Studio
             <ArrowRight className="w-3.5 h-3.5" />
@@ -152,37 +152,42 @@ export default function TopicsPage() {
         {topics.map((t) => (
           <div
             key={t.id}
-            className="p-6 rounded-2xl bg-[#151D2A] border border-[#233044] flex flex-col justify-between hover:border-[#6F41EC]/50 transition"
+            className="p-6 rounded-3xl bg-white border border-[#E2E8F0] shadow-sm flex flex-col justify-between hover:border-[#F29F67]/50 transition"
           >
             <div>
               <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-bold text-[#C4B5FD] uppercase tracking-wider">{t.category}</span>
+                <span className="font-bold text-[#F29F67] uppercase tracking-wider">{t.category}</span>
                 {t.isUsed ? (
-                  <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+                  <span className="flex items-center gap-1 text-[#34B1AA] font-bold">
                     <Check className="w-3.5 h-3.5" /> Used in Reel
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-amber-400 font-semibold">
+                  <span className="flex items-center gap-1 text-[#E0B50F] font-bold">
                     <Clock className="w-3.5 h-3.5" /> Unused (Eligible)
                   </span>
                 )}
               </div>
-              <h3 className="font-bold text-white text-lg">{t.title}</h3>
-              <p className="text-sm text-[#94A3B8] mt-2 leading-relaxed">{t.brief}</p>
+              <h3 className="font-bold text-[#1E1E2C] text-base">{t.title}</h3>
+              <p className="text-xs text-[#64748B] mt-2 leading-relaxed">{t.brief}</p>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-[#233044] flex items-center justify-end">
+            <div className="mt-6 pt-4 border-t border-[#F1F5F9] flex items-center justify-end">
               <button
                 onClick={() => handleGenerate(t.id)}
                 disabled={isGenerating !== null}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#233044] hover:bg-[#6F41EC] text-white text-xs font-bold transition disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FDEEE3] hover:bg-[#F29F67] text-[#F29F67] hover:text-white text-xs font-bold transition disabled:opacity-50"
               >
                 {isGenerating === t.id ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Gemini Generating...</span>
+                  </>
                 ) : (
-                  <Sparkles className="w-3.5 h-3.5 text-[#C4B5FD]" />
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Generate Reel</span>
+                  </>
                 )}
-                {isGenerating === t.id ? 'Enqueuing...' : 'Generate Reel Script'}
               </button>
             </div>
           </div>

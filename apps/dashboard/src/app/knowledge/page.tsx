@@ -85,11 +85,11 @@ export default function KnowledgePage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-[#C4B5FD]" />
+          <h1 className="text-2xl font-black text-[#1E1E2C] tracking-tight flex items-center gap-2">
+            <BookOpen className="w-6 h-6 text-[#F29F67]" />
             Knowledge Base
           </h1>
-          <p className="text-sm text-[#94A3B8] mt-1">
+          <p className="text-sm text-[#64748B] mt-1">
             Verified technical facts and brand claims. Gemini free-tier receives ONLY approved context documents.
           </p>
         </div>
@@ -114,16 +114,16 @@ export default function KnowledgePage() {
                 });
             }
           }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#6F41EC] hover:bg-[#825CF0] text-white text-sm font-bold shadow-lg shadow-[#6F41EC]/30 transition"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1E1E2C] hover:bg-[#272738] text-white text-xs font-bold shadow-md shadow-[#1E1E2C]/20 transition"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 text-[#F29F67]" />
           Add Document
         </button>
       </div>
 
       {statusMsg && (
-        <div className="flex items-center gap-2 p-3 px-4 rounded-xl bg-[#151D2A] border border-[#6F41EC]/50 text-sm text-[#C4B5FD]">
-          <AlertCircle className="w-4 h-4 text-[#C4B5FD] shrink-0" />
+        <div className="flex items-center gap-2 p-3.5 px-4 rounded-xl bg-white border border-[#34B1AA] text-sm text-[#1E1E2C] shadow-sm">
+          <AlertCircle className="w-4 h-4 text-[#34B1AA] shrink-0" />
           <span>{statusMsg}</span>
         </div>
       )}
@@ -132,23 +132,23 @@ export default function KnowledgePage() {
         {docs.map((doc) => (
           <div
             key={doc.id}
-            className="p-6 rounded-2xl bg-[#151D2A] border border-[#233044] space-y-4"
+            className="p-6 rounded-3xl bg-white border border-[#E2E8F0] shadow-sm space-y-4"
           >
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold text-[#C4B5FD] uppercase tracking-wider">
+                <span className="text-xs font-bold text-[#F29F67] uppercase tracking-wider">
                   {doc.category}
                 </span>
-                <h3 className="text-lg font-bold text-white mt-1">{doc.title}</h3>
-                <span className="text-xs text-[#64748B]">Source: {doc.source}</span>
+                <h3 className="text-base font-bold text-[#1E1E2C] mt-0.5">{doc.title}</h3>
+                <span className="text-xs text-[#94A3B8]">Source: {doc.source}</span>
               </div>
 
               <button
                 onClick={() => toggleApproval(doc.id, doc.isApproved)}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition ${
                   doc.isApproved
-                    ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
-                    : 'bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
+                    ? 'bg-[#34B1AA]/15 border border-[#34B1AA]/40 text-[#18857E] hover:bg-[#34B1AA]/25'
+                    : 'bg-[#E0B50F]/15 border border-[#E0B50F]/40 text-[#A68407] hover:bg-[#E0B50F]/25'
                 }`}
               >
                 {doc.isApproved ? (
@@ -163,7 +163,7 @@ export default function KnowledgePage() {
               </button>
             </div>
 
-            <p className="text-sm text-[#94A3B8] leading-relaxed bg-[#0F1623] p-4 rounded-xl border border-[#233044]/60">
+            <p className="text-xs text-[#64748B] leading-relaxed bg-[#F8F9FA] p-4 rounded-2xl border border-[#E2E8F0]">
               {doc.content}
             </p>
           </div>
