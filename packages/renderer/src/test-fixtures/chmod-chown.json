@@ -1,0 +1,76 @@
+{
+  "brand": {
+    "name": "LearnOps",
+    "primaryColor": "#783CEB",
+    "secondaryColor": "#B28BFF",
+    "backgroundColor": "#110F17",
+    "cardBackground": "#1C1824",
+    "textColor": "#FFFFFF"
+  },
+  "script": {
+    "hook": "Confused by *chmod* vs *chown* in Linux? Here is the exact difference.",
+    "topic": "Linux: chmod vs chown",
+    "scenes": [
+      {
+        "kind": "hook",
+        "badge": "LINUX PERMISSIONS",
+        "subtext": "Permissions vs Ownership explained",
+        "headline": "*chmod* vs *chown*",
+        "visualMetaphor": "permissions_matrix",
+        "durationSeconds": 4
+      },
+      {
+        "kind": "folder_tree",
+        "tree": [
+          {
+            "name": "app.sh",
+            "highlight": true,
+            "description": "Permissions & Owner metadata",
+            "isDirectory": false
+          }
+        ],
+        "title": "File Metadata",
+        "rootPath": "/var/www",
+        "explanation": "Every Linux file tracks an *owner* and *access rights*",
+        "highlightPath": "/var/www/app.sh",
+        "durationSeconds": 4
+      },
+      {
+        "kind": "comparison",
+        "title": "Scope Distinction",
+        "leftIcon": "settings",
+        "takeaway": "*chmod* sets access rules, *chown* sets file owner",
+        "leftLabel": "CHMOD",
+        "leftTitle": "Access Rights",
+        "rightIcon": "user",
+        "rightLabel": "CHOWN",
+        "rightTitle": "User Ownership",
+        "durationSeconds": 4,
+        "leftDescription": "Controls Read, Write, Execute permissions",
+        "rightDescription": "Changes User and Group file owners"
+      },
+      {
+        "kind": "terminal",
+        "title": "Commands in Action",
+        "command": "chmod 755 app.sh && chown dev app.sh",
+        "promptUser": "learner@linux:~$",
+        "explanation": "Update mode with *chmod* and user with *chown*",
+        "outputLines": [
+          "-rwxr-xr-x 1 dev staff 1024 Oct 24 app.sh"
+        ],
+        "durationSeconds": 4
+      },
+      {
+        "kind": "outro",
+        "tagline": "Follow for daily tutorials.",
+        "brandName": "LearnOps",
+        "callToAction": "Follow",
+        "durationSeconds": 1
+      }
+    ],
+    "caption": "Master Linux file security! *chmod* modifies permissions, *chown* changes user and group ownership.",
+    "hashtags": ["linux", "devops", "bash", "terminal"],
+    "schemaVersion": 1,
+    "durationSeconds": 17
+  }
+}

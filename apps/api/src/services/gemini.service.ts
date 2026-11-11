@@ -158,12 +158,18 @@ CRITICAL RULES:
 - Return exactly one raw JSON object with all top-level fields: schemaVersion, topic, hook, durationSeconds, scenes, caption, hashtags.
 - Return exactly five scenes, in this order: hook, one visual explanation, comparison, terminal example, outro.
 - The visual explanation must use exactly one relevant kind: folder_tree, container_diagram, or pipeline.
-- Set hook.visualMetaphor to the best topic-specific option: folder_drawer for Linux, container_stack for Docker, or pipeline_flow for CI/CD.
+- Set hook.visualMetaphor to the best topic-specific option:
+  * "permissions_matrix" for Linux permissions, chmod, chown, users, groups, security
+  * "container_stack" for Docker, containers, images, volumes
+  * "git_graph" for Git, GitHub, commits, branching, PRs, version control
+  * "network_flow" for Networking, DNS, IP addresses, ports, HTTP, sockets
+  * "pipeline_flow" for CI/CD workflows, automated build/test/deploy
+  * "folder_drawer" for Linux filesystem, /etc, directories, configuration files
 - Put every scene field directly on its scene object. Never nest fields under "props".
 - Do not include Markdown backticks or conversational text. Return only valid raw JSON.
 
 SCENE KINDS & FLAT REQUIRED FIELDS:
-- "hook": { "kind": "hook", "durationSeconds": 3, "badge": string, "headline": string, "subtext": string, "visualMetaphor": "folder_drawer|container_stack|pipeline_flow" }
+- "hook": { "kind": "hook", "durationSeconds": 3, "badge": string, "headline": string, "subtext": string, "visualMetaphor": "folder_drawer|container_stack|pipeline_flow|permissions_matrix|git_graph|network_flow" }
 - "folder_tree": { "kind": "folder_tree", "durationSeconds": 4, "title": string, "rootPath": "/", "highlightPath": string, "tree": [{"name": string, "isDirectory": boolean, "highlight": boolean, "description": string}], "explanation": string }
 - "terminal": { "kind": "terminal", "durationSeconds": 4, "title": string, "promptUser": "learner@linux:~$", "command": string, "outputLines": [string], "explanation": string }
 - "container_diagram": { "kind": "container_diagram", "durationSeconds": 4, "title": string, "hostOs": "Host Linux Kernel", "containerEngine": "Docker Engine", "containers": [{"name": "app-container", "app": "Node.js API", "binsLibs": "Alpine libc + Node v20"}], "comparisonNote": string }

@@ -1,17 +1,145 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { ArrowRight, Box, FileText, Folder, Layers, Server } from 'lucide-react';
-import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
+import {
+  ArrowRight,
+  Box,
+  FileText,
+  Folder,
+  GitBranch,
+  GitCommit,
+  GitPullRequest,
+  Key,
+  Laptop,
+  Layers,
+  Network,
+  Rocket,
+  Server,
+  ShieldCheck,
+  User,
+  Users,
+  Wifi,
+} from 'lucide-react';
+import { useBrandTheme } from '../styles/theme.js';
 import type { HookScene as HookSceneType } from '@learnops/schema';
 
+/**
+ * Renders text on the purple canvas with a black box behind any highlighted (*word* or `word`) term.
+ * Solves color conflict so purple text/accents never blend into the purple canvas.
+ */
+function renderHookTextWithBlackBox(
+  text: string,
+  defaultColor = '#FFFFFF',
+  highlightTextColor = '#B28BFF'
+) {
+  if (!text) return [];
+
+  const parts = text.split(/(\*[^*]+\*|`[^`]+`)/g);
+
+  return parts.map((part, idx) => {
+    if (
+      (part.startsWith('*') && part.endsWith('*') && part.length > 2) ||
+      (part.startsWith('`') && part.endsWith('`') && part.length > 2)
+    ) {
+      const cleanWord = part.slice(1, -1);
+      return (
+        <span
+          key={idx}
+          style={{
+            backgroundColor: '#110F17', // Black box behind highlighted word
+            color: highlightTextColor, // High-contrast lavender/purple text inside black box
+            padding: '2px 18px',
+            borderRadius: '16px',
+            display: 'inline-block',
+            margin: '0 6px',
+            border: '1.5px solid rgba(255, 255, 255, 0.25)',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
+            fontWeight: 900,
+            verticalAlign: 'baseline',
+          }}
+        >
+          {cleanWord}
+        </span>
+      );
+    }
+
+    return (
+      <span key={idx} style={{ color: defaultColor }}>
+        {part}
+      </span>
+    );
+  });
+}
+
+/**
+ * Intelligently resolves the visual metaphor based on topic keywords and schema:
+ * - permissions_matrix: chmod, chown, user, permissions, security
+ * - container_stack: docker, container, image, volume
+ * - git_graph: git, github, commit, branch, merge, pull request
+ * - network_flow: network, dns, ip, port, http, curl, socket
+ * - pipeline_flow: ci/cd, pipeline, build, deploy, test
+ * - folder_drawer: linux filesystem, /etc, directory, config files
+ */
+function resolveVisualMetaphor(scene: HookSceneType): string {
+  const text = `${scene.headline || ''} ${scene.badge || ''} ${scene.subtext || ''}`.toLowerCase();
+
+  if (
+    text.includes('chmod') ||
+    text.includes('chown') ||
+    text.includes('permission') ||
+    text.includes('ownership') ||
+    text.includes('user') ||
+    text.includes('group')
+  ) {
+    return 'permissions_matrix';
+  }
+  if (
+    text.includes('docker') ||
+    text.includes('container') ||
+    text.includes('image') ||
+    text.includes('volume') ||
+    text.includes('dockerfile')
+  ) {
+    return 'container_stack';
+  }
+  if (
+    text.includes('git') ||
+    text.includes('github') ||
+    text.includes('commit') ||
+    text.includes('branch') ||
+    text.includes('merge') ||
+    text.includes('pull request') ||
+    text.includes('pr ')
+  ) {
+    return 'git_graph';
+  }
+  if (
+    text.includes('network') ||
+    text.includes('dns') ||
+    text.includes(' ip') ||
+    text.includes('port') ||
+    text.includes('http') ||
+    text.includes('curl') ||
+    text.includes('tcp') ||
+    text.includes('socket')
+  ) {
+    return 'network_flow';
+  }
+  if (text.includes('ci/cd') || text.includes('pipeline') || text.includes('deploy')) {
+    return 'pipeline_flow';
+  }
+
+  return scene.visualMetaphor || 'folder_drawer';
+}
+
 interface HookVisualProps {
-  kind: HookSceneType['visualMetaphor'];
+  scene: HookSceneType;
   frame: number;
   fps: number;
 }
 
-const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, fps }) => {
+const HookVisual: React.FC<HookVisualProps> = ({ scene, frame, fps }) => {
   const theme = useBrandTheme();
+  const kind = resolveVisualMetaphor(scene);
 
   // Sliding active drawer animation
   const drawerSlide = spring({
@@ -21,15 +149,16 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
   });
   const drawerOffset = interpolate(drawerSlide, [0, 1], [0, 56]);
 
-  if (kind === 'container_stack') {
+  // 1. Linux Permissions & Ownership (chmod vs chown)
+  if (kind === 'permissions_matrix') {
     return (
       <div
         style={{
-          width: '620px',
-          backgroundColor: theme.colors.deepBackground,
+          width: '640px',
+          backgroundColor: '#110F17', // Black background
           borderRadius: '36px',
           padding: '36px',
-          boxShadow: '0 35px 80px rgba(0, 0, 0, 0.45)',
+          boxShadow: '0 35px 80px rgba(0, 0, 0, 0.55)',
           display: 'flex',
           flexDirection: 'column',
           gap: '20px',
@@ -43,7 +172,7 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
             fontFamily: theme.fonts.mono,
             fontWeight: 800,
             letterSpacing: '0.14em',
-            color: 'rgba(255, 255, 255, 0.55)',
+            color: '#FFFFFF', // White text
             textTransform: 'uppercase',
             paddingLeft: '12px',
             display: 'flex',
@@ -51,21 +180,21 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
             gap: '12px',
           }}
         >
-          <Server size={20} color={theme.colors.brightAccent} />
-          <span>DOCKER ENGINE • HOST MACHINE</span>
+          <ShieldCheck size={22} color="#FFFFFF" strokeWidth={2.4} /> {/* White accent icon */}
+          <span>LINUX MACHINE • ACCESS CONTROL</span>
         </div>
 
-        {/* Slot 1: Inactive Container */}
+        {/* Slot 1: User / Owner */}
         <div
           style={{
-            backgroundColor: theme.colors.cardSurface,
+            backgroundColor: '#1C1824',
             borderRadius: '20px',
             padding: '24px 32px',
-            border: '1.5px solid rgba(255, 255, 255, 0.08)',
+            border: '1.5px solid rgba(255, 255, 255, 0.12)',
             fontSize: '22px',
             fontWeight: 700,
             letterSpacing: '0.08em',
-            color: 'rgba(255, 255, 255, 0.4)',
+            color: 'rgba(255, 255, 255, 0.6)',
             fontFamily: theme.fonts.mono,
             display: 'flex',
             alignItems: 'center',
@@ -73,33 +202,390 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Layers size={28} color="rgba(255, 255, 255, 0.35)" />
-            <span>api-gateway</span>
+            <User size={28} color="#FFFFFF" /> {/* White accent */}
+            <span>chown developer:staff</span>
           </div>
-          <span style={{ fontSize: '16px', opacity: 0.6 }}>:3000</span>
+          <span style={{ fontSize: '15px', color: '#FFFFFF', opacity: 0.8 }}>USER:GROUP</span>
         </div>
 
-        {/* Slot 2: Active Sliding Container with glowing accent */}
+        {/* Slot 2: Active Sliding chmod Drawer (White accent + Purple text) */}
         <div
           style={{
             transform: `translateX(${drawerOffset}px)`,
-            backgroundColor: theme.colors.cardSurface,
+            backgroundColor: '#1C1824',
             borderRadius: '20px',
             padding: '24px 32px',
-            border: `2px solid ${theme.colors.brightAccent}`,
-            boxShadow: `0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px ${theme.colors.primaryGlow}`,
+            border: '2px solid #FFFFFF', // White border
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(120, 60, 235, 0.5)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             fontSize: '26px',
             fontWeight: 900,
-            color: theme.colors.brightAccent,
+            color: theme.colors.brightAccent, // Purple text!
             fontFamily: theme.fonts.mono,
             zIndex: 10,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Box size={32} color={theme.colors.brightAccent} strokeWidth={2.5} />
+            <Key size={32} color="#FFFFFF" strokeWidth={2.5} /> {/* White accent! */}
+            <span>chmod 755 app.sh</span>
+          </div>
+          <span
+            style={{
+              fontSize: '16px',
+              padding: '6px 14px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(120, 60, 235, 0.35)',
+              border: '1px solid #FFFFFF',
+              color: '#FFFFFF', // White accent badge
+              letterSpacing: '0.08em',
+            }}
+          >
+            rwxr-xr-x
+          </span>
+        </div>
+
+        {/* Slot 3: Security Policy */}
+        <div
+          style={{
+            backgroundColor: '#1C1824',
+            borderRadius: '20px',
+            padding: '24px 32px',
+            border: '1.5px solid rgba(255, 255, 255, 0.12)',
+            fontSize: '22px',
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontFamily: theme.fonts.mono,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <Users size={28} color="#FFFFFF" /> {/* White accent */}
+            <span>chmod u+x,g-w,o=r</span>
+          </div>
+          <span style={{ fontSize: '15px', color: '#FFFFFF', opacity: 0.8 }}>PERMISSIONS</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Git & GitHub Repository Flow
+  if (kind === 'git_graph') {
+    return (
+      <div
+        style={{
+          width: '640px',
+          backgroundColor: '#110F17', // Black background
+          borderRadius: '36px',
+          padding: '36px',
+          boxShadow: '0 35px 80px rgba(0, 0, 0, 0.55)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '18px',
+            fontFamily: theme.fonts.mono,
+            fontWeight: 800,
+            letterSpacing: '0.14em',
+            color: '#FFFFFF',
+            textTransform: 'uppercase',
+            paddingLeft: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <GitBranch size={22} color="#FFFFFF" strokeWidth={2.4} /> {/* White accent */}
+          <span>GIT REPOSITORY • VERSION CONTROL</span>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: '#1C1824',
+            borderRadius: '20px',
+            padding: '24px 32px',
+            border: '1.5px solid rgba(255, 255, 255, 0.12)',
+            fontSize: '22px',
+            fontWeight: 700,
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontFamily: theme.fonts.mono,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <GitCommit size={28} color="#FFFFFF" />
+            <span>commit a8f21e9 : HEAD~1</span>
+          </div>
+          <span style={{ fontSize: '15px', color: '#FFFFFF', opacity: 0.8 }}>COMMITTED</span>
+        </div>
+
+        {/* Slot 2: Active Sliding Push Drawer */}
+        <div
+          style={{
+            transform: `translateX(${drawerOffset}px)`,
+            backgroundColor: '#1C1824',
+            borderRadius: '20px',
+            padding: '24px 32px',
+            border: '2px solid #FFFFFF',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(120, 60, 235, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '26px',
+            fontWeight: 900,
+            color: theme.colors.brightAccent, // Purple text!
+            fontFamily: theme.fonts.mono,
+            zIndex: 10,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <GitBranch size={32} color="#FFFFFF" strokeWidth={2.5} /> {/* White accent! */}
+            <span>git push origin main</span>
+          </div>
+          <span
+            style={{
+              fontSize: '16px',
+              padding: '6px 14px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(120, 60, 235, 0.35)',
+              border: '1px solid #FFFFFF',
+              color: '#FFFFFF',
+            }}
+          >
+            SYNCED
+          </span>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: '#1C1824',
+            borderRadius: '20px',
+            padding: '24px 32px',
+            border: '1.5px solid rgba(255, 255, 255, 0.12)',
+            fontSize: '22px',
+            fontWeight: 700,
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontFamily: theme.fonts.mono,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <GitPullRequest size={28} color="#FFFFFF" />
+            <span>origin/main : remote branch</span>
+          </div>
+          <span style={{ fontSize: '15px', color: '#FFFFFF', opacity: 0.8 }}>REMOTE</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Networking & Ports
+  if (kind === 'network_flow') {
+    return (
+      <div
+        style={{
+          width: '640px',
+          backgroundColor: '#110F17', // Black background
+          borderRadius: '36px',
+          padding: '36px',
+          boxShadow: '0 35px 80px rgba(0, 0, 0, 0.55)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '18px',
+            fontFamily: theme.fonts.mono,
+            fontWeight: 800,
+            letterSpacing: '0.14em',
+            color: '#FFFFFF',
+            textTransform: 'uppercase',
+            paddingLeft: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <Network size={22} color="#FFFFFF" strokeWidth={2.4} /> {/* White accent */}
+          <span>NETWORK TOPOLOGY • PORT MAP</span>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: '#1C1824',
+            borderRadius: '20px',
+            padding: '24px 32px',
+            border: '1.5px solid rgba(255, 255, 255, 0.12)',
+            fontSize: '22px',
+            fontWeight: 700,
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontFamily: theme.fonts.mono,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <Laptop size={28} color="#FFFFFF" />
+            <span>CLIENT IP: 192.168.1.105</span>
+          </div>
+          <span style={{ fontSize: '15px', color: '#FFFFFF', opacity: 0.8 }}>LOCAL</span>
+        </div>
+
+        {/* Slot 2: Active Sliding Route Drawer */}
+        <div
+          style={{
+            transform: `translateX(${drawerOffset}px)`,
+            backgroundColor: '#1C1824',
+            borderRadius: '20px',
+            padding: '24px 32px',
+            border: '2px solid #FFFFFF',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(120, 60, 235, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '26px',
+            fontWeight: 900,
+            color: theme.colors.brightAccent, // Purple text!
+            fontFamily: theme.fonts.mono,
+            zIndex: 10,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <Network size={32} color="#FFFFFF" strokeWidth={2.5} /> {/* White accent! */}
+            <span>TCP ROUTE :443 HTTPS</span>
+          </div>
+          <span
+            style={{
+              fontSize: '16px',
+              padding: '6px 14px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(120, 60, 235, 0.35)',
+              border: '1px solid #FFFFFF',
+              color: '#FFFFFF',
+            }}
+          >
+            CONNECTED
+          </span>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: '#1C1824',
+            borderRadius: '20px',
+            padding: '24px 32px',
+            border: '1.5px solid rgba(255, 255, 255, 0.12)',
+            fontSize: '22px',
+            fontWeight: 700,
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontFamily: theme.fonts.mono,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <Server size={28} color="#FFFFFF" />
+            <span>UPSTREAM: 10.0.0.1:8080</span>
+          </div>
+          <span style={{ fontSize: '15px', color: '#FFFFFF', opacity: 0.8 }}>BACKEND</span>
+        </div>
+      </div>
+    );
+  }
+
+  // 4. Docker & Containers
+  if (kind === 'container_stack') {
+    return (
+      <div
+        style={{
+          width: '640px',
+          backgroundColor: '#110F17', // Black background
+          borderRadius: '36px',
+          padding: '36px',
+          boxShadow: '0 35px 80px rgba(0, 0, 0, 0.55)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '18px',
+            fontFamily: theme.fonts.mono,
+            fontWeight: 800,
+            letterSpacing: '0.14em',
+            color: '#FFFFFF',
+            textTransform: 'uppercase',
+            paddingLeft: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <Server size={22} color="#FFFFFF" strokeWidth={2.4} /> {/* White accent */}
+          <span>DOCKER ENGINE • HOST MACHINE</span>
+        </div>
+
+        <div
+          style={{
+            backgroundColor: '#1C1824',
+            borderRadius: '20px',
+            padding: '24px 32px',
+            border: '1.5px solid rgba(255, 255, 255, 0.12)',
+            fontSize: '22px',
+            fontWeight: 700,
+            color: 'rgba(255, 255, 255, 0.6)',
+            fontFamily: theme.fonts.mono,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <Layers size={28} color="#FFFFFF" />
+            <span>api-gateway</span>
+          </div>
+          <span style={{ fontSize: '16px', color: '#FFFFFF', opacity: 0.8 }}>:3000</span>
+        </div>
+
+        {/* Slot 2: Active Sliding Container (White accent + Purple text) */}
+        <div
+          style={{
+            transform: `translateX(${drawerOffset}px)`,
+            backgroundColor: '#1C1824',
+            borderRadius: '20px',
+            padding: '24px 32px',
+            border: '2px solid #FFFFFF',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(120, 60, 235, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            fontSize: '26px',
+            fontWeight: 900,
+            color: theme.colors.brightAccent, // Purple text!
+            fontFamily: theme.fonts.mono,
+            zIndex: 10,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <Box size={32} color="#FFFFFF" strokeWidth={2.5} /> {/* White accent! */}
             <span>web-app:latest</span>
           </div>
           <span
@@ -107,26 +593,24 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
               fontSize: '16px',
               padding: '6px 14px',
               borderRadius: '8px',
-              backgroundColor: 'rgba(178, 139, 255, 0.16)',
-              border: `1px solid ${theme.colors.brightAccent}`,
-              letterSpacing: '0.06em',
+              backgroundColor: 'rgba(120, 60, 235, 0.35)',
+              border: '1px solid #FFFFFF',
+              color: '#FFFFFF',
             }}
           >
             RUNNING :8080
           </span>
         </div>
 
-        {/* Slot 3: Inactive Container */}
         <div
           style={{
-            backgroundColor: theme.colors.cardSurface,
+            backgroundColor: '#1C1824',
             borderRadius: '20px',
             padding: '24px 32px',
-            border: '1.5px solid rgba(255, 255, 255, 0.08)',
+            border: '1.5px solid rgba(255, 255, 255, 0.12)',
             fontSize: '22px',
             fontWeight: 700,
-            letterSpacing: '0.08em',
-            color: 'rgba(255, 255, 255, 0.4)',
+            color: 'rgba(255, 255, 255, 0.6)',
             fontFamily: theme.fonts.mono,
             display: 'flex',
             alignItems: 'center',
@@ -134,44 +618,44 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Server size={28} color="rgba(255, 255, 255, 0.35)" />
+            <Server size={28} color="#FFFFFF" />
             <span>db-postgres</span>
           </div>
-          <span style={{ fontSize: '16px', opacity: 0.6 }}>:5432</span>
+          <span style={{ fontSize: '16px', color: '#FFFFFF', opacity: 0.8 }}>:5432</span>
         </div>
       </div>
     );
   }
 
+  // 5. CI/CD Workflow
   if (kind === 'pipeline_flow') {
     const stages = [
       { label: 'BUILD', icon: FileText, active: false },
       { label: 'TEST', icon: Layers, active: true },
-      { label: 'SHIP', icon: Box, active: false },
+      { label: 'DEPLOY', icon: Rocket, active: false },
     ];
 
     return (
       <div
         style={{
-          width: '620px',
-          backgroundColor: theme.colors.deepBackground,
+          width: '640px',
+          backgroundColor: '#110F17', // Black background
           borderRadius: '36px',
           padding: '36px',
-          boxShadow: '0 35px 80px rgba(0, 0, 0, 0.45)',
+          boxShadow: '0 35px 80px rgba(0, 0, 0, 0.55)',
           display: 'flex',
           flexDirection: 'column',
           gap: '24px',
           position: 'relative',
         }}
       >
-        {/* Header Label */}
         <div
           style={{
             fontSize: '18px',
             fontFamily: theme.fonts.mono,
             fontWeight: 800,
             letterSpacing: '0.14em',
-            color: 'rgba(255, 255, 255, 0.55)',
+            color: '#FFFFFF',
             textTransform: 'uppercase',
             paddingLeft: '12px',
           }}
@@ -179,7 +663,6 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
           CI/CD PIPELINE • AUTOMATED STAGES
         </div>
 
-        {/* 3 Pipeline Stages */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
           {stages.map((stage, idx) => {
             const entrance = spring({
@@ -197,11 +680,9 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
                     flex: 1,
                     height: '148px',
                     borderRadius: '22px',
-                    backgroundColor: theme.colors.cardSurface,
-                    border: isActive
-                      ? `2px solid ${theme.colors.brightAccent}`
-                      : '1.5px solid rgba(255, 255, 255, 0.08)',
-                    boxShadow: isActive ? `0 0 24px ${theme.colors.primaryGlow}` : 'none',
+                    backgroundColor: '#1C1824',
+                    border: isActive ? '2px solid #FFFFFF' : '1.5px solid rgba(255, 255, 255, 0.12)',
+                    boxShadow: isActive ? '0 0 25px rgba(120, 60, 235, 0.5)' : 'none',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -213,7 +694,7 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
                 >
                   <Icon
                     size={32}
-                    color={isActive ? theme.colors.brightAccent : 'rgba(255, 255, 255, 0.45)'}
+                    color="#FFFFFF" // White accent icon!
                     strokeWidth={isActive ? 2.5 : 2}
                   />
                   <span
@@ -222,7 +703,7 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
                       fontSize: '18px',
                       fontWeight: 800,
                       letterSpacing: '0.08em',
-                      color: isActive ? theme.colors.brightAccent : 'rgba(255, 255, 255, 0.45)',
+                      color: isActive ? theme.colors.brightAccent : 'rgba(255, 255, 255, 0.6)', // Purple text on active!
                     }}
                   >
                     {stage.label}
@@ -230,7 +711,7 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
                 </div>
 
                 {idx < stages.length - 1 && (
-                  <ArrowRight size={22} color="rgba(255, 255, 255, 0.3)" />
+                  <ArrowRight size={22} color="#FFFFFF" />
                 )}
               </React.Fragment>
             );
@@ -240,87 +721,86 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
     );
   }
 
-  // Default: 'folder_drawer' (Filing Cabinet /etc drawer sliding out)
+  // 6. Default: Linux Filesystem /etc Drawer
   return (
     <div
       style={{
-        width: '620px',
-        backgroundColor: theme.colors.deepBackground,
+        width: '640px',
+        backgroundColor: '#110F17', // Black background
         borderRadius: '36px',
         padding: '36px',
-        boxShadow: '0 35px 80px rgba(0, 0, 0, 0.45)',
+        boxShadow: '0 35px 80px rgba(0, 0, 0, 0.55)',
         display: 'flex',
         flexDirection: 'column',
         gap: '20px',
         position: 'relative',
       }}
     >
-      {/* Cabinet Header Label */}
       <div
         style={{
           fontSize: '18px',
           fontFamily: theme.fonts.mono,
           fontWeight: 800,
           letterSpacing: '0.14em',
-          color: 'rgba(255, 255, 255, 0.55)',
+          color: '#FFFFFF',
           textTransform: 'uppercase',
           paddingLeft: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
         }}
       >
-        LINUX MACHINE
+        <Folder size={22} color="#FFFFFF" strokeWidth={2.4} /> {/* White accent */}
+        <span>LINUX MACHINE • FILESYSTEM</span>
       </div>
 
-      {/* Drawer 1: SYSTEM DRAWER 01 */}
       <div
         style={{
-          backgroundColor: theme.colors.cardSurface,
+          backgroundColor: '#1C1824',
           borderRadius: '20px',
           padding: '24px 32px',
-          border: '1.5px solid rgba(255, 255, 255, 0.08)',
+          border: '1.5px solid rgba(255, 255, 255, 0.12)',
           fontSize: '22px',
           fontWeight: 700,
-          letterSpacing: '0.08em',
-          color: 'rgba(255, 255, 255, 0.4)',
+          color: 'rgba(255, 255, 255, 0.6)',
           fontFamily: theme.fonts.mono,
         }}
       >
         SYSTEM DRAWER 01
       </div>
 
-      {/* Drawer 2 (SLIDING ACTIVE DRAWER): /etc with Lucide Folder Icon */}
+      {/* Drawer 2 (SLIDING ACTIVE DRAWER): White accent + Purple text */}
       <div
         style={{
           transform: `translateX(${drawerOffset}px)`,
-          backgroundColor: theme.colors.cardSurface,
+          backgroundColor: '#1C1824',
           borderRadius: '20px',
           padding: '24px 32px',
-          border: `2px solid ${theme.colors.brightAccent}`,
-          boxShadow: `0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px ${theme.colors.primaryGlow}`,
+          border: '2px solid #FFFFFF', // White border
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(120, 60, 235, 0.5)',
           display: 'flex',
           alignItems: 'center',
           gap: '18px',
           fontSize: '32px',
           fontWeight: 900,
-          color: theme.colors.brightAccent,
+          color: theme.colors.brightAccent, // Purple text!
           fontFamily: theme.fonts.mono,
           zIndex: 10,
         }}
       >
-        <Folder size={36} color={theme.colors.brightAccent} strokeWidth={2.5} />
+        <Folder size={36} color="#FFFFFF" strokeWidth={2.5} /> {/* White accent icon! */}
         <span>/etc</span>
       </div>
 
-      {/* Drawer 3: SYSTEM DRAWER 03 */}
       <div
         style={{
-          backgroundColor: theme.colors.cardSurface,
+          backgroundColor: '#1C1824',
           borderRadius: '20px',
           padding: '24px 32px',
-          border: '1.5px solid rgba(255, 255, 255, 0.08)',
+          border: '1.5px solid rgba(255, 255, 255, 0.12)',
           fontSize: '22px',
           fontWeight: 700,
-          letterSpacing: '0.08em',
-          color: 'rgba(255, 255, 255, 0.4)',
+          color: 'rgba(255, 255, 255, 0.6)',
           fontFamily: theme.fonts.mono,
         }}
       >
@@ -333,16 +813,13 @@ const HookVisual: React.FC<HookVisualProps> = ({ kind = 'folder_drawer', frame, 
 /**
  * Scene 1: The Hook (00:00 - 00:03, 3 sec)
  *
- * 3-Tier Open Canvas Visual Architecture:
- * - Tier 1 (Top): Monospace kicker & massive bold headline open directly on purple canvas.
- * - Tier 2 (Middle): Dedicated visual metaphor card (folder_drawer, container_stack, pipeline_flow).
- * - Tier 3 (Bottom): Explanatory subtext & monospace badge open directly on purple canvas.
- *
  * Rules:
- * - Background: Solid Brand Primary Purple (no enclosing outer card, no 2-tone split).
- * - Text: All text on the purple canvas is WHITE (#FFFFFF / rgba(255, 255, 255, 0.75)), strictly avoiding dark/black text.
- * - Platform Safe Area (80/20 Rule): All essential elements are contained inside the top 80% (0 - 1536px),
- *   leaving the bottom 20% (384px) strictly clear for platform interface overlays.
+ * - 3 Colors Only: Purple (#783CEB), Black (#110F17), White (#FFFFFF)
+ * - Canvas Background: Solid Purple
+ * - Canvas Text: White (#FFFFFF)
+ * - Highlighted Word: Black box behind that specific word with high contrast
+ * - Middle Diagram: Black background, white accents/icons, purple text
+ * - Platform Safe Area (80/20 Rule): All essential elements inside upper 80% (1536px), bottom 20% clear.
  * - Zero Emojis: Strictly Lucide SVG icons.
  */
 export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
@@ -376,15 +853,11 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
         inset: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: theme.colors.brandPrimary, // Solid Brand Primary Purple background
+        backgroundColor: theme.colors.brandPrimary, // Solid Purple Canvas
         overflow: 'hidden',
       }}
     >
-      {/* 
-        Platform Safe Area Container:
-        Height: 1536px (Upper 80% of 1920px)
-        Leaves the bottom 384px completely clear for platform UI overlays.
-      */}
+      {/* Platform Safe Area Container (Upper 80% = 1536px) */}
       <div
         style={{
           position: 'absolute',
@@ -413,32 +886,33 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
               fontFamily: theme.fonts.mono,
               fontWeight: 800,
               letterSpacing: '0.12em',
-              color: 'rgba(255, 255, 255, 0.75)', // White text
+              color: '#FFFFFF', // White text
               textTransform: 'uppercase',
               marginBottom: '28px',
+              opacity: 0.85,
             }}
           >
             {scene.badge || 'DEVOPS ESSENTIALS • 01'}
           </div>
 
-          {/* Headline (Open directly on canvas, massive 84px, white text) */}
+          {/* Headline (White text + Black box behind highlighted words) */}
           <h1
             style={{
               fontSize: '84px',
               fontWeight: 900,
-              lineHeight: 1.08,
-              color: '#FFFFFF', // White text on purple screen
+              lineHeight: 1.15,
+              color: '#FFFFFF',
               letterSpacing: '-0.04em',
               margin: 0,
               maxWidth: '920px',
               fontFamily: theme.fonts.heading,
             }}
           >
-            {renderHighlightedText(scene.headline, '#FFFFFF', theme.colors.brightAccent)}
+            {renderHookTextWithBlackBox(scene.headline, '#FFFFFF', theme.colors.brightAccent)}
           </h1>
         </div>
 
-        {/* Tier 2 (Middle): Visual Metaphor Card */}
+        {/* Tier 2 (Middle): Visual Metaphor Card with Black Background, White Accents, Purple Text */}
         <div
           style={{
             display: 'flex',
@@ -449,7 +923,7 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
             margin: 'auto 0',
           }}
         >
-          <HookVisual kind={scene.visualMetaphor} frame={frame} fps={fps} />
+          <HookVisual scene={scene} frame={frame} fps={fps} />
         </div>
 
         {/* Tier 3 (Bottom): Explanatory Subtext & Monospace Pill directly on canvas */}
@@ -476,7 +950,7 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
                 lineHeight: 1.25,
               }}
             >
-              {renderHighlightedText(scene.subtext, '#FFFFFF', theme.colors.brightAccent)}
+              {renderHookTextWithBlackBox(scene.subtext, '#FFFFFF', theme.colors.brightAccent)}
             </p>
           )}
 
@@ -487,7 +961,8 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
               fontWeight: 800,
               letterSpacing: '0.12em',
               textTransform: 'uppercase',
-              color: 'rgba(255, 255, 255, 0.75)', // White text
+              color: '#FFFFFF',
+              opacity: 0.85,
             }}
           >
             {scene.badge ? scene.badge.replace(/•.*$/, '').trim() : 'CORE ARCHITECTURE'}

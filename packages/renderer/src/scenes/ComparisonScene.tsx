@@ -181,8 +181,8 @@ export const ComparisonScene: React.FC<{ scene: ComparisonSceneType }> = ({ scen
                   backgroundColor: theme.colors.cardSurface,
                   borderRadius: '32px',
                   padding: '38px 34px',
-                  border: `1.5px solid ${card.color}`,
-                  boxShadow: `0 20px 50px rgba(0, 0, 0, 0.45)`,
+                  border: '1.5px solid #FFFFFF', // White border
+                  boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45), 0 0 20px rgba(255, 255, 255, 0.1)',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
@@ -197,15 +197,15 @@ export const ComparisonScene: React.FC<{ scene: ComparisonSceneType }> = ({ scen
                       width: '64px',
                       height: '64px',
                       borderRadius: '18px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                      border: `1.5px solid ${card.color}`,
+                      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                      border: '1.5px solid #FFFFFF', // White border
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       marginBottom: '26px',
                     }}
                   >
-                    <Icon size={34} color={card.color} strokeWidth={2.2} />
+                    <Icon size={34} color="#FFFFFF" strokeWidth={2.2} />
                   </div>
 
                   <h2

@@ -144,8 +144,8 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
             transform: `scale(${windowSpring})`,
             opacity: windowSpring,
             backgroundColor: theme.colors.terminalBg,
-            border: `1.5px solid ${theme.colors.brandPrimary}`,
-            boxShadow: `${theme.colors.cardGlow}, 0 30px 70px rgba(0, 0, 0, 0.70)`,
+            border: '1.5px solid #FFFFFF', // White border
+            boxShadow: '0 30px 70px rgba(0, 0, 0, 0.70), 0 0 25px rgba(255, 255, 255, 0.15)',
             borderRadius: '28px',
             overflow: 'hidden',
             margin: 'auto 0',
@@ -160,7 +160,7 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderBottom: `1px solid rgba(255, 255, 255, 0.08)`,
+              borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           >
             {/* Mac window dots */}

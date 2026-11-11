@@ -145,20 +145,20 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
               padding: '14px 38px',
               borderRadius: '18px',
               backgroundColor: theme.colors.cardSurface,
-              border: `2px solid ${theme.colors.brandPrimary}`,
-              boxShadow: `0 0 25px ${theme.colors.primaryGlow}`,
+              border: '1.5px solid #FFFFFF', // White border
+              boxShadow: '0 0 25px rgba(255, 255, 255, 0.15)',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '16px',
             }}
           >
-            <GitBranch size={28} color={theme.colors.brightAccent} strokeWidth={2.4} />
+            <GitBranch size={28} color="#FFFFFF" strokeWidth={2.4} />
             <span
               style={{
                 fontSize: '26px',
                 fontWeight: 800,
                 fontFamily: theme.fonts.mono,
-                color: theme.colors.brightAccent,
+                color: '#FFFFFF',
               }}
             >
               {scene.trigger}
@@ -168,9 +168,9 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                 fontSize: '15px',
                 padding: '4px 12px',
                 borderRadius: '6px',
-                backgroundColor: 'rgba(178, 139, 255, 0.16)',
-                border: `1px solid ${theme.colors.brightAccent}`,
-                color: theme.colors.brightAccent,
+                backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                border: '1px solid #FFFFFF',
+                color: '#FFFFFF',
                 fontWeight: 800,
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',
@@ -186,7 +186,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
             style={{
               width: '3px',
               height: '24px',
-              backgroundColor: theme.colors.brandPrimary,
+              backgroundColor: '#FFFFFF',
               opacity: nodeSpring,
             }}
           />
@@ -221,10 +221,10 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                     borderRadius: '24px',
                     padding: '22px 30px',
                     border: isCurrent
-                      ? `2px solid ${theme.colors.brightAccent}`
-                      : '1.5px solid rgba(255, 255, 255, 0.10)',
+                      ? '2px solid #FFFFFF' // White border on active
+                      : '1.5px solid rgba(255, 255, 255, 0.25)', // White border on inactive
                     boxShadow: isCurrent
-                      ? `0 15px 40px rgba(0, 0, 0, 0.5), 0 0 20px ${theme.colors.primaryGlow}`
+                      ? '0 15px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 255, 255, 0.2)'
                       : '0 15px 40px rgba(0, 0, 0, 0.5)',
                     display: 'flex',
                     alignItems: 'center',
@@ -238,12 +238,10 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                         width: '54px',
                         height: '54px',
                         borderRadius: '16px',
-                        backgroundColor: isCurrent
-                          ? 'rgba(178, 139, 255, 0.15)'
-                          : 'rgba(255, 255, 255, 0.06)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
                         border: isCurrent
-                          ? `1px solid ${theme.colors.brightAccent}`
-                          : '1px solid rgba(255, 255, 255, 0.12)',
+                          ? '1.5px solid #FFFFFF'
+                          : '1px solid rgba(255, 255, 255, 0.2)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -251,7 +249,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                     >
                       <IconComponent
                         size={28}
-                        color={isCurrent ? theme.colors.brightAccent : 'rgba(255, 255, 255, 0.45)'}
+                        color="#FFFFFF"
                         strokeWidth={2.2}
                       />
                     </div>
@@ -262,7 +260,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                           fontSize: '22px',
                           fontFamily: theme.fonts.mono,
                           fontWeight: 800,
-                          color: isCurrent ? theme.colors.brightAccent : theme.colors.mutedText,
+                          color: isCurrent ? theme.colors.brightAccent : 'rgba(255, 255, 255, 0.65)',
                           marginBottom: '4px',
                           textTransform: 'uppercase',
                           letterSpacing: '0.06em',

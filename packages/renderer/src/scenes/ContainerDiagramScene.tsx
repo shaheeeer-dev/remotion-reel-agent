@@ -142,20 +142,20 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
               padding: '14px 38px',
               borderRadius: '18px',
               backgroundColor: theme.colors.cardSurface,
-              border: `2px solid ${theme.colors.brandPrimary}`,
-              boxShadow: `0 0 25px ${theme.colors.primaryGlow}`,
+              border: '1.5px solid #FFFFFF', // White border
+              boxShadow: '0 0 25px rgba(255, 255, 255, 0.15)',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '16px',
             }}
           >
-            <Server size={28} color={theme.colors.brightAccent} strokeWidth={2.4} />
+            <Server size={28} color="#FFFFFF" strokeWidth={2.4} />
             <span
               style={{
                 fontSize: '26px',
                 fontWeight: 800,
                 fontFamily: theme.fonts.mono,
-                color: theme.colors.brightAccent,
+                color: '#FFFFFF',
               }}
             >
               {scene.containerEngine || 'Docker Engine (cgroups + namespaces)'}
@@ -167,7 +167,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
             style={{
               width: '3px',
               height: '24px',
-              backgroundColor: theme.colors.brandPrimary,
+              backgroundColor: '#FFFFFF',
               opacity: rootNodeSpring,
             }}
           />
@@ -200,10 +200,10 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                     borderRadius: '24px',
                     padding: '22px 30px',
                     border: idx === 0
-                      ? `2px solid ${theme.colors.brightAccent}`
-                      : '1.5px solid rgba(255, 255, 255, 0.10)',
+                      ? '2px solid #FFFFFF' // White border on active
+                      : '1.5px solid rgba(255, 255, 255, 0.25)', // White border on inactive
                     boxShadow: idx === 0
-                      ? `0 15px 40px rgba(0, 0, 0, 0.5), 0 0 20px ${theme.colors.primaryGlow}`
+                      ? '0 15px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 255, 255, 0.2)'
                       : '0 15px 40px rgba(0, 0, 0, 0.5)',
                     display: 'flex',
                     alignItems: 'center',
@@ -217,12 +217,10 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                         width: '54px',
                         height: '54px',
                         borderRadius: '16px',
-                        backgroundColor: idx === 0
-                          ? 'rgba(178, 139, 255, 0.15)'
-                          : 'rgba(255, 255, 255, 0.06)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
                         border: idx === 0
-                          ? `1px solid ${theme.colors.brightAccent}`
-                          : '1px solid rgba(255, 255, 255, 0.12)',
+                          ? '1.5px solid #FFFFFF'
+                          : '1px solid rgba(255, 255, 255, 0.2)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -230,7 +228,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                     >
                       <IconComponent
                         size={28}
-                        color={idx === 0 ? theme.colors.brightAccent : 'rgba(255, 255, 255, 0.45)'}
+                        color="#FFFFFF"
                         strokeWidth={2.2}
                       />
                     </div>

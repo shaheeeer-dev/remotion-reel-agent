@@ -154,8 +154,9 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
               opacity: rootNodeSpring,
               padding: '14px 44px',
               borderRadius: '18px',
-              backgroundColor: theme.colors.brandPrimary,
-              boxShadow: `0 0 25px ${theme.colors.primaryGlow}`,
+              backgroundColor: theme.colors.cardSurface,
+              border: '1.5px solid #FFFFFF', // White border
+              boxShadow: '0 0 25px rgba(255, 255, 255, 0.15)',
               fontSize: '36px',
               fontWeight: 900,
               fontFamily: theme.fonts.mono,
@@ -174,7 +175,7 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
             style={{
               width: '3px',
               height: '24px',
-              backgroundColor: theme.colors.brandPrimary,
+              backgroundColor: '#FFFFFF',
               opacity: rootNodeSpring,
             }}
           />
@@ -206,8 +207,12 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                     backgroundColor: theme.colors.cardSurface,
                     borderRadius: '24px',
                     padding: '22px 30px',
-                    border: '1.5px solid rgba(255, 255, 255, 0.10)',
-                    boxShadow: '0 15px 40px rgba(0, 0, 0, 0.5)',
+                    border: idx === 0
+                      ? '2px solid #FFFFFF' // White border on active
+                      : '1.5px solid rgba(255, 255, 255, 0.25)', // White border on inactive
+                    boxShadow: idx === 0
+                      ? '0 15px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 255, 255, 0.2)'
+                      : '0 15px 40px rgba(0, 0, 0, 0.5)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -220,14 +225,16 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
                         width: '54px',
                         height: '54px',
                         borderRadius: '16px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                        border: idx === 0
+                          ? '1.5px solid #FFFFFF'
+                          : '1px solid rgba(255, 255, 255, 0.2)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}
                     >
-                      <IconComponent size={28} color={theme.colors.brightAccent} strokeWidth={2.2} />
+                      <IconComponent size={28} color="#FFFFFF" strokeWidth={2.2} />
                     </div>
 
                     <div>

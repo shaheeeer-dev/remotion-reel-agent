@@ -8,6 +8,7 @@ import type { ReelRenderInput } from '@learnops/schema';
 import linuxEtcFixture from './test-fixtures/linux-etc.json' assert { type: 'json' };
 import dockerFixture from './test-fixtures/docker-container.json' assert { type: 'json' };
 import cicdFixture from './test-fixtures/devops-cicd.json' assert { type: 'json' };
+import chmodChownFixture from './test-fixtures/chmod-chown.json' assert { type: 'json' };
 
 const FPS = 30;
 const WIDTH = 1080;
@@ -122,6 +123,17 @@ export const RemotionRoot: React.FC = () => {
         width={WIDTH}
         height={HEIGHT}
         defaultProps={cicdFixture as unknown as ReelRenderInput}
+      />
+
+      {/* Test 2 Video 4: Linux Permissions chmod vs chown */}
+      <Composition
+        id="Test2-ChmodChown"
+        component={MainReel}
+        durationInFrames={chmodChownFixture.script.durationSeconds * FPS}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+        defaultProps={chmodChownFixture as unknown as ReelRenderInput}
       />
     </>
   );

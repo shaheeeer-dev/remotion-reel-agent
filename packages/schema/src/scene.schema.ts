@@ -11,7 +11,14 @@ export const HookSceneSchema = BaseSceneSchema.extend({
   badge: z.string().max(40),
   headline: z.string().max(120),
   subtext: z.string().max(160).optional(),
-  visualMetaphor: z.enum(['folder_drawer', 'container_stack', 'pipeline_flow']).optional(),
+  visualMetaphor: z.enum([
+    'folder_drawer',
+    'container_stack',
+    'pipeline_flow',
+    'permissions_matrix',
+    'git_graph',
+    'network_flow',
+  ]).optional(),
 });
 
 export const KineticTypeSceneSchema = BaseSceneSchema.extend({
@@ -127,7 +134,13 @@ export interface HookScene {
   badge: string;
   headline: string;
   subtext?: string;
-  visualMetaphor?: 'folder_drawer' | 'container_stack' | 'pipeline_flow';
+  visualMetaphor?:
+    | 'folder_drawer'
+    | 'container_stack'
+    | 'pipeline_flow'
+    | 'permissions_matrix'
+    | 'git_graph'
+    | 'network_flow';
 }
 
 export interface KineticTypeScene {
