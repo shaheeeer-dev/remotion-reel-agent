@@ -16,37 +16,38 @@ import {
 import { fetchApi } from '../../lib/api-client';
 
 const COLOR_PRESETS = [
+  { label: 'Brand Purple (Official)', hex: '#783CEB' },
+  { label: 'Accent Lavender (Official)', hex: '#B28BFF' },
+  { label: 'Dark Amethyst', hex: '#110F17' },
+  { label: 'Surface Amethyst', hex: '#1C1824' },
   { label: 'Sunset Coral', hex: '#F29F67' },
-  { label: 'Deep Navy', hex: '#1E1E2C' },
   { label: 'Royal Blue', hex: '#3B8FF3' },
   { label: 'Teal Mint', hex: '#34B1AA' },
   { label: 'Golden Amber', hex: '#E0B50F' },
-  { label: 'Electric Purple', hex: '#6F41EC' },
-  { label: 'Crimson Rose', hex: '#E11D48' },
-  { label: 'Emerald Green', hex: '#10B981' },
 ];
 
 const BG_PRESETS = [
+  { label: 'Dark Amethyst (Official)', hex: '#110F17' },
+  { label: 'Surface Amethyst', hex: '#1C1824' },
   { label: 'Obsidian Navy', hex: '#1E1E2C' },
   { label: 'Dark Midnight', hex: '#0B0F17' },
   { label: 'Slate Charcoal', hex: '#0F172A' },
-  { label: 'Neutral Zinc', hex: '#18181B' },
-  { label: 'Studio Cream', hex: '#F8F9FA' },
 ];
 
 export default function BrandPage() {
   const [brandId, setBrandId] = useState<string | null>(null);
-  const [displayName, setDisplayName] = useState('Remotion Reel');
-  const [slug, setSlug] = useState('remotion-reel');
-  const [audience, setAudience] = useState('Software engineers, DevOps architects, and modern developers');
+  const [displayName, setDisplayName] = useState('LearnOps');
+  const [slug, setSlug] = useState('learnops');
+  const [audience, setAudience] = useState('Beginner to intermediate Linux & DevOps engineers');
   const [voiceTone, setVoiceTone] = useState('Practical, concise, technically rigorous, encouraging');
   const [autoPublish, setAutoPublish] = useState(false);
   const [defaultDuration, setDefaultDuration] = useState(16);
 
-  // Reel Color Customization
-  const [primaryColor, setPrimaryColor] = useState('#F29F67');
-  const [secondaryColor, setSecondaryColor] = useState('#34B1AA');
-  const [bgColor, setBgColor] = useState('#1E1E2C');
+  // Reel Color Customization (Defaults to Official LearnOps Theme)
+  const [primaryColor, setPrimaryColor] = useState('#783CEB');
+  const [secondaryColor, setSecondaryColor] = useState('#B28BFF');
+  const [bgColor, setBgColor] = useState('#110F17');
+  const [previewScene, setPreviewScene] = useState<'hook' | 'terminal' | 'outro'>('hook');
 
   const [isSaved, setIsSaved] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -407,101 +408,166 @@ export default function BrandPage() {
           <div className="sticky top-8 space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-[#64748B] flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5 text-[#F29F67]" />
-                Live Reel Composition Preview
+                <Eye className="w-3.5 h-3.5 text-[#783CEB]" />
+                Live Reel Preview
               </span>
-              <span className="text-[11px] font-semibold text-[#34B1AA] bg-[#34B1AA]/10 px-2 py-0.5 rounded-full">
-                9:16 Video Frame
-              </span>
+              <div className="flex items-center gap-1 bg-[#F1F5F9] p-0.5 rounded-lg text-[10px] font-bold">
+                <button
+                  type="button"
+                  onClick={() => setPreviewScene('hook')}
+                  className={`px-2 py-0.5 rounded-md transition ${
+                    previewScene === 'hook' ? 'bg-[#783CEB] text-white' : 'text-[#64748B]'
+                  }`}
+                >
+                  Hook
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewScene('terminal')}
+                  className={`px-2 py-0.5 rounded-md transition ${
+                    previewScene === 'terminal' ? 'bg-[#783CEB] text-white' : 'text-[#64748B]'
+                  }`}
+                >
+                  Terminal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewScene('outro')}
+                  className={`px-2 py-0.5 rounded-md transition ${
+                    previewScene === 'outro' ? 'bg-[#783CEB] text-white' : 'text-[#64748B]'
+                  }`}
+                >
+                  Outro
+                </button>
+              </div>
             </div>
 
-            {/* Mobile Phone Mockup Frame */}
+            {/* Mobile Phone Mockup Frame (Pure matte background, no lines) */}
             <div
               className="relative aspect-[9/16] w-full max-w-[320px] mx-auto rounded-[32px] p-4 shadow-2xl border-4 border-[#1E1E2C] flex flex-col justify-between overflow-hidden transition-colors duration-300"
-              style={{ backgroundColor: bgColor }}
+              style={{
+                backgroundColor: previewScene === 'hook' ? primaryColor : bgColor,
+              }}
             >
-              {/* Subtle Background Grid overlay */}
-              <div
-                className="absolute inset-0 opacity-15 pointer-events-none"
-                style={{
-                  backgroundImage: `linear-gradient(${primaryColor} 1px, transparent 1px), linear-gradient(90deg, ${primaryColor} 1px, transparent 1px)`,
-                  backgroundSize: '24px 24px',
-                }}
-              />
+              {/* Top Reel Progress Bar */}
+              <div className="relative z-20 w-full h-1 bg-white/15 rounded-full overflow-hidden mb-2">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: previewScene === 'hook' ? '18%' : previewScene === 'terminal' ? '65%' : '95%',
+                    background: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})`,
+                  }}
+                />
+              </div>
 
-              {/* Mock Reel Header */}
-              <div className="relative z-10 flex items-center justify-between border-b border-white/10 pb-2.5">
-                <div className="flex items-center gap-2">
+              {/* Scene 1: Hook Preview */}
+              {previewScene === 'hook' && (
+                <div className="relative z-10 flex-1 flex flex-col justify-center items-center text-center p-2">
                   <div
-                    className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black text-white shadow-sm"
-                    style={{ backgroundColor: primaryColor }}
+                    className="w-full rounded-2xl p-4 shadow-2xl flex flex-col items-center"
+                    style={{ backgroundColor: '#1C1824' }}
                   >
-                    {displayName.charAt(0) || 'R'}
-                  </div>
-                  <span className="text-xs font-bold text-white tracking-tight truncate max-w-[140px]">
-                    {displayName}
-                  </span>
-                </div>
-                <span
-                  className="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider text-black"
-                  style={{ backgroundColor: secondaryColor }}
-                >
-                  HD Reel
-                </span>
-              </div>
+                    {/* Badge on #110F17 pill */}
+                    <div
+                      className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider mb-3 flex items-center gap-1.5"
+                      style={{
+                        backgroundColor: '#110F17',
+                        border: `1px solid ${primaryColor}`,
+                        color: secondaryColor,
+                      }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: secondaryColor }} />
+                      <span>LINUX FUNDAMENTALS</span>
+                    </div>
 
-              {/* Mock Reel Scene: Hook & Terminal */}
-              <div className="relative z-10 space-y-3 my-auto">
-                {/* Badge */}
-                <div
-                  className="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider text-white"
-                  style={{ backgroundColor: primaryColor }}
-                >
-                  TECHNICAL INSIGHT
-                </div>
+                    <h3 className="text-base font-black text-white leading-tight mb-2">
+                      Where does Linux keep all its configuration?
+                    </h3>
 
-                {/* Headline */}
-                <h3 className="text-lg font-black text-white leading-tight">
-                  What is a Container Really?
-                </h3>
-                <p className="text-[11px] text-white/70 line-clamp-2">
-                  It is not a lightweight VM. Here is how host kernel namespaces work.
-                </p>
-
-                {/* Mock Terminal Card */}
-                <div className="bg-black/40 border border-white/15 rounded-xl p-3 font-mono text-[10px] space-y-1 backdrop-blur-sm">
-                  <div className="flex items-center gap-1.5 text-white/40 pb-1 border-b border-white/10">
-                    <span className="w-2 h-2 rounded-full bg-red-500/80 inline-block" />
-                    <span className="w-2 h-2 rounded-full bg-yellow-500/80 inline-block" />
-                    <span className="w-2 h-2 rounded-full bg-green-500/80 inline-block" />
-                    <span className="text-[9px] ml-1">bash terminal</span>
-                  </div>
-                  <div className="text-white pt-1">
-                    <span style={{ color: secondaryColor }}>$</span> docker run -d nginx
-                  </div>
-                  <div style={{ color: primaryColor }}>
-                    [cgroups] PID namespaces attached
+                    <p className="text-[10px] text-white/70 leading-normal">
+                      Every service, network setting, and user rule lives in one place.
+                    </p>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Mock Reel Outro Bar */}
-              <div className="relative z-10 p-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between text-[10px]">
-                <div className="text-white/80">
-                  <div className="font-bold text-white">{displayName}</div>
-                  <div className="text-[9px] text-white/60">Follow for daily tutorials</div>
+              {/* Scene 3: Terminal Preview */}
+              {previewScene === 'terminal' && (
+                <div className="relative z-10 flex-1 flex flex-col justify-center my-auto p-1">
+                  <div className="text-center mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: secondaryColor }}>
+                      Filesystem Anatomy
+                    </span>
+                    <h3 className="text-sm font-black text-white">The /etc Hierarchy</h3>
+                  </div>
+
+                  {/* Terminal Box */}
+                  <div
+                    className="rounded-xl overflow-hidden shadow-2xl"
+                    style={{
+                      backgroundColor: '#1C1824',
+                      border: `1px solid ${primaryColor}`,
+                      boxShadow: '0 0 15px rgba(120, 60, 235, 0.25)',
+                    }}
+                  >
+                    <div className="bg-[#15131C] px-2.5 py-1.5 flex items-center justify-between border-b border-white/10">
+                      <div className="flex gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 inline-block" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                      </div>
+                      <span className="text-[9px] font-mono text-[#91899C]">learner@linux: ~</span>
+                      <div className="w-4" />
+                    </div>
+
+                    <div className="p-3 font-mono text-[10px] space-y-1">
+                      <div>
+                        <span style={{ color: secondaryColor, fontWeight: 700 }}>learner@linux:~$ </span>
+                        <span className="text-white font-bold">ls -la /etc/nginx</span>
+                      </div>
+                      <div className="text-white/80 pt-1 text-[9px]">
+                        drwxr-xr-x 8 root root 4096 conf.d
+                      </div>
+                      <div className="text-white/80 text-[9px]">
+                        -rw-r--r-- 1 root root 1440 nginx.conf
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div
-                  className="px-2.5 py-1 rounded-lg font-bold text-black text-[10px] shadow-sm"
-                  style={{ backgroundColor: primaryColor }}
-                >
-                  Follow
+              )}
+
+              {/* Scene 4: Outro Preview */}
+              {previewScene === 'outro' && (
+                <div className="relative z-10 flex-1 flex items-center justify-center p-2">
+                  <div className="flex items-center justify-between w-full px-2">
+                    <div>
+                      <h1 className="text-lg font-bold text-white leading-tight">{displayName}</h1>
+                      <p className="text-[10px] text-[#91899C]">Follow for daily tutorials.</p>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="px-4 py-1.5 rounded-full font-bold text-white text-[11px] shadow-lg"
+                      style={{
+                        backgroundColor: primaryColor,
+                        boxShadow: '0 0 15px rgba(120, 60, 235, 0.4)',
+                      }}
+                    >
+                      Follow
+                    </button>
+                  </div>
                 </div>
+              )}
+
+              {/* Reel Brand Label */}
+              <div className="relative z-10 pt-2 border-t border-white/10 flex items-center justify-between text-[9px] text-[#91899C]">
+                <span>1080x1920 • 9:16</span>
+                <span className="font-mono">{previewScene.toUpperCase()} SCENE</span>
               </div>
             </div>
 
             <p className="text-center text-xs text-[#64748B]">
-              Changes made here automatically update Remotion video scenes upon rendering.
+              Changes made here automatically apply to Remotion video scenes upon rendering.
             </p>
           </div>
         </div>
