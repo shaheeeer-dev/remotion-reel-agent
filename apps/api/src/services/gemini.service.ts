@@ -145,6 +145,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
   "topic": "${options.topic}",
   "hook": "A short, engaging hook sentence questioning or introducing the concept (max 120 chars)",
   "durationSeconds": ${targetDuration},
+  "narrationText": "Have you ever opened the etc directory in Linux and wondered what actually lives inside? Think of it as the control center, holding configuration files for every host service. From your nginx configs to user passwords, every setting is editable text. Follow ${brandName} for daily tutorials!",
   "scenes": [
     {
       "kind": "hook",
@@ -153,7 +154,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
       "headline": "Main Punchy Title",
       "subtext": "Brief teaser text",
       "visualMetaphor": "folder_drawer",
-      "voiceover": "Where does Linux keep all its configuration files?"
+      "voiceover": "Have you ever opened the etc directory in Linux and wondered what lives inside?"
     },
     {
       "kind": "folder_tree",
@@ -163,7 +164,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
       "highlightPath": "/etc",
       "tree": [{"name": "etc", "isDirectory": true, "highlight": true, "description": "System configuration"}],
       "explanation": "Machine-wide settings",
-      "voiceover": "Inside etc, plain text files configure your system."
+      "voiceover": "Think of it as the control center, holding configuration files for every host service."
     },
     {
       "kind": "comparison",
@@ -178,7 +179,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
       "rightDescription": "Personal settings",
       "rightIcon": "user",
       "takeaway": "Different folders, different scope",
-      "voiceover": "chmod modifies access rights, while chown sets the owner."
+      "voiceover": "Unlike personal user configs, etc manages system-wide daemon and server settings."
     },
     {
       "kind": "terminal",
@@ -188,7 +189,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
       "command": "ls /etc",
       "outputLines": ["hosts", "fstab", "ssh/"],
       "explanation": "Real config files",
-      "voiceover": "Run ls to inspect active file permissions."
+      "voiceover": "From your nginx configs to user passwords, every setting is editable plain text."
     },
     {
       "kind": "outro",
@@ -196,7 +197,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
       "brandName": "${brandName}",
       "tagline": "Follow for daily tutorials.",
       "callToAction": "Follow",
-      "voiceover": "Follow for daily tutorials."
+      "voiceover": "Follow ${brandName} for daily DevOps tutorials!"
     }
   ],
   "caption": "A concise, engaging educational Instagram caption explaining key takeaways.",
@@ -204,7 +205,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
 }
 
 CRITICAL RULES:
-- Return exactly one raw JSON object with all top-level fields: schemaVersion, topic, hook, durationSeconds, scenes, caption, hashtags.
+- Return exactly one raw JSON object with all top-level fields: schemaVersion, topic, hook, durationSeconds, narrationText, scenes, caption, hashtags.
 - Return exactly five scenes, in this order: hook, one visual explanation, comparison, terminal example, outro.
 - The visual explanation must use exactly one relevant kind: folder_tree, container_diagram, or pipeline.
 - Set hook.visualMetaphor to the best topic-specific option:
@@ -231,13 +232,24 @@ RULES:
 2. Hashtags MUST be simple alphanumeric strings without "#".
 3. Do NOT invent unsupported claims or fictional commands. Use verified technical specifications.
 4. Keep terminal commands short (40 characters or fewer), safe, and relevant.
-5. VOICEOVER & PACING RULES:
-   - Every scene MUST include a "voiceover" field: natural, conversational English written to be spoken aloud by TTS.
-   - PURE SPOKEN TEXT: Do NOT use asterisks, backticks, emojis, or code syntax in "voiceover". Write readable words (e.g. "slash etc" or "etc folder", not slash etc with code backticks).
-   - STRICT WORD BUDGET: To ensure speech fits the visual scene timing without overflow, keep voiceover under (durationSeconds * 2.2) words:
-     * 3-second scene: max 6-7 words.
-     * 4-second scene: max 8-9 words.
-     * 2-second outro: max 3-4 words (e.g. "Follow for daily tutorials.").
+5. CONTINUOUS STORY NARRATION (CRITICAL):
+   - You MUST provide "narrationText" at the top level: a single, uninterrupted, high-energy spoken monologue that explains the concept in the form of a story from second 0 to the very end of the video.
+   - THE NARRATOR MUST KEEP TALKING. Do NOT quit after 4 words or leave dead air.
+   - Story Structure:
+     * Hook: Start with a curiosity gap, common mistake, or relatable question.
+     * Analogy/Metaphor: Give the viewer an immediate intuitive anchor ("Think of it as...").
+     * Real-world Context: Connect how it actually works in real DevOps / Linux systems.
+     * The Key Insight: Reveal the core takeaway that makes them feel smarter.
+     * Call to Action: Seamless outro prompt to follow.
+   - Natural Pacing & Word Budget (~2.6 - 2.8 words/second):
+     * For a 16-second reel: 42 to 46 words TOTAL across the entire monologue.
+     * Each scene's "voiceover" field MUST be the exact sentence or clause from "narrationText" that aligns with that scene's visual moment:
+       - 3-second scene: 8 to 9 words.
+       - 4-second scene: 10 to 12 words.
+       - 2-second outro: 5 to 6 words.
+   - PURE SPOKEN TEXT:
+     * Write purely for natural human speech with natural commas for breath pauses.
+     * Do NOT use asterisks, backticks, emojis, code tags, or slashes in "voiceover" or "narrationText". Write pronounceable words (e.g. "slash etc", "nginx", "nano").
 
 APPROVED BRAND KNOWLEDGE:
 ${knowledgeContext}

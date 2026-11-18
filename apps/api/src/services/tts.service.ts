@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import type { Scene, SceneAudio } from '@learnops/schema';
+import type { Scene, SceneAudio, MasterAudio } from '@learnops/schema';
 import { getMonorepoRoot } from './remotion.service.js';
 import { getSharedTTSInstance, CURATED_KOKORO_VOICES } from './voice.service.js';
 
@@ -161,6 +161,96 @@ export class TtsService {
     }
 
     return sceneAudios;
+  }
+
+  /**
+   * Synthesizes the full reel narrative as ONE continuous master audio stream.
+   * This provides natural, attention-grabbing storytelling with organic pauses,
+   * completely eliminating artificial silence gaps between scenes.
+   */
+  async synthesizeStoryAudio(
+    reelId: string,
+    storyText: string,
+    targetDurationSeconds: number,
+    voiceId?: string
+  ): Promise<MasterAudio> {
+    const selectedVoice = this.resolveVoiceId(voiceId);
+    const rootDir = getMonorepoRoot();
+    const audioDir = path.resolve(rootDir, 'storage/media/audio/reels', reelId);
+    await fs.mkdir(audioDir, { recursive: true });
+
+    const cleanText = cleanTextForSpeech(storyText);
+    if (!cleanText) {
+      throw new Error(`Cannot synthesize voiceover: story text is empty.`);
+    }
+
+    const tts = await getSharedTTSInstance();
+    // Target duration: leave 0.5s breathing room before video ends
+    const targetDuration = Math.max(2.0, targetDurationSeconds - 0.5);
+
+    console.log(
+      `[TtsService] Synthesizing continuous story voiceover ("${selectedVoice}", target: ${targetDuration.toFixed(2)}s): "${cleanText}"`
+    );
+
+    // Initial synthesis at natural pace (1.05x)
+    let speed = 1.05;
+    let audio = await tts.generate(cleanText, {
+      voice: selectedVoice as any,
+      speed,
+    });
+    trimSilence(audio);
+
+    let durationSeconds = audio.audio.length / audio.sampling_rate;
+    console.log(`[TtsService] Initial continuous narration duration: ${durationSeconds.toFixed(2)}s`);
+
+    // Dynamic pacing: if duration differs from target by more than 0.7s, adjust speed
+    if (Math.abs(durationSeconds - targetDuration) > 0.7) {
+      const neededSpeed = speed * (durationSeconds / targetDuration);
+      speed = Math.min(1.4, Math.max(0.95, Number(neededSpeed.toFixed(2))));
+
+      console.log(
+        `[TtsService] Adjusting narration speed to ${speed}x to match reel duration (${targetDuration.toFixed(2)}s)...`
+      );
+      audio = await tts.generate(cleanText, {
+        voice: selectedVoice as any,
+        speed,
+      });
+      trimSilence(audio);
+      durationSeconds = audio.audio.length / audio.sampling_rate;
+      console.log(`[TtsService] Paced continuous narration duration: ${durationSeconds.toFixed(2)}s`);
+    }
+
+    // Safety guard: ensure audio never spills past targetDurationSeconds
+    const maxAllowedSamples = Math.floor((targetDurationSeconds - 0.1) * audio.sampling_rate);
+    if (audio.audio.length > maxAllowedSamples) {
+      const fadeSamples = Math.round(0.05 * audio.sampling_rate);
+      const clamped = audio.audio.subarray(0, maxAllowedSamples);
+      const fadeStart = maxAllowedSamples - fadeSamples;
+      for (let s = fadeStart; s < maxAllowedSamples; s++) {
+        const factor = (maxAllowedSamples - s) / fadeSamples;
+        clamped[s] *= factor;
+      }
+      audio.audio = clamped;
+      durationSeconds = audio.audio.length / audio.sampling_rate;
+    }
+
+    const outPath = path.join(audioDir, 'master.wav');
+    await audio.save(outPath);
+
+    const fileBuffer = await fs.readFile(outPath);
+    const audioDataUri = `data:audio/wav;base64,${fileBuffer.toString('base64')}`;
+    const audioUrl = `/media/audio/reels/${reelId}/master.wav`;
+
+    console.log(
+      `[TtsService] Master continuous story audio ready: ${durationSeconds.toFixed(2)}s / ${targetDurationSeconds}s reel.`
+    );
+
+    return {
+      audioPath: outPath,
+      audioUrl,
+      audioDataUri,
+      durationSeconds: Number(durationSeconds.toFixed(2)),
+    };
   }
 }
 

@@ -6,7 +6,7 @@ import { BrandHeader } from '../components/BrandHeader.js';
 import { SceneDispatcher } from '../scenes/SceneDispatcher.js';
 import { BrandThemeProvider, defaultTheme } from '../styles/theme.js';
 
-export const MainReel: React.FC<ReelRenderInput> = ({ script, brand, sceneAudios }) => {
+export const MainReel: React.FC<ReelRenderInput> = ({ script, brand, masterAudio, sceneAudios }) => {
   const { fps } = useVideoConfig();
 
   const brandName = brand?.name || 'Brand';
@@ -14,6 +14,8 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand, sceneAudios
   const outroStartFrame = Math.round(
     script.scenes.slice(0, -1).reduce((total, scene) => total + scene.durationSeconds, 0) * fps
   );
+
+  const masterAudioSrc = masterAudio?.audioDataUri || masterAudio?.audioUrl || masterAudio?.audioPath;
 
   return (
     <BrandThemeProvider brand={brand}>
@@ -28,6 +30,9 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand, sceneAudios
       >
         <BackgroundGrid />
 
+        {/* Master continuous story audio track */}
+        {masterAudioSrc ? <Audio src={masterAudioSrc} /> : null}
+
         <Series>
           {script.scenes.map((scene, idx) => {
             const sceneFrames = Math.round(scene.durationSeconds * fps);
@@ -38,7 +43,8 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand, sceneAudios
 
             const isHook = scene.kind === 'hook';
             const isOutro = scene.kind === 'outro';
-            const sceneAudio = sceneAudios?.find((a) => a.sceneIndex === idx);
+            // Only play per-scene audio if no master audio track is provided
+            const sceneAudio = !masterAudioSrc ? sceneAudios?.find((a) => a.sceneIndex === idx) : null;
             const audioSrc = sceneAudio?.audioDataUri || sceneAudio?.audioUrl || sceneAudio?.audioPath;
 
             return (

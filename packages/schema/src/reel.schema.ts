@@ -34,6 +34,15 @@ export const SceneAudioSchema = z.object({
 
 export type SceneAudio = z.infer<typeof SceneAudioSchema>;
 
+export const MasterAudioSchema = z.object({
+  audioPath: z.string().optional(),
+  audioUrl: z.string().optional(),
+  audioDataUri: z.string().optional(),
+  durationSeconds: z.number().positive().optional(),
+});
+
+export type MasterAudio = z.infer<typeof MasterAudioSchema>;
+
 export const ReelRenderInputSchema = z.object({
   reelId: z.string().optional(),
   brand: z.object({
@@ -50,6 +59,7 @@ export const ReelRenderInputSchema = z.object({
     callToAction: z.string().optional(),
   }),
   script: ReelScriptSchema,
+  masterAudio: MasterAudioSchema.optional(),
   sceneAudios: z.array(SceneAudioSchema).optional(),
 });
 

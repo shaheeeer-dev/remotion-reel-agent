@@ -217,13 +217,19 @@ export class QueueService {
           const script = reel.scriptJson as any;
           const voiceId = profile?.voiceId || undefined;
 
-          console.log(`[Queue] Synthesizing voiceover audio for reel ${reel.id} (voice: ${voiceId || 'af_heart'})...`);
-          const sceneAudios = await ttsService.synthesizeReelAudio(
+          // Build continuous story narrative: prefer script.narrationText or join scene voiceovers
+          const fullStoryText =
+            script.narrationText?.trim() ||
+            (script.scenes || []).map((s: any) => s.voiceover).filter(Boolean).join(' ');
+
+          console.log(`[Queue] Synthesizing continuous story voiceover for reel ${reel.id} (voice: ${voiceId || 'af_heart'})...`);
+          const masterAudio = await ttsService.synthesizeStoryAudio(
             reel.id,
-            script.scenes || [],
+            fullStoryText,
+            script.durationSeconds || 16,
             voiceId
           );
-          console.log(`[Queue] Synthesized ${sceneAudios.length} scene voiceovers.`);
+          console.log(`[Queue] Master story voiceover ready (${masterAudio.durationSeconds}s).`);
 
           const renderInput: ReelRenderInput = {
             reelId: reel.id,
@@ -237,7 +243,7 @@ export class QueueService {
               creatorCredit: env.REPO_CREDIT_URL,
             },
             script,
-            sceneAudios,
+            masterAudio,
           };
 
           const outputFileName = `reel_${reel.id}_${Date.now()}.mp4`;
