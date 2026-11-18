@@ -69,7 +69,12 @@
       }
     ],
     "caption": "Master Linux file security! *chmod* modifies permissions, *chown* changes user and group ownership.",
-    "hashtags": ["linux", "devops", "bash", "terminal"],
+    "hashtags": [
+      "linux",
+      "devops",
+      "bash",
+      "terminal"
+    ],
     "schemaVersion": 1,
     "durationSeconds": 17
   }

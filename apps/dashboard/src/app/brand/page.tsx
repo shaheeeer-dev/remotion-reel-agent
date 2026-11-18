@@ -12,6 +12,10 @@ import {
   Sparkles,
   Terminal,
   Layers,
+  Folder,
+  Network,
+  HardDrive,
+  ShieldCheck,
 } from 'lucide-react';
 import { fetchApi } from '../../lib/api-client';
 
@@ -47,7 +51,7 @@ export default function BrandPage() {
   const [primaryColor, setPrimaryColor] = useState('#783CEB');
   const [secondaryColor, setSecondaryColor] = useState('#B28BFF');
   const [bgColor, setBgColor] = useState('#110F17');
-  const [previewScene, setPreviewScene] = useState<'hook' | 'terminal' | 'outro'>('hook');
+  const [previewScene, setPreviewScene] = useState<'hook' | 'content' | 'terminal' | 'outro'>('hook');
 
   const [isSaved, setIsSaved] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -423,6 +427,15 @@ export default function BrandPage() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setPreviewScene('content')}
+                  className={`px-2 py-0.5 rounded-md transition ${
+                    previewScene === 'content' ? 'bg-[#783CEB] text-white' : 'text-[#64748B]'
+                  }`}
+                >
+                  Content
+                </button>
+                <button
+                  type="button"
                   onClick={() => setPreviewScene('terminal')}
                   className={`px-2 py-0.5 rounded-md transition ${
                     previewScene === 'terminal' ? 'bg-[#783CEB] text-white' : 'text-[#64748B]'
@@ -450,64 +463,219 @@ export default function BrandPage() {
               }}
             >
               {/* Top Reel Progress Bar */}
-              <div className="relative z-20 w-full h-1 bg-white/15 rounded-full overflow-hidden mb-2">
+              <div className="relative z-20 w-full h-1 bg-white/20 rounded-full overflow-hidden mb-2 shrink-0">
                 <div
-                  className="h-full rounded-full"
+                  className="h-full rounded-full transition-all duration-300"
                   style={{
-                    width: previewScene === 'hook' ? '18%' : previewScene === 'terminal' ? '65%' : '95%',
-                    background: `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})`,
+                    width:
+                      previewScene === 'hook'
+                        ? '25%'
+                        : previewScene === 'content'
+                        ? '50%'
+                        : previewScene === 'terminal'
+                        ? '75%'
+                        : '100%',
+                    background:
+                      previewScene === 'hook'
+                        ? '#FFFFFF'
+                        : `linear-gradient(90deg, ${primaryColor}, ${secondaryColor})`,
                   }}
                 />
               </div>
 
-              {/* Scene 1: Hook Preview */}
+              {/* Scene 1: Hook Preview (Purple canvas, 3-tier open architecture, black box highlight) */}
               {previewScene === 'hook' && (
-                <div className="relative z-10 flex-1 flex flex-col justify-center items-center text-center p-2">
+                <div className="relative z-10 flex-1 flex flex-col justify-between pb-6 pt-1 text-left">
+                  {/* Tier 1 (Top): Monospace Kicker & Headline with Black Box */}
+                  <div>
+                    <div className="text-[8.5px] font-mono font-extrabold text-white/85 uppercase tracking-wider mb-1.5">
+                      LINUX FILE SYSTEM • 02
+                    </div>
+                    <h3 className="text-[17px] font-black text-white leading-[1.18] tracking-tight">
+                      Where Linux keeps its{' '}
+                      <span className="inline-block bg-[#110F17] text-white px-1.5 py-0.5 rounded text-[14px] font-black shadow-md border border-white/20">
+                        rules.
+                      </span>
+                    </h3>
+                  </div>
+
+                  {/* Tier 2 (Middle): Linux Drawer Metaphor (Black BG, White Accents, Purple Text) */}
                   <div
-                    className="w-full rounded-2xl p-4 shadow-2xl flex flex-col items-center"
-                    style={{ backgroundColor: '#1C1824' }}
+                    className="w-full rounded-2xl p-3 shadow-2xl flex flex-col gap-1.5 border border-white/25"
+                    style={{ backgroundColor: '#110F17' }}
                   >
-                    {/* Badge on #110F17 pill */}
-                    <div
-                      className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider mb-3 flex items-center gap-1.5"
-                      style={{
-                        backgroundColor: '#110F17',
-                        border: `1px solid ${primaryColor}`,
-                        color: secondaryColor,
-                      }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: secondaryColor }} />
-                      <span>LINUX FUNDAMENTALS</span>
+                    <div className="text-[8px] font-mono font-extrabold text-white/70 uppercase tracking-widest px-1">
+                      LINUX MACHINE
+                    </div>
+                    <div className="bg-[#1C1824] rounded-lg px-2.5 py-1.5 text-[8px] font-mono font-bold text-white/40 border border-white/5 flex items-center justify-between">
+                      <span>SYSTEM DRAWER 01</span>
+                      <span className="text-[7px] text-white/30 uppercase">SYSTEM</span>
                     </div>
 
-                    <h3 className="text-base font-black text-white leading-tight mb-2">
-                      Where does Linux keep all its configuration?
-                    </h3>
+                    {/* Active Sliding Drawer */}
+                    <div className="bg-[#1C1824] rounded-lg px-2.5 py-1.5 text-[9px] font-mono font-black border border-white shadow-xl flex items-center justify-between translate-x-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <Folder size={12} color="#FFFFFF" strokeWidth={2.5} />
+                        <span style={{ color: secondaryColor }}>/etc</span>
+                      </div>
+                      <span
+                        className="text-[7px] font-mono font-bold px-1.5 py-0.5 rounded text-white"
+                        style={{ backgroundColor: 'rgba(120, 60, 235, 0.45)' }}
+                      >
+                        CONFIG
+                      </span>
+                    </div>
 
-                    <p className="text-[10px] text-white/70 leading-normal">
-                      Every service, network setting, and user rule lives in one place.
+                    <div className="bg-[#1C1824] rounded-lg px-2.5 py-1.5 text-[8px] font-mono font-bold text-white/40 border border-white/5 flex items-center justify-between">
+                      <span>SYSTEM DRAWER 03</span>
+                      <span className="text-[7px] text-white/30 uppercase">SYSTEM</span>
+                    </div>
+                  </div>
+
+                  {/* Tier 3 (Bottom): Explanatory Subtext open directly on purple canvas */}
+                  <div className="flex flex-col items-center text-center gap-0.5">
+                    <p className="text-[11px] font-black text-white leading-tight">
+                      A directory of configuration files
                     </p>
+                    <span className="text-[8px] font-mono font-extrabold uppercase tracking-widest text-white/80">
+                      MACHINE-WIDE SETTINGS
+                    </span>
                   </div>
                 </div>
               )}
 
-              {/* Scene 3: Terminal Preview */}
-              {previewScene === 'terminal' && (
-                <div className="relative z-10 flex-1 flex flex-col justify-center my-auto p-1">
-                  <div className="text-center mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: secondaryColor }}>
-                      Filesystem Anatomy
-                    </span>
-                    <h3 className="text-sm font-black text-white">The /etc Hierarchy</h3>
+              {/* Scene 2: Content Preview (Black canvas, 3-Card Stack branching from root node, crisp white borders) */}
+              {previewScene === 'content' && (
+                <div className="relative z-10 flex-1 flex flex-col justify-between pb-6 pt-1 text-left">
+                  {/* Tier 1 (Top): Kicker with Accent Mark & Headline */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[8.5px] font-mono font-extrabold text-white/60 uppercase tracking-wider">
+                        INSIDE /ETC • 01
+                      </span>
+                      <div
+                        className="w-6 h-1 rounded-full"
+                        style={{ backgroundColor: primaryColor }}
+                      />
+                    </div>
+                    <h3 className="text-[17px] font-black text-white leading-[1.18] tracking-tight">
+                      Plain files.{' '}
+                      <span style={{ color: secondaryColor }}>Real effects.</span>
+                    </h3>
                   </div>
 
-                  {/* Terminal Box */}
+                  {/* Tier 2 (Middle): Root node & 3 vertical cards */}
+                  <div className="flex flex-col items-center w-full my-auto">
+                    {/* Root Node */}
+                    <div
+                      className="px-3 py-1 rounded-lg border border-white font-mono text-[9px] font-black text-white inline-flex items-center gap-1.5 shadow-md"
+                      style={{ backgroundColor: '#1C1824' }}
+                    >
+                      <Folder size={11} color="#FFFFFF" strokeWidth={2.5} />
+                      <span>/etc</span>
+                    </div>
+                    <div className="w-0.5 h-2 bg-white/60 my-0.5" />
+
+                    {/* Staggered cards */}
+                    <div className="w-full space-y-1.5">
+                      {/* Card 1 */}
+                      <div
+                        className="rounded-xl px-2.5 py-1.5 border border-white shadow-md flex items-center justify-between"
+                        style={{ backgroundColor: '#1C1824' }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-md bg-white/10 border border-white flex items-center justify-center shrink-0">
+                            <Network size={12} color="#FFFFFF" strokeWidth={2.2} />
+                          </div>
+                          <div>
+                            <div className="text-[8px] font-mono font-black" style={{ color: secondaryColor }}>
+                              /etc/hosts
+                            </div>
+                            <div className="text-[9px] font-black text-white leading-none">Name → address</div>
+                          </div>
+                        </div>
+                        <span className="text-[7px] font-mono font-bold text-white/50 uppercase">HOSTS</span>
+                      </div>
+
+                      {/* Card 2 */}
+                      <div
+                        className="rounded-xl px-2.5 py-1.5 border border-white/25 shadow-md flex items-center justify-between"
+                        style={{ backgroundColor: '#1C1824' }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-md bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
+                            <HardDrive size={12} color="#FFFFFF" strokeWidth={2.2} />
+                          </div>
+                          <div>
+                            <div className="text-[8px] font-mono font-black" style={{ color: secondaryColor }}>
+                              /etc/fstab
+                            </div>
+                            <div className="text-[9px] font-black text-white leading-none">Filesystems at boot</div>
+                          </div>
+                        </div>
+                        <span className="text-[7px] font-mono font-bold text-white/50 uppercase">FSTAB</span>
+                      </div>
+
+                      {/* Card 3 */}
+                      <div
+                        className="rounded-xl px-2.5 py-1.5 border border-white/25 shadow-md flex items-center justify-between"
+                        style={{ backgroundColor: '#1C1824' }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-md bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
+                            <ShieldCheck size={12} color="#FFFFFF" strokeWidth={2.2} />
+                          </div>
+                          <div>
+                            <div className="text-[8px] font-mono font-black" style={{ color: secondaryColor }}>
+                              /etc/ssh/sshd_config
+                            </div>
+                            <div className="text-[9px] font-black text-white leading-none">SSH server rules</div>
+                          </div>
+                        </div>
+                        <span className="text-[7px] font-mono font-bold text-white/50 uppercase">SSHD_CONFIG</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tier 3 (Bottom): Open directly on black canvas */}
+                  <div className="flex flex-col items-center text-center gap-0.5">
+                    <p className="text-[10px] font-black text-white leading-tight">
+                      Plain text configuration drives modern systems.
+                    </p>
+                    <span className="text-[7.5px] font-mono font-extrabold uppercase tracking-widest text-white/70">
+                      CONFIGURATION IS OFTEN HUMAN-READABLE TEXT
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Scene 3: Terminal Preview (Crisp white border, no purple borders, open bottom subtext) */}
+              {previewScene === 'terminal' && (
+                <div className="relative z-10 flex-1 flex flex-col justify-between pb-6 pt-1 text-left">
+                  {/* Tier 1 (Top): Kicker with Accent Mark & Headline */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[8.5px] font-mono font-extrabold text-white/60 uppercase tracking-wider">
+                        TERMINAL EXECUTION • 02
+                      </span>
+                      <div
+                        className="w-6 h-1 rounded-full"
+                        style={{ backgroundColor: primaryColor }}
+                      />
+                    </div>
+                    <h3 className="text-[17px] font-black text-white leading-[1.18] tracking-tight">
+                      Inspect rules in{' '}
+                      <span style={{ color: secondaryColor }}>real time.</span>
+                    </h3>
+                  </div>
+
+                  {/* Tier 2 (Middle): Terminal Box with Crisp White Border */}
                   <div
-                    className="rounded-xl overflow-hidden shadow-2xl"
+                    className="rounded-xl overflow-hidden shadow-2xl my-auto"
                     style={{
                       backgroundColor: '#1C1824',
-                      border: `1px solid ${primaryColor}`,
-                      boxShadow: '0 0 15px rgba(120, 60, 235, 0.25)',
+                      border: '1.5px solid #FFFFFF', // Crisp white border!
+                      boxShadow: '0 0 20px rgba(255, 255, 255, 0.1)',
                     }}
                   >
                     <div className="bg-[#15131C] px-2.5 py-1.5 flex items-center justify-between border-b border-white/10">
@@ -516,51 +684,99 @@ export default function BrandPage() {
                         <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 inline-block" />
                         <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
                       </div>
-                      <span className="text-[9px] font-mono text-[#91899C]">learner@linux: ~</span>
-                      <div className="w-4" />
+                      <span className="text-[8px] font-mono text-[#91899C]">learner@linux: ~</span>
+                      <div className="w-3" />
                     </div>
 
-                    <div className="p-3 font-mono text-[10px] space-y-1">
+                    <div className="p-2.5 font-mono text-[9px] space-y-1">
                       <div>
                         <span style={{ color: secondaryColor, fontWeight: 700 }}>learner@linux:~$ </span>
                         <span className="text-white font-bold">ls -la /etc/nginx</span>
                       </div>
-                      <div className="text-white/80 pt-1 text-[9px]">
+                      <div className="text-white/80 pt-0.5 text-[8px] leading-tight">
                         drwxr-xr-x 8 root root 4096 conf.d
                       </div>
-                      <div className="text-white/80 text-[9px]">
+                      <div className="text-white/80 text-[8px] leading-tight">
                         -rw-r--r-- 1 root root 1440 nginx.conf
                       </div>
+                      <div className="text-[8px] pt-0.5 font-bold" style={{ color: secondaryColor }}>
+                        # Active production configuration
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Tier 3 (Bottom): Open directly on black canvas */}
+                  <div className="flex flex-col items-center text-center gap-0.5">
+                    <p className="text-[10px] font-black text-white leading-tight">
+                      Standard permissions guard sensitive rules.
+                    </p>
+                    <span className="text-[7.5px] font-mono font-extrabold uppercase tracking-widest text-white/70">
+                      REAL-TIME FEEDBACK FROM THE KERNEL
+                    </span>
                   </div>
                 </div>
               )}
 
               {/* Scene 4: Outro Preview */}
               {previewScene === 'outro' && (
-                <div className="relative z-10 flex-1 flex items-center justify-center p-2">
-                  <div className="flex items-center justify-between w-full px-2">
-                    <div>
-                      <h1 className="text-lg font-bold text-white leading-tight">{displayName}</h1>
-                      <p className="text-[10px] text-[#91899C]">Follow for daily tutorials.</p>
+                <div className="relative z-10 flex-1 flex flex-col justify-between pb-6 pt-1 text-left">
+                  {/* Tier 1 (Top): Kicker with Accent Mark & Headline */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[8.5px] font-mono font-extrabold text-white/60 uppercase tracking-wider">
+                        JOIN THE COMMUNITY • 04
+                      </span>
+                      <div
+                        className="w-6 h-1 rounded-full"
+                        style={{ backgroundColor: primaryColor }}
+                      />
                     </div>
+                    <h3 className="text-[17px] font-black text-white leading-[1.18] tracking-tight">
+                      Master DevOps{' '}
+                      <span style={{ color: secondaryColor }}>one reel at a time.</span>
+                    </h3>
+                  </div>
+
+                  {/* Tier 2 (Middle): Brand Showcase Card */}
+                  <div
+                    className="w-full rounded-2xl p-4 flex flex-col items-center text-center shadow-2xl border border-white/20 my-auto"
+                    style={{ backgroundColor: '#1C1824' }}
+                  >
+                    <div
+                      className="w-11 h-11 rounded-xl flex items-center justify-center font-black text-white text-base shadow-lg mb-2"
+                      style={{
+                        backgroundColor: primaryColor,
+                        boxShadow: `0 0 16px ${primaryColor}66`,
+                      }}
+                    >
+                      {displayName.slice(0, 1).toUpperCase()}
+                    </div>
+                    <h1 className="text-base font-black text-white leading-tight">{displayName}</h1>
+                    <p className="text-[9px] text-white/70 mt-1">Follow for daily Linux & DevOps tutorials.</p>
 
                     <button
                       type="button"
-                      className="px-4 py-1.5 rounded-full font-bold text-white text-[11px] shadow-lg"
+                      className="mt-3 px-5 py-1.5 rounded-full font-black text-white text-[10px] uppercase tracking-wider shadow-lg transition hover:brightness-110"
                       style={{
                         backgroundColor: primaryColor,
-                        boxShadow: '0 0 15px rgba(120, 60, 235, 0.4)',
+                        boxShadow: `0 0 15px ${primaryColor}88`,
                       }}
                     >
                       Follow
                     </button>
                   </div>
+
+                  {/* Tier 3 (Bottom): Open directly on black canvas */}
+                  <div className="flex flex-col items-center text-center gap-0.5">
+                    <span className="text-[7.5px] font-mono font-extrabold uppercase tracking-widest text-white/70">
+                      NEW EPISODES RELEASED EVERY DAY
+                    </span>
+                  </div>
                 </div>
               )}
 
               {/* Reel Brand Label */}
-              <div className="relative z-10 pt-2 border-t border-white/10 flex items-center justify-between text-[9px] text-[#91899C]">
+              <div className="relative z-10 pt-2 border-t border-white/10 flex items-center justify-between text-[9px] text-[#91899C] shrink-0">
                 <span>1080x1920 • 9:16</span>
                 <span className="font-mono">{previewScene.toUpperCase()} SCENE</span>
               </div>
