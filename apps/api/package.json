@@ -8,6 +8,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc && prisma generate",
     "start": "node dist/index.js",
+    "setup:kokoro:model": "tsx src/scripts/cache-kokoro-model.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
@@ -15,6 +16,7 @@
   },
   "dependencies": {
     "@google/genai": "^3.0.0",
+    "@huggingface/transformers": "^3.8.1",
     "@learnops/schema": "*",
     "@prisma/client": "^5.19.1",
     "bullmq": "^5.12.15",
@@ -24,6 +26,7 @@
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
     "ioredis": "^5.4.1",
+    "kokoro-js": "^1.2.1",
     "morgan": "^1.10.0",
     "zod": "^3.23.8"
   },
@@ -37,4 +40,3 @@
     "typescript": "^5.5.4"
   }
 }
-

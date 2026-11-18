@@ -399,3 +399,19 @@ npm run dev:dashboard
 ```
 
 Open `http://localhost:3000`; the API health endpoint is `http://localhost:4000/health`. To generate the three Test 2 MP4s, run `npm run render:test2`. Outputs are written under `renders/test2/`; inspect the files and manifest before calling Test 2 complete. Local media URLs use localhost and cannot be fetched by Meta. Live Instagram publishing still requires an eligible account, verified app permissions, a public HTTPS media URL, and production-safe dashboard authentication.
+
+### Prepare the local Kokoro model
+
+Kokoro model files are not included in Git. With network access available for the initial download, run:
+
+```bash
+npm run setup:kokoro
+```
+
+The model cache is stored under `storage/models/kokoro/` (ignored by Git). To check that the cached model can load without remote model downloads, run:
+
+```bash
+npm run setup:kokoro -- --offline
+```
+
+Voice tensors ship with `kokoro-js`; the model weights and tokenizer are cached locally on the first setup. The application’s TTS generation and audio rendering are separate later phases.
