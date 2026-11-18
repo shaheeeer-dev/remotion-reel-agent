@@ -719,58 +719,30 @@ export default function BrandPage() {
 
               {/* Scene 4: Outro Preview */}
               {previewScene === 'outro' && (
-                <div className="relative z-10 flex-1 flex flex-col justify-between pb-6 pt-1 text-left">
-                  {/* Tier 1 (Top): Kicker with Accent Mark & Headline */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[8.5px] font-mono font-extrabold text-white/60 uppercase tracking-wider">
-                        JOIN THE COMMUNITY • 04
-                      </span>
-                      <div
-                        className="w-6 h-1 rounded-full"
-                        style={{ backgroundColor: primaryColor }}
-                      />
+                <div
+                  className="relative z-10 flex-1 flex items-center justify-center w-full"
+                  style={{ backgroundColor: bgColor }}
+                >
+                  <div className="flex items-center justify-between w-[80%]">
+                    <div>
+                      <h1 className="text-base font-bold text-white leading-tight">
+                        {displayName}
+                      </h1>
+                      <p className="text-[10px] text-[#91899C] mt-0.5">
+                        Follow for daily tutorials.
+                      </p>
                     </div>
-                    <h3 className="text-[17px] font-black text-white leading-[1.18] tracking-tight">
-                      Master DevOps{' '}
-                      <span style={{ color: secondaryColor }}>one reel at a time.</span>
-                    </h3>
-                  </div>
-
-                  {/* Tier 2 (Middle): Brand Showcase Card */}
-                  <div
-                    className="w-full rounded-2xl p-4 flex flex-col items-center text-center shadow-2xl border border-white/20 my-auto"
-                    style={{ backgroundColor: '#1C1824' }}
-                  >
-                    <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center font-black text-white text-base shadow-lg mb-2"
-                      style={{
-                        backgroundColor: primaryColor,
-                        boxShadow: `0 0 16px ${primaryColor}66`,
-                      }}
-                    >
-                      {displayName.slice(0, 1).toUpperCase()}
-                    </div>
-                    <h1 className="text-base font-black text-white leading-tight">{displayName}</h1>
-                    <p className="text-[9px] text-white/70 mt-1">Follow for daily Linux & DevOps tutorials.</p>
 
                     <button
                       type="button"
-                      className="mt-3 px-5 py-1.5 rounded-full font-black text-white text-[10px] uppercase tracking-wider shadow-lg transition hover:brightness-110"
+                      className="px-4 py-1.5 rounded-full font-bold text-white text-[11px] shadow-lg transition hover:brightness-110 shrink-0"
                       style={{
                         backgroundColor: primaryColor,
-                        boxShadow: `0 0 15px ${primaryColor}88`,
+                        border: 'none',
                       }}
                     >
                       Follow
                     </button>
-                  </div>
-
-                  {/* Tier 3 (Bottom): Open directly on black canvas */}
-                  <div className="flex flex-col items-center text-center gap-0.5">
-                    <span className="text-[7.5px] font-mono font-extrabold uppercase tracking-widest text-white/70">
-                      NEW EPISODES RELEASED EVERY DAY
-                    </span>
                   </div>
                 </div>
               )}

@@ -75,7 +75,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
         <div>
           <h1
             style={{
-              color: theme.colors.textPrimary, // Dynamic Brand Text Primary (#FFFFFF)
+              color: '#FFFFFF',
               fontSize: '48px',
               fontWeight: 'bold',
               margin: '0 0 12px 0',
@@ -87,7 +87,7 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
           </h1>
           <p
             style={{
-              color: theme.colors.textSecondary, // Dynamic Brand Text Secondary (#91899C)
+              color: '#91899C',
               fontSize: '24px',
               margin: 0,
               fontFamily: theme.fonts.body,
@@ -99,14 +99,13 @@ export const OutroScene: React.FC<OutroSceneProps> = ({
 
         <button
           style={{
-            backgroundColor: theme.colors.primary, // Dynamic Brand Primary CTA fill (#783CEB)
-            color: theme.colors.textPrimary,
+            backgroundColor: theme.colors.primary || '#783CEB',
+            color: '#FFFFFF',
             padding: '16px 36px',
             borderRadius: '50px',
             fontWeight: 'bold',
             fontSize: '24px',
             border: 'none',
-            boxShadow: `0 0 25px ${theme.colors.primaryGlow}`,
             transform: `scale(${buttonSpring})`,
             cursor: 'pointer',
           }}
