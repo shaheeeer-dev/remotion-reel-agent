@@ -1,12 +1,12 @@
 import React from 'react';
-import { Series, useVideoConfig } from 'remotion';
+import { Audio, Series, useVideoConfig } from 'remotion';
 import type { ReelRenderInput } from '@learnops/schema';
 import { BackgroundGrid } from '../components/BackgroundGrid.js';
 import { BrandHeader } from '../components/BrandHeader.js';
 import { SceneDispatcher } from '../scenes/SceneDispatcher.js';
 import { BrandThemeProvider, defaultTheme } from '../styles/theme.js';
 
-export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
+export const MainReel: React.FC<ReelRenderInput> = ({ script, brand, sceneAudios }) => {
   const { fps } = useVideoConfig();
 
   const brandName = brand?.name || 'Brand';
@@ -38,6 +38,8 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
 
             const isHook = scene.kind === 'hook';
             const isOutro = scene.kind === 'outro';
+            const sceneAudio = sceneAudios?.find((a) => a.sceneIndex === idx);
+            const audioSrc = sceneAudio?.audioDataUri || sceneAudio?.audioUrl || sceneAudio?.audioPath;
 
             return (
               <Series.Sequence key={scene.id || idx} durationInFrames={sceneFrames}>
@@ -53,6 +55,7 @@ export const MainReel: React.FC<ReelRenderInput> = ({ script, brand }) => {
                 >
                   <SceneDispatcher scene={sceneForRender} />
                 </div>
+                {audioSrc ? <Audio src={audioSrc} /> : null}
               </Series.Sequence>
             );
           })}

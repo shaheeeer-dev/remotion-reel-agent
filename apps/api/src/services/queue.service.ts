@@ -3,6 +3,7 @@ import { env } from '../config/env.js';
 import { prisma } from '../prisma/client.js';
 import { geminiService } from './gemini.service.js';
 import { remotionService } from './remotion.service.js';
+import { ttsService } from './tts.service.js';
 import { instagramService } from './instagram.service.js';
 import { REEL_STATUS, type ReelRenderInput } from '@learnops/schema';
 import { decryptToken } from '../utils/crypto.js';
@@ -213,6 +214,17 @@ export class QueueService {
             data: { status: REEL_STATUS.RENDERING },
           });
 
+          const script = reel.scriptJson as any;
+          const voiceId = profile?.voiceId || undefined;
+
+          console.log(`[Queue] Synthesizing voiceover audio for reel ${reel.id} (voice: ${voiceId || 'af_heart'})...`);
+          const sceneAudios = await ttsService.synthesizeReelAudio(
+            reel.id,
+            script.scenes || [],
+            voiceId
+          );
+          console.log(`[Queue] Synthesized ${sceneAudios.length} scene voiceovers.`);
+
           const renderInput: ReelRenderInput = {
             reelId: reel.id,
             brand: {
@@ -224,7 +236,8 @@ export class QueueService {
               fontFamily: profile.fontFamily || undefined,
               creatorCredit: env.REPO_CREDIT_URL,
             },
-            script: reel.scriptJson as any,
+            script,
+            sceneAudios,
           };
 
           const outputFileName = `reel_${reel.id}_${Date.now()}.mp4`;

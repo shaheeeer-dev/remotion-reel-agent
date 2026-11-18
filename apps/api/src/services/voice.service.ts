@@ -94,6 +94,26 @@ const PREVIEW_SAMPLE_TEXT = 'Welcome to LearnOps. Master Linux, Docker, and DevO
 
 let ttsInstancePromise: Promise<KokoroTTS> | null = null;
 
+export async function getSharedTTSInstance(): Promise<KokoroTTS> {
+  if (!ttsInstancePromise) {
+    ttsInstancePromise = (async () => {
+      const rootDir = getMonorepoRoot();
+      const modelCacheDir = path.resolve(rootDir, 'storage/models/kokoro');
+
+      hfEnv.cacheDir = modelCacheDir;
+      hfEnv.useFSCache = true;
+      hfEnv.allowLocalModels = true;
+      hfEnv.allowRemoteModels = false; // Strictly offline
+
+      return await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', {
+        dtype: 'q8',
+        device: 'cpu',
+      });
+    })();
+  }
+  return ttsInstancePromise;
+}
+
 export class VoiceService {
   private getStorageDir(): string {
     const rootDir = getMonorepoRoot();
@@ -101,23 +121,7 @@ export class VoiceService {
   }
 
   private async getTTSInstance(): Promise<KokoroTTS> {
-    if (!ttsInstancePromise) {
-      ttsInstancePromise = (async () => {
-        const rootDir = getMonorepoRoot();
-        const modelCacheDir = path.resolve(rootDir, 'storage/models/kokoro');
-
-        hfEnv.cacheDir = modelCacheDir;
-        hfEnv.useFSCache = true;
-        hfEnv.allowLocalModels = true;
-        hfEnv.allowRemoteModels = false; // Strictly offline
-
-        return await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', {
-          dtype: 'q8',
-          device: 'cpu',
-        });
-      })();
-    }
-    return ttsInstancePromise;
+    return getSharedTTSInstance();
   }
 
   getAvailableVoices(): VoiceMeta[] {

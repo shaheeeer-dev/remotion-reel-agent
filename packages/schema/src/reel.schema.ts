@@ -24,6 +24,16 @@ export const ReelScriptSchema = z.object({
 
 export type ReelScript = z.infer<typeof ReelScriptSchema>;
 
+export const SceneAudioSchema = z.object({
+  sceneIndex: z.number().int().min(0),
+  audioPath: z.string().optional(),
+  audioUrl: z.string().optional(),
+  audioDataUri: z.string().optional(),
+  durationSeconds: z.number().positive().optional(),
+});
+
+export type SceneAudio = z.infer<typeof SceneAudioSchema>;
+
 export const ReelRenderInputSchema = z.object({
   reelId: z.string().optional(),
   brand: z.object({
@@ -40,6 +50,7 @@ export const ReelRenderInputSchema = z.object({
     callToAction: z.string().optional(),
   }),
   script: ReelScriptSchema,
+  sceneAudios: z.array(SceneAudioSchema).optional(),
 });
 
 export type ReelRenderInput = z.infer<typeof ReelRenderInputSchema>;
