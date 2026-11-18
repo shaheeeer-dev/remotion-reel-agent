@@ -16,6 +16,10 @@ import {
   Network,
   HardDrive,
   ShieldCheck,
+  Volume2,
+  Play,
+  Pause,
+  Mic,
 } from 'lucide-react';
 import { fetchApi } from '../../lib/api-client';
 
@@ -38,6 +42,81 @@ const BG_PRESETS = [
   { label: 'Slate Charcoal', hex: '#0F172A' },
 ];
 
+const KOKORO_VOICES = [
+  {
+    id: 'af_heart',
+    name: 'Heart',
+    gender: 'Female',
+    accent: 'American',
+    grade: 'A',
+    description: 'Warm, natural, and expressive. Top overall quality.',
+  },
+  {
+    id: 'af_bella',
+    name: 'Bella',
+    gender: 'Female',
+    accent: 'American',
+    grade: 'A-',
+    description: 'Dynamic, clear, and confident narration.',
+  },
+  {
+    id: 'af_nicole',
+    name: 'Nicole',
+    gender: 'Female',
+    accent: 'American',
+    grade: 'B+',
+    description: 'Calm, measured, and conversational tech educator.',
+  },
+  {
+    id: 'af_sarah',
+    name: 'Sarah',
+    gender: 'Female',
+    accent: 'American',
+    grade: 'B',
+    description: 'Professional, articulate documentary-style tone.',
+  },
+  {
+    id: 'am_michael',
+    name: 'Michael',
+    gender: 'Male',
+    accent: 'American',
+    grade: 'B+',
+    description: 'Engaging, authentic developer and tech educator.',
+  },
+  {
+    id: 'am_adam',
+    name: 'Adam',
+    gender: 'Male',
+    accent: 'American',
+    grade: 'B',
+    description: 'Direct, clear, and authoritative narrator.',
+  },
+  {
+    id: 'am_fenrir',
+    name: 'Fenrir',
+    gender: 'Male',
+    accent: 'American',
+    grade: 'B',
+    description: 'Deep, crisp, and resonant tech explainer.',
+  },
+  {
+    id: 'bf_emma',
+    name: 'Emma',
+    gender: 'Female',
+    accent: 'British',
+    grade: 'A-',
+    description: 'Polished, articulate British academic narrator.',
+  },
+  {
+    id: 'bm_george',
+    name: 'George',
+    gender: 'Male',
+    accent: 'British',
+    grade: 'B+',
+    description: 'Distinguished, authoritative British tech guide.',
+  },
+];
+
 export default function BrandPage() {
   const [brandId, setBrandId] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState('LearnOps');
@@ -51,7 +130,33 @@ export default function BrandPage() {
   const [primaryColor, setPrimaryColor] = useState('#783CEB');
   const [secondaryColor, setSecondaryColor] = useState('#B28BFF');
   const [bgColor, setBgColor] = useState('#110F17');
+  const [voiceId, setVoiceId] = useState<string | null>(null);
+  const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null);
+  const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
   const [previewScene, setPreviewScene] = useState<'hook' | 'content' | 'terminal' | 'outro'>('hook');
+
+  const playVoicePreview = (vId: string) => {
+    if (playingVoiceId === vId && audioPlayer) {
+      audioPlayer.pause();
+      setPlayingVoiceId(null);
+      return;
+    }
+
+    if (audioPlayer) {
+      audioPlayer.pause();
+    }
+
+    const audio = new Audio(`/media/audio/previews/${vId}.wav`);
+    audio.onended = () => {
+      setPlayingVoiceId(null);
+    };
+    audio.onerror = () => {
+      setPlayingVoiceId(null);
+    };
+    audio.play().catch(() => setPlayingVoiceId(null));
+    setAudioPlayer(audio);
+    setPlayingVoiceId(vId);
+  };
 
   const [isSaved, setIsSaved] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -75,6 +180,7 @@ export default function BrandPage() {
             if (brand.profile.bgColor) setBgColor(brand.profile.bgColor);
             if (brand.profile.audience) setAudience(brand.profile.audience);
             if (brand.profile.voiceTone) setVoiceTone(brand.profile.voiceTone);
+            if (brand.profile.voiceId) setVoiceId(brand.profile.voiceId);
           }
         }
       } catch {
@@ -102,6 +208,7 @@ export default function BrandPage() {
             bgColor,
             audience,
             voiceTone,
+            voiceId,
           }),
         });
       }
@@ -403,6 +510,102 @@ export default function BrandPage() {
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Section 4: Narration & Voice Audition (Kokoro Offline TTS) */}
+          <div className="p-6 rounded-2xl bg-white border border-[#E2E8F0] shadow-sm space-y-5">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E2E8F0]">
+              <h2 className="text-base font-bold text-[#1E1E2C] flex items-center gap-2">
+                <Mic className="w-4 h-4 text-[#783CEB]" />
+                Local Voice Narration (Kokoro TTS)
+              </h2>
+              <span className="text-[10px] font-mono font-bold bg-[#F1F5F9] text-[#64748B] px-2 py-0.5 rounded-full border border-[#E2E8F0]">
+                100% On-Device CPU
+              </span>
+            </div>
+
+            <p className="text-xs text-[#64748B] leading-relaxed">
+              Listen to the neural voice previews below. Click <strong className="text-[#1E1E2C]">Audition (▶)</strong> to test pronunciation on DevOps terms, then select your preferred voice.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {KOKORO_VOICES.map((v) => {
+                const isSelected = voiceId === v.id;
+                const isPlaying = playingVoiceId === v.id;
+
+                return (
+                  <div
+                    key={v.id}
+                    className={`p-3.5 rounded-xl border transition-all flex flex-col justify-between gap-3 ${
+                      isSelected
+                        ? 'border-[#783CEB] bg-[#783CEB]/5 ring-1 ring-[#783CEB]'
+                        : 'border-[#E2E8F0] bg-[#F8F9FA] hover:border-slate-300'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-[#1E1E2C]">{v.name}</span>
+                          <span className="text-[10px] font-mono bg-white px-1.5 py-0.5 rounded border border-[#E2E8F0] text-[#64748B]">
+                            {v.id}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[9px] font-bold">
+                          <span className="bg-white px-1.5 py-0.5 rounded border border-[#E2E8F0] text-[#1E1E2C]">
+                            {v.accent}
+                          </span>
+                          <span className="bg-white px-1.5 py-0.5 rounded border border-[#E2E8F0] text-[#1E1E2C]">
+                            {v.gender}
+                          </span>
+                          <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200">
+                            {v.grade}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-[#64748B] mt-1 line-clamp-2 leading-snug">
+                        {v.description}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2 border-t border-black/5">
+                      <button
+                        type="button"
+                        onClick={() => playVoicePreview(v.id)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
+                          isPlaying
+                            ? 'bg-[#783CEB] text-white animate-pulse'
+                            : 'bg-white border border-[#E2E8F0] text-[#1E1E2C] hover:bg-slate-50'
+                        }`}
+                      >
+                        {isPlaying ? (
+                          <>
+                            <Pause className="w-3.5 h-3.5" />
+                            <span>Playing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-3.5 h-3.5 text-[#783CEB]" />
+                            <span>Audition</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setVoiceId(v.id)}
+                        className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition ${
+                          isSelected
+                            ? 'bg-[#783CEB] text-white shadow-sm'
+                            : 'bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#1E1E2C]'
+                        }`}
+                      >
+                        {isSelected ? '✓ Selected' : 'Select Voice'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

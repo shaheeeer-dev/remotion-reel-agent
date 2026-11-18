@@ -45,7 +45,7 @@ export const Sidebar: React.FC = () => {
           });
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [pathname]);
 
   return (
@@ -84,11 +84,10 @@ export const Sidebar: React.FC = () => {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
-                    isActive
-                      ? 'bg-[#FDEEE3] text-[#F29F67] shadow-sm font-bold'
-                      : 'text-[#64748B] hover:bg-[#F4F5F7] hover:text-[#1E1E2C]'
-                  }`}
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${isActive
+                    ? 'bg-[#FDEEE3] text-[#F29F67] shadow-sm font-bold'
+                    : 'text-[#64748B] hover:bg-[#F4F5F7] hover:text-[#1E1E2C]'
+                    }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-[#F29F67]' : 'text-[#94A3B8]'}`} />
                   <span>{item.name}</span>
@@ -112,11 +111,10 @@ export const Sidebar: React.FC = () => {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
-                    isActive
-                      ? 'bg-[#FDEEE3] text-[#F29F67] shadow-sm font-bold'
-                      : 'text-[#64748B] hover:bg-[#F4F5F7] hover:text-[#1E1E2C]'
-                  }`}
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${isActive
+                    ? 'bg-[#FDEEE3] text-[#F29F67] shadow-sm font-bold'
+                    : 'text-[#64748B] hover:bg-[#F4F5F7] hover:text-[#1E1E2C]'
+                    }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-[#F29F67]' : 'text-[#94A3B8]'}`} />
                   <span>{item.name}</span>
@@ -135,9 +133,14 @@ export const Sidebar: React.FC = () => {
             Online
           </span>
         </div>
-        <p className="text-[11px] text-[#64748B] leading-snug">
-          Remotion 4.0 deterministic canvas & Gemini script generation.
-        </p>
+        <a
+          href="https://shaheer-dev.netlify.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[11px] text-[#64748B] leading-snug hover:text-[#6F41EC] hover:underline transition-colors"
+        >
+          By shaheer-dev
+        </a>
       </div>
     </aside>
   );

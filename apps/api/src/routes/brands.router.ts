@@ -308,6 +308,7 @@ brandsRouter.patch('/:brandId', async (req, res, next) => {
       audience,
       voiceTone,
       contentPillars,
+      voiceId,
       profile,
     } = req.body;
 
@@ -340,6 +341,7 @@ brandsRouter.patch('/:brandId', async (req, res, next) => {
       ...(audience ? { audience } : {}),
       ...(voiceTone ? { voiceTone } : {}),
       ...(contentPillars ? { contentPillars } : {}),
+      ...(voiceId !== undefined ? { voiceId } : {}),
     };
 
     const brand = await prisma.brand.update({

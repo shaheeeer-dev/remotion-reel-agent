@@ -10,6 +10,7 @@ import { topicsRouter } from './routes/topics.router.js';
 import { reelsRouter, brandReelsRouter } from './routes/reels.router.js';
 import { jobsRouter } from './routes/jobs.router.js';
 import { instagramRouter } from './routes/instagram.router.js';
+import { voicesRouter } from './routes/voices.router.js';
 import { requireAuth } from './middleware/auth.js';
 import { env } from './config/env.js';
 import { getMonorepoRoot } from './services/remotion.service.js';
@@ -42,6 +43,7 @@ app.use('/api/v1/brands/:brandId/reels', brandReelsRouter);
 app.use('/api/v1/brands/:brandId/integrations/instagram', instagramRouter);
 app.use('/api/v1/reels', reelsRouter);
 app.use('/api/v1/jobs', jobsRouter);
+app.use('/api/v1/voices', voicesRouter);
 
 // Global Error Handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
