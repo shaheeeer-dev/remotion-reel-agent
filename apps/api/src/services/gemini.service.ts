@@ -20,7 +20,9 @@ function normalizeSceneDurations(script: ReelScript, targetDurationSeconds: numb
   }
 
   const totalFrames = Math.round(targetDurationSeconds * RENDER_FPS);
-  const outroFrames = RENDER_FPS;
+  // Allocate 2 seconds for outro (60 frames) so a 3-4 word spoken CTA comfortably fits
+  const outroDurationSeconds = targetDurationSeconds >= 14 ? 2 : 1.5;
+  const outroFrames = Math.round(outroDurationSeconds * RENDER_FPS);
   const contentFrames = totalFrames - outroFrames;
   const framesPerContentScene = Math.floor(contentFrames / 4);
   const extraContentFrames = contentFrames % 4;
@@ -30,10 +32,52 @@ function normalizeSceneDurations(script: ReelScript, targetDurationSeconds: numb
   return {
     ...script,
     durationSeconds: totalFrames / RENDER_FPS,
-    scenes: script.scenes.map((scene, index) => ({
-      ...scene,
-      durationSeconds: frameCounts[index] / RENDER_FPS,
-    })) as ReelScript['scenes'],
+    scenes: script.scenes.map((scene, index) => {
+      const durSec = frameCounts[index] / RENDER_FPS;
+      const maxWords = Math.floor(durSec * 2.2);
+
+      // Clean and sanitize voiceover for TTS
+      let voiceover = scene.voiceover;
+      if (!voiceover || typeof voiceover !== 'string' || !voiceover.trim()) {
+        // Fallback voiceover derived from visual content
+        if (scene.kind === 'hook') {
+          voiceover = `${scene.headline}. ${scene.subtext || ''}`;
+        } else if (scene.kind === 'folder_tree') {
+          voiceover = `${scene.title}. ${scene.explanation}`;
+        } else if (scene.kind === 'container_diagram') {
+          voiceover = `${scene.title}. ${scene.comparisonNote || ''}`;
+        } else if (scene.kind === 'pipeline') {
+          voiceover = `${scene.title}. ${scene.takeaway}`;
+        } else if (scene.kind === 'comparison') {
+          voiceover = scene.takeaway;
+        } else if (scene.kind === 'terminal') {
+          voiceover = scene.explanation;
+        } else if (scene.kind === 'outro') {
+          voiceover = scene.tagline || 'Follow for daily tutorials.';
+        }
+      }
+
+      // Strip asterisks, code backticks, brackets, and markdown noise
+      voiceover = (voiceover || '')
+        .replace(/\*+/g, '')
+        .replace(/`+/g, '')
+        .replace(/[\[\]{}()]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      // Word budget enforcement: cap words so audio strictly fits within the slot
+      const words = voiceover.split(' ').filter(Boolean);
+      if (words.length > maxWords) {
+        voiceover = words.slice(0, maxWords).join(' ');
+        if (!voiceover.endsWith('.')) voiceover += '.';
+      }
+
+      return {
+        ...scene,
+        durationSeconds: durSec,
+        voiceover,
+      };
+    }) as ReelScript['scenes'],
   };
 }
 
@@ -108,7 +152,8 @@ You must output a single, raw JSON object strictly adhering to this exact struct
       "badge": "CATEGORY OR TOPIC BADGE",
       "headline": "Main Punchy Title",
       "subtext": "Brief teaser text",
-      "visualMetaphor": "folder_drawer"
+      "visualMetaphor": "folder_drawer",
+      "voiceover": "Where does Linux keep all its configuration files?"
     },
     {
       "kind": "folder_tree",
@@ -117,7 +162,8 @@ You must output a single, raw JSON object strictly adhering to this exact struct
       "rootPath": "/",
       "highlightPath": "/etc",
       "tree": [{"name": "etc", "isDirectory": true, "highlight": true, "description": "System configuration"}],
-      "explanation": "Machine-wide settings"
+      "explanation": "Machine-wide settings",
+      "voiceover": "Inside etc, plain text files configure your system."
     },
     {
       "kind": "comparison",
@@ -131,7 +177,8 @@ You must output a single, raw JSON object strictly adhering to this exact struct
       "rightTitle": "One User",
       "rightDescription": "Personal settings",
       "rightIcon": "user",
-      "takeaway": "Different folders, different scope"
+      "takeaway": "Different folders, different scope",
+      "voiceover": "chmod modifies access rights, while chown sets the owner."
     },
     {
       "kind": "terminal",
@@ -140,14 +187,16 @@ You must output a single, raw JSON object strictly adhering to this exact struct
       "promptUser": "learner@linux:~$",
       "command": "ls /etc",
       "outputLines": ["hosts", "fstab", "ssh/"],
-      "explanation": "Real config files"
+      "explanation": "Real config files",
+      "voiceover": "Run ls to inspect active file permissions."
     },
     {
       "kind": "outro",
-      "durationSeconds": 1,
+      "durationSeconds": 2,
       "brandName": "${brandName}",
       "tagline": "Follow for daily tutorials.",
-      "callToAction": "Follow"
+      "callToAction": "Follow",
+      "voiceover": "Follow for daily tutorials."
     }
   ],
   "caption": "A concise, engaging educational Instagram caption explaining key takeaways.",
@@ -169,19 +218,26 @@ CRITICAL RULES:
 - Do not include Markdown backticks or conversational text. Return only valid raw JSON.
 
 SCENE KINDS & FLAT REQUIRED FIELDS:
-- "hook": { "kind": "hook", "durationSeconds": 3, "badge": string, "headline": string, "subtext": string, "visualMetaphor": "folder_drawer|container_stack|pipeline_flow|permissions_matrix|git_graph|network_flow" }
-- "folder_tree": { "kind": "folder_tree", "durationSeconds": 4, "title": string, "rootPath": "/", "highlightPath": string, "tree": [{"name": string, "isDirectory": boolean, "highlight": boolean, "description": string}], "explanation": string }
-- "terminal": { "kind": "terminal", "durationSeconds": 4, "title": string, "promptUser": "learner@linux:~$", "command": string, "outputLines": [string], "explanation": string }
-- "container_diagram": { "kind": "container_diagram", "durationSeconds": 4, "title": string, "hostOs": "Host Linux Kernel", "containerEngine": "Docker Engine", "containers": [{"name": "app-container", "app": "Node.js API", "binsLibs": "Alpine libc + Node v20"}], "comparisonNote": string }
-- "pipeline": { "kind": "pipeline", "durationSeconds": 4, "title": string, "trigger": "git push origin main", "stages": [{"name": "Build", "status": "success"}, {"name": "Test", "status": "success"}, {"name": "Deploy", "status": "success"}], "takeaway": string }
-- "comparison": { "kind": "comparison", "durationSeconds": 4, "title": string, "leftLabel": string, "leftTitle": string, "leftDescription": string, "leftIcon": "server|user|layers|box|git-branch|rocket|file-text|settings", "rightLabel": string, "rightTitle": string, "rightDescription": string, "rightIcon": "server|user|layers|box|git-branch|rocket|file-text|settings", "takeaway": string }
-- "outro": { "kind": "outro", "durationSeconds": 1, "brandName": "${brandName}", "tagline": "Follow for daily tutorials.", "callToAction": "Follow" }
+- "hook": { "kind": "hook", "durationSeconds": 3, "badge": string, "headline": string, "subtext": string, "visualMetaphor": "folder_drawer|container_stack|pipeline_flow|permissions_matrix|git_graph|network_flow", "voiceover": string }
+- "folder_tree": { "kind": "folder_tree", "durationSeconds": 4, "title": string, "rootPath": "/", "highlightPath": string, "tree": [{"name": string, "isDirectory": boolean, "highlight": boolean, "description": string}], "explanation": string, "voiceover": string }
+- "terminal": { "kind": "terminal", "durationSeconds": 4, "title": string, "promptUser": "learner@linux:~$", "command": string, "outputLines": [string], "explanation": string, "voiceover": string }
+- "container_diagram": { "kind": "container_diagram", "durationSeconds": 4, "title": string, "hostOs": "Host Linux Kernel", "containerEngine": "Docker Engine", "containers": [{"name": "app-container", "app": "Node.js API", "binsLibs": "Alpine libc + Node v20"}], "comparisonNote": string, "voiceover": string }
+- "pipeline": { "kind": "pipeline", "durationSeconds": 4, "title": string, "trigger": "git push origin main", "stages": [{"name": "Build", "status": "success"}, {"name": "Test", "status": "success"}, {"name": "Deploy", "status": "success"}], "takeaway": string, "voiceover": string }
+- "comparison": { "kind": "comparison", "durationSeconds": 4, "title": string, "leftLabel": string, "leftTitle": string, "leftDescription": string, "leftIcon": "server|user|layers|box|git-branch|rocket|file-text|settings", "rightLabel": string, "rightTitle": string, "rightDescription": string, "rightIcon": "server|user|layers|box|git-branch|rocket|file-text|settings", "takeaway": string, "voiceover": string }
+- "outro": { "kind": "outro", "durationSeconds": 2, "brandName": "${brandName}", "tagline": "Follow for daily tutorials.", "callToAction": "Follow", "voiceover": string }
 
 RULES:
-1. Keyword Highlights: Wrap only short, important terms in asterisks (e.g. *Docker*, *container*) so the renderer emphasizes them.
+1. Keyword Highlights: Wrap only short, important terms in asterisks (e.g. *Docker*, *container*) so the visual renderer emphasizes them.
 2. Hashtags MUST be simple alphanumeric strings without "#".
 3. Do NOT invent unsupported claims or fictional commands. Use verified technical specifications.
 4. Keep terminal commands short (40 characters or fewer), safe, and relevant.
+5. VOICEOVER & PACING RULES:
+   - Every scene MUST include a "voiceover" field: natural, conversational English written to be spoken aloud by TTS.
+   - PURE SPOKEN TEXT: Do NOT use asterisks, backticks, emojis, or code syntax in "voiceover". Write readable words (e.g. "slash etc" or "etc folder", not slash etc with code backticks).
+   - STRICT WORD BUDGET: To ensure speech fits the visual scene timing without overflow, keep voiceover under (durationSeconds * 2.2) words:
+     * 3-second scene: max 6-7 words.
+     * 4-second scene: max 8-9 words.
+     * 2-second outro: max 3-4 words (e.g. "Follow for daily tutorials.").
 
 APPROVED BRAND KNOWLEDGE:
 ${knowledgeContext}

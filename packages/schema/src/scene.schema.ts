@@ -4,6 +4,7 @@ import { SCENE_KINDS } from './constants.js';
 export const BaseSceneSchema = z.object({
   id: z.string().optional(),
   durationSeconds: z.number().min(1).max(10),
+  voiceover: z.string().max(200).optional(),
 });
 
 export const HookSceneSchema = BaseSceneSchema.extend({
@@ -127,9 +128,13 @@ export const SceneSchema = z.discriminatedUnion('kind', [
   OutroSceneSchema,
 ]);
 
-export interface HookScene {
+export interface BaseScene {
   id?: string;
   durationSeconds: number;
+  voiceover?: string;
+}
+
+export interface HookScene extends BaseScene {
   kind: 'hook';
   badge: string;
   headline: string;
@@ -143,17 +148,13 @@ export interface HookScene {
     | 'network_flow';
 }
 
-export interface KineticTypeScene {
-  id?: string;
-  durationSeconds: number;
+export interface KineticTypeScene extends BaseScene {
   kind: 'kinetic_type';
   phrases: string[];
   emphasis: string;
 }
 
-export interface ComparisonScene {
-  id?: string;
-  durationSeconds: number;
+export interface ComparisonScene extends BaseScene {
   kind: 'comparison';
   title: string;
   leftLabel: string;
@@ -167,9 +168,7 @@ export interface ComparisonScene {
   takeaway: string;
 }
 
-export interface FolderTreeScene {
-  id?: string;
-  durationSeconds: number;
+export interface FolderTreeScene extends BaseScene {
   kind: 'folder_tree';
   title: string;
   rootPath: string;
@@ -178,9 +177,7 @@ export interface FolderTreeScene {
   explanation: string;
 }
 
-export interface TerminalScene {
-  id?: string;
-  durationSeconds: number;
+export interface TerminalScene extends BaseScene {
   kind: 'terminal';
   title?: string;
   promptUser?: string;
@@ -189,9 +186,7 @@ export interface TerminalScene {
   explanation: string;
 }
 
-export interface ContainerDiagramScene {
-  id?: string;
-  durationSeconds: number;
+export interface ContainerDiagramScene extends BaseScene {
   kind: 'container_diagram';
   title: string;
   hostOs: string;
@@ -212,9 +207,7 @@ export interface PipelineStage {
   details?: string;
 }
 
-export interface PipelineScene {
-  id?: string;
-  durationSeconds: number;
+export interface PipelineScene extends BaseScene {
   kind: 'pipeline';
   title: string;
   trigger: string;
@@ -222,9 +215,7 @@ export interface PipelineScene {
   takeaway: string;
 }
 
-export interface OutroScene {
-  id?: string;
-  durationSeconds: number;
+export interface OutroScene extends BaseScene {
   kind: 'outro';
   brandName: string;
   tagline: string;
