@@ -146,14 +146,19 @@ export default function BrandPage() {
       audioPlayer.pause();
     }
 
-    const audio = new Audio(`/media/audio/previews/${vId}.wav`);
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+    const audio = new Audio(`${apiBase}/api/v1/voices/${vId}/preview`);
     audio.onended = () => {
       setPlayingVoiceId(null);
     };
-    audio.onerror = () => {
+    audio.onerror = (e) => {
+      console.error('[VoicePreview] Audio playback error:', e);
       setPlayingVoiceId(null);
     };
-    audio.play().catch(() => setPlayingVoiceId(null));
+    audio.play().catch((err) => {
+      console.error('[VoicePreview] Play failed:', err);
+      setPlayingVoiceId(null);
+    });
     setAudioPlayer(audio);
     setPlayingVoiceId(vId);
   };
