@@ -1,12 +1,23 @@
 import { z } from 'zod';
 import { SCENE_KINDS } from './constants.js';
 
+export const TimedWordSchema = z.object({
+  word: z.string(),
+  startSeconds: z.number().min(0),
+  endSeconds: z.number().min(0),
+  startFrame: z.number().int().min(0).optional(),
+  endFrame: z.number().int().min(0).optional(),
+});
+
+export type TimedWord = z.infer<typeof TimedWordSchema>;
+
 export const SubtitleChunkSchema = z.object({
   text: z.string(),
   startSeconds: z.number().min(0),
   endSeconds: z.number().min(0),
   startFrame: z.number().int().min(0).optional(),
   endFrame: z.number().int().min(0).optional(),
+  words: z.array(TimedWordSchema).optional(),
 });
 
 export type SubtitleChunk = z.infer<typeof SubtitleChunkSchema>;

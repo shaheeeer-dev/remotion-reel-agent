@@ -740,13 +740,16 @@ export default function BrandPage() {
                     </div>
                   </div>
 
-                  {/* Tier 3 (Bottom): Subtitles Pill (Black box + White text on Purple Canvas) */}
-                  <div className="flex flex-col items-center text-center gap-1">
-                    <div className="bg-[#110F17] text-white px-3 py-1 rounded-xl text-[12px] font-black border border-white/20 shadow-xl">
-                      Where Linux keeps
-                    </div>
-                    <span className="text-[7.5px] font-mono font-extrabold uppercase tracking-widest text-white/70">
-                      MACHINE-WIDE SETTINGS
+                  {/* Tier 3 (Bottom): Subtitles (3 words on screen, black block behind active spoken word) */}
+                  <div className="flex items-center justify-center gap-1 text-center">
+                    <span className="text-white/85 text-[11px] font-black px-1 py-0.5 border border-transparent">
+                      Where
+                    </span>
+                    <span className="bg-[#110F17] text-white px-1.5 py-0.5 rounded-md text-[11px] font-black border border-white/20 shadow-lg">
+                      Linux
+                    </span>
+                    <span className="text-white/85 text-[11px] font-black px-1 py-0.5 border border-transparent">
+                      keeps
                     </span>
                   </div>
                 </div>
@@ -845,16 +848,19 @@ export default function BrandPage() {
                     </div>
                   </div>
 
-                  {/* Tier 3 (Bottom): Subtitles Pill (Brand Primary Box + White text on Black Canvas) */}
-                  <div className="flex flex-col items-center text-center gap-1">
-                    <div
-                      className="text-white px-3 py-1 rounded-xl text-[12px] font-black border border-white/25 shadow-xl"
+                  {/* Tier 3 (Bottom): Subtitles (3 words on screen, brand color block behind active spoken word) */}
+                  <div className="flex items-center justify-center gap-1 text-center">
+                    <span className="text-white/60 text-[11px] font-black px-1 py-0.5 border border-transparent">
+                      Plain
+                    </span>
+                    <span
+                      className="text-white px-1.5 py-0.5 rounded-md text-[11px] font-black border border-white/25 shadow-lg"
                       style={{ backgroundColor: primaryColor }}
                     >
-                      Plain text files
-                    </div>
-                    <span className="text-[7.5px] font-mono font-extrabold uppercase tracking-widest text-white/70">
-                      CONFIGURATION IS OFTEN HUMAN-READABLE TEXT
+                      text
+                    </span>
+                    <span className="text-white/60 text-[11px] font-black px-1 py-0.5 border border-transparent">
+                      files
                     </span>
                   </div>
                 </div>
@@ -916,16 +922,19 @@ export default function BrandPage() {
                     </div>
                   </div>
 
-                  {/* Tier 3 (Bottom): Subtitles Pill (Brand Primary Box + White text on Black Canvas) */}
-                  <div className="flex flex-col items-center text-center gap-1">
-                    <div
-                      className="text-white px-3 py-1 rounded-xl text-[12px] font-black border border-white/25 shadow-xl"
+                  {/* Tier 3 (Bottom): Subtitles (3 words on screen, brand color block behind active spoken word) */}
+                  <div className="flex items-center justify-center gap-1 text-center">
+                    <span className="text-white/60 text-[11px] font-black px-1 py-0.5 border border-transparent">
+                      Inspect
+                    </span>
+                    <span
+                      className="text-white px-1.5 py-0.5 rounded-md text-[11px] font-black border border-white/25 shadow-lg"
                       style={{ backgroundColor: primaryColor }}
                     >
-                      Inspect active rules
-                    </div>
-                    <span className="text-[7.5px] font-mono font-extrabold uppercase tracking-widest text-white/70">
-                      REAL-TIME FEEDBACK FROM THE KERNEL
+                      active
+                    </span>
+                    <span className="text-white/60 text-[11px] font-black px-1 py-0.5 border border-transparent">
+                      rules
                     </span>
                   </div>
                 </div>
