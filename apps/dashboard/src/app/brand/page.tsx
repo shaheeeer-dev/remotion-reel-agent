@@ -740,12 +740,12 @@ export default function BrandPage() {
                     </div>
                   </div>
 
-                  {/* Tier 3 (Bottom): Explanatory Subtext open directly on purple canvas */}
-                  <div className="flex flex-col items-center text-center gap-0.5">
-                    <p className="text-[11px] font-black text-white leading-tight">
-                      A directory of configuration files
-                    </p>
-                    <span className="text-[8px] font-mono font-extrabold uppercase tracking-widest text-white/80">
+                  {/* Tier 3 (Bottom): Subtitles Pill (Black box + White text on Purple Canvas) */}
+                  <div className="flex flex-col items-center text-center gap-1">
+                    <div className="bg-[#110F17] text-white px-3 py-1 rounded-xl text-[12px] font-black border border-white/20 shadow-xl">
+                      Where Linux keeps
+                    </div>
+                    <span className="text-[7.5px] font-mono font-extrabold uppercase tracking-widest text-white/70">
                       MACHINE-WIDE SETTINGS
                     </span>
                   </div>
@@ -845,11 +845,14 @@ export default function BrandPage() {
                     </div>
                   </div>
 
-                  {/* Tier 3 (Bottom): Open directly on black canvas */}
-                  <div className="flex flex-col items-center text-center gap-0.5">
-                    <p className="text-[10px] font-black text-white leading-tight">
-                      Plain text configuration drives modern systems.
-                    </p>
+                  {/* Tier 3 (Bottom): Subtitles Pill (Brand Primary Box + White text on Black Canvas) */}
+                  <div className="flex flex-col items-center text-center gap-1">
+                    <div
+                      className="text-white px-3 py-1 rounded-xl text-[12px] font-black border border-white/25 shadow-xl"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      Plain text files
+                    </div>
                     <span className="text-[7.5px] font-mono font-extrabold uppercase tracking-widest text-white/70">
                       CONFIGURATION IS OFTEN HUMAN-READABLE TEXT
                     </span>
@@ -913,11 +916,14 @@ export default function BrandPage() {
                     </div>
                   </div>
 
-                  {/* Tier 3 (Bottom): Open directly on black canvas */}
-                  <div className="flex flex-col items-center text-center gap-0.5">
-                    <p className="text-[10px] font-black text-white leading-tight">
-                      Standard permissions guard sensitive rules.
-                    </p>
+                  {/* Tier 3 (Bottom): Subtitles Pill (Brand Primary Box + White text on Black Canvas) */}
+                  <div className="flex flex-col items-center text-center gap-1">
+                    <div
+                      className="text-white px-3 py-1 rounded-xl text-[12px] font-black border border-white/25 shadow-xl"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      Inspect active rules
+                    </div>
                     <span className="text-[7.5px] font-mono font-extrabold uppercase tracking-widest text-white/70">
                       REAL-TIME FEEDBACK FROM THE KERNEL
                     </span>

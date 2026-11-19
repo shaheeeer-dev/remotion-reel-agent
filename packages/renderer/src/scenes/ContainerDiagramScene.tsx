@@ -2,6 +2,7 @@ import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { Box, Layers, Server, Cpu } from 'lucide-react';
 import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
+import { AnimatedSubtitles } from '../components/AnimatedSubtitles.js';
 import type { ContainerDiagramScene as ContainerDiagramSceneType } from '@learnops/schema';
 
 /**
@@ -279,7 +280,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
           </div>
         </div>
 
-        {/* Tier 3 (Bottom): Explanatory Subtext & Monospace Pill directly on canvas */}
+        {/* Tier 3 (Bottom): Animated Subtitles Pill (Brand Box + White Text) */}
         <div
           style={{
             transform: `translateY(${(1 - subtextSpring) * 20}px)`,
@@ -287,38 +288,17 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '12px',
-            textAlign: 'center',
+            justifyContent: 'center',
+            minHeight: '120px',
+            width: '100%',
           }}
         >
-          {scene.comparisonNote && (
-            <p
-              style={{
-                fontSize: '32px',
-                fontWeight: 800,
-                color: '#FFFFFF',
-                margin: 0,
-                fontFamily: theme.fonts.heading,
-                maxWidth: '920px',
-                lineHeight: 1.25,
-              }}
-            >
-              {renderHighlightedText(scene.comparisonNote, '#FFFFFF', theme.colors.brightAccent)}
-            </p>
-          )}
-
-          <span
-            style={{
-              fontSize: '20px',
-              fontFamily: theme.fonts.mono,
-              fontWeight: 800,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: 'rgba(255, 255, 255, 0.75)',
-            }}
-          >
-            SHARED KERNEL • LOW OVERHEAD
-          </span>
+          <AnimatedSubtitles
+            voiceover={scene.voiceover || scene.comparisonNote}
+            durationSeconds={scene.durationSeconds}
+            isHook={false}
+            subtitles={scene.subtitles}
+          />
         </div>
       </div>
     </div>

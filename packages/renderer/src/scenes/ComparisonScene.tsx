@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import type { ComparisonScene as ComparisonSceneType } from '@learnops/schema';
 import { renderHighlightedText, useBrandTheme } from '../styles/theme.js';
+import { AnimatedSubtitles } from '../components/AnimatedSubtitles.js';
 
 const iconByName = {
   server: Server,
@@ -253,7 +254,7 @@ export const ComparisonScene: React.FC<{ scene: ComparisonSceneType }> = ({ scen
           })}
         </div>
 
-        {/* Tier 3 (Bottom): Explanatory Takeaway & Monospace Pill directly on canvas */}
+        {/* Tier 3 (Bottom): Animated Subtitles Pill (Brand Box + White Text) */}
         <div
           style={{
             transform: `translateY(${(1 - subtextSpring) * 20}px)`,
@@ -261,38 +262,17 @@ export const ComparisonScene: React.FC<{ scene: ComparisonSceneType }> = ({ scen
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '12px',
-            textAlign: 'center',
+            justifyContent: 'center',
+            minHeight: '120px',
+            width: '100%',
           }}
         >
-          {scene.takeaway && (
-            <p
-              style={{
-                fontSize: '32px',
-                fontWeight: 800,
-                color: '#FFFFFF',
-                margin: 0,
-                fontFamily: theme.fonts.heading,
-                maxWidth: '920px',
-                lineHeight: 1.25,
-              }}
-            >
-              {renderHighlightedText(scene.takeaway, '#FFFFFF', theme.colors.brightAccent)}
-            </p>
-          )}
-
-          <span
-            style={{
-              fontSize: '20px',
-              fontFamily: theme.fonts.mono,
-              fontWeight: 800,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: 'rgba(255, 255, 255, 0.75)',
-            }}
-          >
-            DISTINCT BOUNDARIES • ARCHITECTURAL SCOPE
-          </span>
+          <AnimatedSubtitles
+            voiceover={scene.voiceover || scene.takeaway}
+            durationSeconds={scene.durationSeconds}
+            isHook={false}
+            subtitles={scene.subtitles}
+          />
         </div>
       </div>
     </div>

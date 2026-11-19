@@ -2,6 +2,7 @@ import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { Sparkles, Terminal as TerminalIcon } from 'lucide-react';
 import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
+import { AnimatedSubtitles } from '../components/AnimatedSubtitles.js';
 import type { TerminalScene as TerminalSceneType } from '@learnops/schema';
 
 /**
@@ -253,7 +254,7 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
           </div>
         </div>
 
-        {/* Tier 3 (Bottom): Explanatory Subtext & Monospace Pill directly on canvas */}
+        {/* Tier 3 (Bottom): Animated Subtitles Pill (Brand Box + White Text) */}
         <div
           style={{
             transform: `translateY(${(1 - subtextSpring) * 20}px)`,
@@ -261,38 +262,17 @@ export const TerminalScene: React.FC<{ scene: TerminalSceneType }> = ({ scene })
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '12px',
-            textAlign: 'center',
+            justifyContent: 'center',
+            minHeight: '120px',
+            width: '100%',
           }}
         >
-          {scene.explanation && (
-            <p
-              style={{
-                fontSize: '32px',
-                fontWeight: 800,
-                color: '#FFFFFF',
-                margin: 0,
-                fontFamily: theme.fonts.heading,
-                maxWidth: '920px',
-                lineHeight: 1.25,
-              }}
-            >
-              {renderHighlightedText(scene.explanation, '#FFFFFF', theme.colors.brightAccent)}
-            </p>
-          )}
-
-          <span
-            style={{
-              fontSize: '20px',
-              fontFamily: theme.fonts.mono,
-              fontWeight: 800,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: 'rgba(255, 255, 255, 0.75)',
-            }}
-          >
-            INTERACTIVE SHELL VERIFICATION
-          </span>
+          <AnimatedSubtitles
+            voiceover={scene.voiceover || scene.explanation}
+            durationSeconds={scene.durationSeconds}
+            isHook={false}
+            subtitles={scene.subtitles}
+          />
         </div>
       </div>
     </div>

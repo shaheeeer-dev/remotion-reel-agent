@@ -1,10 +1,21 @@
 import { z } from 'zod';
 import { SCENE_KINDS } from './constants.js';
 
+export const SubtitleChunkSchema = z.object({
+  text: z.string(),
+  startSeconds: z.number().min(0),
+  endSeconds: z.number().min(0),
+  startFrame: z.number().int().min(0).optional(),
+  endFrame: z.number().int().min(0).optional(),
+});
+
+export type SubtitleChunk = z.infer<typeof SubtitleChunkSchema>;
+
 export const BaseSceneSchema = z.object({
   id: z.string().optional(),
   durationSeconds: z.number().min(1).max(10),
-  voiceover: z.string().max(200).optional(),
+  voiceover: z.string().max(300).optional(),
+  subtitles: z.array(SubtitleChunkSchema).optional(),
 });
 
 export const HookSceneSchema = BaseSceneSchema.extend({
@@ -132,6 +143,7 @@ export interface BaseScene {
   id?: string;
   durationSeconds: number;
   voiceover?: string;
+  subtitles?: SubtitleChunk[];
 }
 
 export interface HookScene extends BaseScene {

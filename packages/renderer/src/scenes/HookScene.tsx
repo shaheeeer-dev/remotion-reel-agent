@@ -20,6 +20,7 @@ import {
   Wifi,
 } from 'lucide-react';
 import { useBrandTheme } from '../styles/theme.js';
+import { AnimatedSubtitles } from '../components/AnimatedSubtitles.js';
 import type { HookScene as HookSceneType } from '@learnops/schema';
 
 /**
@@ -926,7 +927,7 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
           <HookVisual scene={scene} frame={frame} fps={fps} />
         </div>
 
-        {/* Tier 3 (Bottom): Explanatory Subtext & Monospace Pill directly on canvas */}
+        {/* Tier 3 (Bottom): Animated Subtitles Pill replacing static bottom text */}
         <div
           style={{
             transform: `translateY(${(1 - subtextSpring) * 25}px)`,
@@ -934,39 +935,17 @@ export const HookScene: React.FC<{ scene: HookSceneType }> = ({ scene }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '14px',
-            textAlign: 'center',
+            justifyContent: 'center',
+            minHeight: '120px',
+            width: '100%',
           }}
         >
-          {scene.subtext && (
-            <p
-              style={{
-                fontSize: '36px',
-                fontWeight: 800,
-                color: '#FFFFFF', // White text on purple screen
-                margin: 0,
-                fontFamily: theme.fonts.heading,
-                maxWidth: '900px',
-                lineHeight: 1.25,
-              }}
-            >
-              {renderHookTextWithBlackBox(scene.subtext, '#FFFFFF', theme.colors.brightAccent)}
-            </p>
-          )}
-
-          <span
-            style={{
-              fontSize: '20px',
-              fontFamily: theme.fonts.mono,
-              fontWeight: 800,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: '#FFFFFF',
-              opacity: 0.85,
-            }}
-          >
-            {scene.badge ? scene.badge.replace(/•.*$/, '').trim() : 'CORE ARCHITECTURE'}
-          </span>
+          <AnimatedSubtitles
+            voiceover={scene.voiceover || scene.subtext}
+            durationSeconds={scene.durationSeconds}
+            isHook={true}
+            subtitles={scene.subtitles}
+          />
         </div>
       </div>
     </div>
