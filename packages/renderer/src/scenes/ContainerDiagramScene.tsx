@@ -1,19 +1,17 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { Box, Layers, Server, Cpu } from 'lucide-react';
+import { Box, Layers, Server, Cpu, Play, FileText, Shield, ShieldCheck } from 'lucide-react';
 import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import { AnimatedSubtitles } from '../components/AnimatedSubtitles.js';
 import type { ContainerDiagramScene as ContainerDiagramSceneType } from '@learnops/schema';
 
 /**
- * Scene 2: Container Architecture Diagram (Docker Topics)
+ * Scene 2: Container Architecture Diagram (Docker & Kubernetes Topics)
  *
- * Adheres strictly to the Unified 3-Tier Visual Architecture:
- * - Tier 1 (Top): Kicker & 84px bold headline left-aligned directly on canvas.
- * - Tier 2 (Middle): Vertical 3-card stack branching from a Docker Engine root node.
- * - Tier 3 (Bottom): Explanatory subtext & monospace pill open directly on canvas.
- * - Safe Area: Contained within upper 80% (1536px), bottom 20% clear.
- * - Zero Emojis: Lucide SVG icons only.
+ * Renders the iconic "ISOLATED WORKLOAD" container sandbox boundary:
+ * - Dashed container sandbox representing Linux cgroups & namespaces
+ * - Running process card with active execution badge
+ * - Private Mount & PID namespace resource pills
  */
 export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType }> = ({ scene }) => {
   const theme = useBrandTheme();
@@ -27,8 +25,26 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
     config: { damping: 14, stiffness: 120 },
   });
 
-  const rootNodeSpring = spring({
+  const sandboxSpring = spring({
     frame: frame - 6,
+    fps,
+    config: { damping: 14, stiffness: 110 },
+  });
+
+  const processSpring = spring({
+    frame: frame - 12,
+    fps,
+    config: { damping: 14, stiffness: 120 },
+  });
+
+  const namespace1Spring = spring({
+    frame: frame - 18,
+    fps,
+    config: { damping: 14, stiffness: 120 },
+  });
+
+  const namespace2Spring = spring({
+    frame: frame - 24,
     fps,
     config: { damping: 14, stiffness: 120 },
   });
@@ -39,7 +55,11 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
     config: { damping: 14, stiffness: 100 },
   });
 
-  const containerIcons = [Box, Layers, Server, Cpu];
+  const primaryContainer = scene.containers[0] || {
+    name: 'learnops-web',
+    app: 'Node.js API',
+    binsLibs: 'Alpine Linux',
+  };
 
   return (
     <div
@@ -48,7 +68,7 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
         inset: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: theme.colors.deepBackground, // Deep matte canvas
+        backgroundColor: theme.colors.deepBackground,
         overflow: 'hidden',
       }}
     >
@@ -102,12 +122,12 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
                 width: '48px',
                 height: '6px',
                 borderRadius: '999px',
-                backgroundColor: theme.colors.brandPrimary,
+                backgroundColor: '#00E5FF',
               }}
             />
           </div>
 
-          {/* Headline (Left-aligned, massive 84px, white text) */}
+          {/* Headline */}
           <h1
             style={{
               fontSize: '84px',
@@ -120,181 +140,240 @@ export const ContainerDiagramScene: React.FC<{ scene: ContainerDiagramSceneType 
               fontFamily: theme.fonts.heading,
             }}
           >
-            {renderHighlightedText(scene.title, '#FFFFFF', theme.colors.brightAccent)}
+            {renderHighlightedText(scene.title, '#FFFFFF', '#00E5FF')}
           </h1>
         </div>
 
-        {/* Tier 2 (Middle): Vertical 3-Card Stack with Docker Engine Node */}
+        {/* Tier 2 (Middle): The Iconic Dashed Container Sandbox */}
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
+            justifyContent: 'center',
             alignItems: 'center',
-            gap: '14px',
             margin: 'auto 0',
             width: '100%',
           }}
         >
-          {/* Central Docker Engine Root Pill */}
           <div
             style={{
-              transform: `scale(${rootNodeSpring})`,
-              opacity: rootNodeSpring,
-              padding: '14px 38px',
-              borderRadius: '18px',
-              backgroundColor: theme.colors.cardSurface,
-              border: '1.5px solid #FFFFFF', // White border
-              boxShadow: '0 0 25px rgba(255, 255, 255, 0.15)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '16px',
-            }}
-          >
-            <Server size={28} color="#FFFFFF" strokeWidth={2.4} />
-            <span
-              style={{
-                fontSize: '26px',
-                fontWeight: 800,
-                fontFamily: theme.fonts.mono,
-                color: '#FFFFFF',
-              }}
-            >
-              {scene.containerEngine || 'Docker Engine (cgroups + namespaces)'}
-            </span>
-          </div>
-
-          {/* Vertical Connecting Stem Line */}
-          <div
-            style={{
-              width: '3px',
-              height: '24px',
-              backgroundColor: '#FFFFFF',
-              opacity: rootNodeSpring,
-            }}
-          />
-
-          {/* 3 Staggered Container Cards */}
-          <div
-            style={{
+              width: '840px',
+              borderRadius: '36px',
+              border: '3.5px dashed rgba(255, 255, 255, 0.45)',
+              backgroundColor: 'rgba(255, 255, 255, 0.04)',
+              padding: '36px 32px',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(0, 0, 0, 0.4)',
               display: 'flex',
               flexDirection: 'column',
-              gap: '16px',
-              width: '100%',
+              gap: '18px',
+              transform: `scale(${sandboxSpring})`,
+              opacity: sandboxSpring,
+              position: 'relative',
             }}
           >
-            {scene.containers.slice(0, 3).map((container, idx) => {
-              const cardSpring = spring({
-                frame: frame - (6 + idx * 5),
-                fps,
-                config: { damping: 14, stiffness: 130 },
-              });
+            {/* Top Boundary Kicker Badge */}
+            <div
+              style={{
+                fontSize: '18px',
+                fontFamily: theme.fonts.mono,
+                fontWeight: 900,
+                letterSpacing: '0.14em',
+                color: '#FFFFFF',
+                textTransform: 'uppercase',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                paddingLeft: '6px',
+              }}
+            >
+              <ShieldCheck size={22} color="#00E5FF" strokeWidth={2.4} />
+              <span>ISOLATED WORKLOAD • CGROUPS & NAMESPACES</span>
+            </div>
 
-              const IconComponent = containerIcons[idx % containerIcons.length];
-
-              return (
+            {/* Child 1: Running Process (Black card with Red Play Button) */}
+            <div
+              style={{
+                backgroundColor: '#110F17',
+                borderRadius: '22px',
+                padding: '22px 28px',
+                border: '2px solid rgba(255, 255, 255, 0.25)',
+                boxShadow: '0 15px 35px rgba(0, 0, 0, 0.6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                opacity: processSpring,
+                transform: `translateY(${(1 - processSpring) * 20}px)`,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                 <div
-                  key={container.name}
                   style={{
-                    transform: `translateY(${(1 - cardSpring) * 25}px)`,
-                    opacity: cardSpring,
-                    backgroundColor: theme.colors.cardSurface,
-                    borderRadius: '24px',
-                    padding: '22px 30px',
-                    border: idx === 0
-                      ? '2px solid #FFFFFF' // White border on active
-                      : '1.5px solid rgba(255, 255, 255, 0.25)', // White border on inactive
-                    boxShadow: idx === 0
-                      ? '0 15px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 255, 255, 0.2)'
-                      : '0 15px 40px rgba(0, 0, 0, 0.5)',
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '16px',
+                    backgroundColor: '#E53935',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
+                    justifyContent: 'center',
+                    boxShadow: '0 0 20px rgba(229, 57, 53, 0.6)',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
-                    {/* Lucide SVG Icon Badge */}
-                    <div
-                      style={{
-                        width: '54px',
-                        height: '54px',
-                        borderRadius: '16px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        border: idx === 0
-                          ? '1.5px solid #FFFFFF'
-                          : '1px solid rgba(255, 255, 255, 0.2)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <IconComponent
-                        size={28}
-                        color="#FFFFFF"
-                        strokeWidth={2.2}
-                      />
-                    </div>
-
-                    <div>
-                      <div
-                        style={{
-                          fontSize: '22px',
-                          fontFamily: theme.fonts.mono,
-                          fontWeight: 800,
-                          color: idx === 0 ? theme.colors.brightAccent : theme.colors.mutedText,
-                          marginBottom: '4px',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
-                        }}
-                      >
-                        {container.name}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: '30px',
-                          fontWeight: 800,
-                          color: '#FFFFFF',
-                          fontFamily: theme.fonts.heading,
-                        }}
-                      >
-                        {container.app} • {container.binsLibs}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Status Badge */}
+                  <Play size={26} color="#FFFFFF" fill="#FFFFFF" />
+                </div>
+                <div>
                   <div
                     style={{
-                      fontSize: '16px',
                       fontFamily: theme.fonts.mono,
+                      fontSize: '14px',
                       fontWeight: 800,
-                      letterSpacing: '0.1em',
-                      color: idx === 0 ? theme.colors.brightAccent : theme.colors.mutedText,
+                      color: '#FF8A80',
+                      letterSpacing: '0.08em',
                       textTransform: 'uppercase',
+                      marginBottom: '2px',
                     }}
                   >
-                    ISOLATED
+                    RUNNING PROCESS
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '24px',
+                      fontWeight: 900,
+                      fontFamily: theme.fonts.mono,
+                      color: '#FFFFFF',
+                    }}
+                  >
+                    {primaryContainer.name}
                   </div>
                 </div>
-              );
-            })}
+              </div>
+
+              <div
+                style={{
+                  padding: '6px 16px',
+                  borderRadius: '10px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  fontFamily: theme.fonts.mono,
+                  fontSize: '15px',
+                  fontWeight: 800,
+                  color: '#FFFFFF',
+                }}
+              >
+                PID 1
+              </div>
+            </div>
+
+            {/* Child 2: Private File View (Mount Namespace) */}
+            <div
+              style={{
+                backgroundColor: '#1C1824',
+                borderRadius: '20px',
+                padding: '20px 28px',
+                border: '1.5px solid rgba(255, 255, 255, 0.14)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                opacity: namespace1Spring,
+                transform: `translateY(${(1 - namespace1Spring) * 20}px)`,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <FileText size={26} color="#3B82F6" />
+                <span
+                  style={{
+                    fontFamily: theme.fonts.mono,
+                    fontSize: '19px',
+                    fontWeight: 800,
+                    color: '#FFFFFF',
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  PRIVATE FILE VIEW
+                </span>
+              </div>
+              <span
+                style={{
+                  fontFamily: theme.fonts.mono,
+                  fontSize: '14px',
+                  color: '#93C5FD',
+                  fontWeight: 700,
+                }}
+              >
+                mount namespace
+              </span>
+            </div>
+
+            {/* Child 3: Private Process Space (PID Namespace) */}
+            <div
+              style={{
+                backgroundColor: '#1C1824',
+                borderRadius: '20px',
+                padding: '20px 28px',
+                border: '1.5px solid rgba(255, 255, 255, 0.14)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                opacity: namespace2Spring,
+                transform: `translateY(${(1 - namespace2Spring) * 20}px)`,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <Cpu size={26} color="#10B981" />
+                <span
+                  style={{
+                    fontFamily: theme.fonts.mono,
+                    fontSize: '19px',
+                    fontWeight: 800,
+                    color: '#FFFFFF',
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  PRIVATE PROCESS SPACE
+                </span>
+              </div>
+              <span
+                style={{
+                  fontFamily: theme.fonts.mono,
+                  fontSize: '14px',
+                  color: '#6EE7B7',
+                  fontWeight: 700,
+                }}
+              >
+                pid namespace
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Tier 3 (Bottom): Animated Subtitles Pill starting immediately from 0:00 */}
+        {/* Tier 3 (Bottom): Explanatory Monospace Subtext & Subtitles */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '120px',
-            width: '100%',
+            gap: '20px',
+            opacity: subtextSpring,
+            transform: `translateY(${(1 - subtextSpring) * 25}px)`,
           }}
         >
+          {scene.comparisonNote && (
+            <div
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '16px',
+                padding: '16px 24px',
+                fontSize: '20px',
+                color: 'rgba(255, 255, 255, 0.85)',
+                fontWeight: 600,
+                lineHeight: 1.4,
+              }}
+            >
+              {scene.comparisonNote}
+            </div>
+          )}
+
           <AnimatedSubtitles
-            voiceover={scene.voiceover || scene.comparisonNote}
+            voiceover={scene.voiceover}
             durationSeconds={scene.durationSeconds}
-            isHook={false}
             subtitles={scene.subtitles}
           />
         </div>

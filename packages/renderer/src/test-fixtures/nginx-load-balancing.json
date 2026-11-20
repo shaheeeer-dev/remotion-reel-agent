@@ -1,0 +1,97 @@
+{
+  "brand": {
+    "name": "LearnOps",
+    "primaryColor": "#783CEB",
+    "secondaryColor": "#B28BFF",
+    "backgroundColor": "#110F17",
+    "cardBackground": "#1C1824",
+    "textColor": "#FFFFFF"
+  },
+  "script": {
+    "schemaVersion": 1,
+    "topic": "Nginx: Load Balancing Strategies",
+    "hook": "How does Nginx *load balance* millions of requests?",
+    "durationSeconds": 18,
+    "narrationText": null,
+    "scenes": [
+      {
+        "kind": "hook",
+        "durationSeconds": 3,
+        "badge": "Nginx & Traffic Routing",
+        "headline": "How does Nginx *load balance* traffic?",
+        "visualMetaphor": "network_flow",
+        "subtext": "Round-robin, least-conn, or IP-hash: which strategy should you use?"
+      },
+      {
+        "kind": "pipeline",
+        "durationSeconds": 4,
+        "title": "Reverse Proxy Traffic Flow",
+        "trigger": "client ingress GET /api/v1",
+        "stages": [
+          {
+            "name": "Ingress",
+            "status": "success",
+            "details": "client request port 443"
+          },
+          {
+            "name": "Nginx Proxy",
+            "status": "success",
+            "details": "upstream balance algorithm"
+          },
+          {
+            "name": "Backend Pool",
+            "status": "success",
+            "details": "healthy nodes :8080"
+          }
+        ],
+        "takeaway": "Nginx acts as the front door, distributing incoming HTTP requests across private backends."
+      },
+      {
+        "kind": "comparison",
+        "durationSeconds": 4,
+        "title": "Round-Robin vs Least-Conn",
+        "leftLabel": "ROUND-ROBIN",
+        "leftTitle": "Sequential Order",
+        "leftDescription": "Sends requests sequentially to each backend server in turn. Ideal for uniform, stateless API requests.",
+        "leftIcon": "layers",
+        "rightLabel": "LEAST-CONN",
+        "rightTitle": "Active Load Router",
+        "rightDescription": "Sends new requests to whichever server currently has the fewest active open connections.",
+        "rightIcon": "server",
+        "takeaway": "Use Round-Robin for quick web requests; use Least-Connected for heavy tasks or WebSockets."
+      },
+      {
+        "kind": "terminal",
+        "durationSeconds": 4,
+        "title": "bash — /etc/nginx/conf.d/lb.conf",
+        "promptUser": "admin@proxy:~$",
+        "command": "cat /etc/nginx/conf.d/lb.conf && nginx -t",
+        "outputLines": [
+          "upstream backend_pool {",
+          "    least_conn;",
+          "    server 10.0.0.10:8080 weight=3;",
+          "    server 10.0.0.11:8080;",
+          "}",
+          "nginx: configuration test is successful"
+        ],
+        "explanation": "Declare your upstream cluster and select least_conn or ip_hash in just one directive."
+      },
+      {
+        "kind": "outro",
+        "durationSeconds": 3,
+        "brandName": "LearnOps",
+        "tagline": "Master Linux, Nginx & DevOps step by step",
+        "callToAction": "Follow @learnops for daily reels",
+        "creatorCredit": "Rendered with Remotion Reel Agent"
+      }
+    ],
+    "caption": "Nginx Load Balancing Explained: Round-Robin vs Least-Connected vs IP-Hash (illustrative educational demonstration).",
+    "hashtags": [
+      "Nginx",
+      "DevOps",
+      "Networking",
+      "SystemDesign",
+      "LearnOps"
+    ]
+  }
+}

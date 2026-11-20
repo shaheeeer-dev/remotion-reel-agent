@@ -1,6 +1,6 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { GitBranch, CheckCircle2, Box, Layers, FileText, Rocket } from 'lucide-react';
+import { GitBranch, Code2, Settings, CheckCircle2, Rocket, ArrowRight, Check } from 'lucide-react';
 import { useBrandTheme, renderHighlightedText } from '../styles/theme.js';
 import { AnimatedSubtitles } from '../components/AnimatedSubtitles.js';
 import type { PipelineScene as PipelineSceneType } from '@learnops/schema';
@@ -8,10 +8,15 @@ import type { PipelineScene as PipelineSceneType } from '@learnops/schema';
 /**
  * Scene 2: Pipeline Explanation (CI/CD Workflow)
  *
- * Adheres strictly to the Unified 3-Tier Visual Architecture:
- * - Tier 1 (Top): Kicker & 84px bold headline left-aligned directly on canvas.
- * - Tier 2 (Middle): Vertical 3-card stack branching from a central Git trigger node.
- * - Tier 3 (Bottom): Explanatory subtext & monospace pill open directly on canvas.
+ * Implements the Horizontal 3-Stage Pipeline Layout matching ref_cicd_4s.png:
+ * - Tier 1 (Top): Kicker & 84px bold headline left-aligned on canvas.
+ * - Tier 2 (Middle):
+ *   - Git Trigger header pill: "TRIGGER: git push origin main"
+ *   - Horizontal 3-Stage Pipeline: [CODE] → [BUILD] → [TEST]
+ *     Each stage in a dedicated vertical card with circular icon badge,
+ *     animated horizontal connecting wires, and status pill.
+ *   - Monospace telemetry footer: "PIPELINE #104 • 3 OF 3 JOBS PASSED"
+ * - Tier 3 (Bottom): Animated Subtitles starting from 0:00.
  * - Safe Area: Contained within upper 80% (1536px), bottom 20% clear.
  * - Zero Emojis: Lucide SVG icons only.
  */
@@ -27,22 +32,33 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
     config: { damping: 14, stiffness: 120 },
   });
 
-  const nodeSpring = spring({
-    frame: frame - 6,
+  const triggerSpring = spring({
+    frame: frame - 4,
     fps,
     config: { damping: 14, stiffness: 120 },
   });
 
-  const subtextSpring = spring({
-    frame: frame - 28,
+  const pipelineSpring = spring({
+    frame: frame - 8,
+    fps,
+    config: { damping: 14, stiffness: 110 },
+  });
+
+  const footerSpring = spring({
+    frame: frame - 22,
     fps,
     config: { damping: 14, stiffness: 100 },
   });
 
   // Calculate dynamic active stages
-  const stageDurationFrames = durationInFrames / Math.max(1, scene.stages.length);
+  const rawStages = scene.stages && scene.stages.length >= 3 ? scene.stages.slice(0, 3) : [
+    { name: 'CODE', status: 'success' as const, details: 'git push origin main' },
+    { name: 'BUILD', status: 'success' as const, details: 'compile & containerize' },
+    { name: 'TEST', status: 'success' as const, details: 'automated test suite' },
+  ];
 
-  const stageIcons = [FileText, Layers, Rocket, Box];
+  const stageIcons = [Code2, Settings, CheckCircle2];
+  const stageDurationFrames = durationInFrames / 3;
 
   return (
     <div
@@ -96,7 +112,7 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                 textTransform: 'uppercase',
               }}
             >
-              DEVOPS WORKFLOW • 01
+              AUTOMATION PIPELINE • 01
             </span>
 
             {/* Accent Line Indicator on Top Right */}
@@ -127,121 +143,124 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
           </h1>
         </div>
 
-        {/* Tier 2 (Middle): Vertical 3-Card Stack with Trigger Node */}
+        {/* Tier 2 (Middle): Horizontal 3-Stage Pipeline Flow */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '14px',
+            gap: '24px',
             margin: 'auto 0',
             width: '100%',
           }}
         >
-          {/* Central Git Trigger Root Pill */}
+          {/* Git Trigger Header Pill */}
           <div
             style={{
-              transform: `scale(${nodeSpring})`,
-              opacity: nodeSpring,
-              padding: '14px 38px',
-              borderRadius: '18px',
+              transform: `scale(${triggerSpring})`,
+              opacity: triggerSpring,
+              padding: '12px 32px',
+              borderRadius: '999px',
               backgroundColor: theme.colors.cardSurface,
-              border: '1.5px solid #FFFFFF', // White border
-              boxShadow: '0 0 25px rgba(255, 255, 255, 0.15)',
+              border: '1.5px solid rgba(255, 255, 255, 0.8)',
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '16px',
+              gap: '14px',
             }}
           >
-            <GitBranch size={28} color="#FFFFFF" strokeWidth={2.4} />
+            <GitBranch size={24} color="#10B981" strokeWidth={2.4} />
             <span
               style={{
-                fontSize: '26px',
+                fontSize: '22px',
                 fontWeight: 800,
                 fontFamily: theme.fonts.mono,
                 color: '#FFFFFF',
               }}
             >
-              {scene.trigger}
+              TRIGGER: {scene.trigger || 'git push origin main'}
             </span>
             <span
               style={{
-                fontSize: '15px',
-                padding: '4px 12px',
+                fontSize: '13px',
+                padding: '4px 10px',
                 borderRadius: '6px',
-                backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                border: '1px solid #FFFFFF',
-                color: '#FFFFFF',
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                border: '1px solid #10B981',
+                color: '#10B981',
                 fontWeight: 800,
-                letterSpacing: '0.06em',
+                letterSpacing: '0.08em',
                 textTransform: 'uppercase',
                 fontFamily: theme.fonts.mono,
               }}
             >
-              TRIGGERED
+              AUTOMATED
             </span>
           </div>
 
-          {/* Vertical Connecting Stem Line */}
-          <div
-            style={{
-              width: '3px',
-              height: '24px',
-              backgroundColor: '#FFFFFF',
-              opacity: nodeSpring,
-            }}
-          />
-
-          {/* 3 Staggered Pipeline Stage Cards */}
+          {/* Horizontal 3-Stage Pipeline Container */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
               width: '100%',
+              opacity: pipelineSpring,
+              transform: `translateY(${(1 - pipelineSpring) * 20}px)`,
             }}
           >
-            {scene.stages.slice(0, 3).map((stage, idx) => {
+            {rawStages.map((stage, idx) => {
               const cardSpring = spring({
-                frame: frame - (6 + idx * 5),
+                frame: frame - (8 + idx * 6),
                 fps,
-                config: { damping: 14, stiffness: 130 },
+                config: { damping: 14, stiffness: 120 },
               });
 
               const IconComponent = stageIcons[idx % stageIcons.length];
               const isCurrent = frame >= idx * stageDurationFrames;
-              const isFinished = frame >= (idx + 1) * stageDurationFrames;
+              const isFinished = frame >= (idx + 1) * stageDurationFrames - 5;
 
               return (
-                <div
-                  key={stage.name}
-                  style={{
-                    transform: `translateY(${(1 - cardSpring) * 25}px)`,
-                    opacity: cardSpring,
-                    backgroundColor: theme.colors.cardSurface,
-                    borderRadius: '24px',
-                    padding: '22px 30px',
-                    border: isCurrent
-                      ? '2px solid #FFFFFF' // White border on active
-                      : '1.5px solid rgba(255, 255, 255, 0.25)', // White border on inactive
-                    boxShadow: isCurrent
-                      ? '0 15px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 255, 255, 0.2)'
-                      : '0 15px 40px rgba(0, 0, 0, 0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '22px' }}>
-                    {/* Lucide SVG Icon Badge */}
+                <React.Fragment key={stage.name}>
+                  {/* Stage Card */}
+                  <div
+                    style={{
+                      flex: 1,
+                      minHeight: '340px',
+                      backgroundColor: theme.colors.cardSurface,
+                      borderRadius: '26px',
+                      padding: '28px 22px',
+                      border: isCurrent
+                        ? '2.5px solid #FFFFFF'
+                        : '1.5px solid rgba(255, 255, 255, 0.22)',
+                      boxShadow: isCurrent
+                        ? '0 16px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.25)'
+                        : '0 12px 30px rgba(0, 0, 0, 0.4)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                      transform: `scale(${cardSpring})`,
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    {/* Top Circular Icon Badge */}
                     <div
                       style={{
-                        width: '54px',
-                        height: '54px',
-                        borderRadius: '16px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                        border: isCurrent
-                          ? '1.5px solid #FFFFFF'
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '20px',
+                        backgroundColor: isFinished
+                          ? 'rgba(16, 185, 129, 0.16)'
+                          : isCurrent
+                          ? 'rgba(255, 255, 255, 0.12)'
+                          : 'rgba(255, 255, 255, 0.05)',
+                        border: isFinished
+                          ? '2px solid #10B981'
+                          : isCurrent
+                          ? '2px solid #FFFFFF'
                           : '1px solid rgba(255, 255, 255, 0.2)',
                         display: 'flex',
                         alignItems: 'center',
@@ -249,59 +268,144 @@ export const PipelineScene: React.FC<{ scene: PipelineSceneType }> = ({ scene })
                       }}
                     >
                       <IconComponent
-                        size={28}
-                        color="#FFFFFF"
-                        strokeWidth={2.2}
+                        size={32}
+                        color={isFinished ? '#10B981' : '#FFFFFF'}
+                        strokeWidth={2.4}
                       />
                     </div>
 
-                    <div>
+                    {/* Stage Header & Subtitle */}
+                    <div style={{ marginTop: '16px', marginBottom: '16px' }}>
                       <div
                         style={{
-                          fontSize: '22px',
+                          fontSize: '15px',
                           fontFamily: theme.fonts.mono,
                           fontWeight: 800,
-                          color: isCurrent ? theme.colors.brightAccent : 'rgba(255, 255, 255, 0.65)',
-                          marginBottom: '4px',
+                          letterSpacing: '0.12em',
+                          color: isCurrent ? theme.colors.brightAccent : 'rgba(255, 255, 255, 0.6)',
+                          marginBottom: '6px',
                           textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
                         }}
                       >
-                        STAGE 0{idx + 1} • {stage.name}
+                        STAGE 0{idx + 1}
                       </div>
+
                       <div
                         style={{
-                          fontSize: '30px',
-                          fontWeight: 800,
+                          fontSize: '32px',
+                          fontWeight: 900,
                           color: '#FFFFFF',
                           fontFamily: theme.fonts.heading,
+                          letterSpacing: '-0.02em',
                         }}
                       >
-                        {stage.details || (idx === 0 ? 'Compile & Lint Artifacts' : idx === 1 ? 'Automated Unit & E2E Tests' : 'Zero-Downtime Container Deploy')}
+                        {stage.name.toUpperCase()}
                       </div>
+
+                      <div
+                        style={{
+                          fontSize: '17px',
+                          fontFamily: theme.fonts.mono,
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          marginTop: '8px',
+                          lineHeight: 1.35,
+                          maxWidth: '220px',
+                        }}
+                      >
+                        {stage.details || (idx === 0 ? 'git push & lint' : idx === 1 ? 'build image' : 'e2e verify')}
+                      </div>
+                    </div>
+
+                    {/* Bottom Status Pill */}
+                    <div
+                      style={{
+                        padding: '6px 16px',
+                        borderRadius: '999px',
+                        backgroundColor: isFinished
+                          ? 'rgba(16, 185, 129, 0.18)'
+                          : isCurrent
+                          ? 'rgba(255, 255, 255, 0.12)'
+                          : 'rgba(255, 255, 255, 0.04)',
+                        border: isFinished
+                          ? '1.5px solid #10B981'
+                          : isCurrent
+                          ? '1.5px solid #FFFFFF'
+                          : '1px solid rgba(255, 255, 255, 0.15)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '14px',
+                        fontFamily: theme.fonts.mono,
+                        fontWeight: 800,
+                        letterSpacing: '0.08em',
+                        color: isFinished ? '#10B981' : isCurrent ? '#FFFFFF' : theme.colors.mutedText,
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {isFinished ? (
+                        <>
+                          <Check size={16} color="#10B981" strokeWidth={3} />
+                          <span>PASSED</span>
+                        </>
+                      ) : isCurrent ? (
+                        <span>RUNNING</span>
+                      ) : (
+                        <span>WAITING</span>
+                      )}
                     </div>
                   </div>
 
-                  {/* Right Status Badge */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      fontSize: '16px',
-                      fontFamily: theme.fonts.mono,
-                      fontWeight: 800,
-                      letterSpacing: '0.1em',
-                      color: isFinished ? '#10B981' : isCurrent ? theme.colors.brightAccent : theme.colors.mutedText,
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    {isFinished && <CheckCircle2 size={20} color="#10B981" />}
-                    <span>{isFinished ? 'PASSED' : isCurrent ? 'RUNNING' : 'PENDING'}</span>
-                  </div>
-                </div>
+                  {/* Horizontal Wire / Arrow connecting stages */}
+                  {idx < 2 && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '32px',
+                        height: '4px',
+                        position: 'relative',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '3px',
+                          backgroundColor: isFinished ? '#10B981' : 'rgba(255, 255, 255, 0.3)',
+                          borderRadius: '999px',
+                          boxShadow: isFinished ? '0 0 10px rgba(16, 185, 129, 0.6)' : 'none',
+                        }}
+                      />
+                    </div>
+                  )}
+                </React.Fragment>
               );
             })}
+          </div>
+
+          {/* Telemetry Summary Bar */}
+          <div
+            style={{
+              transform: `translateY(${(1 - footerSpring) * 15}px)`,
+              opacity: footerSpring,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              padding: '12px 28px',
+              borderRadius: '14px',
+              backgroundColor: 'rgba(0, 0, 0, 0.35)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              fontSize: '17px',
+              fontFamily: theme.fonts.mono,
+              fontWeight: 700,
+              color: 'rgba(255, 255, 255, 0.75)',
+            }}
+          >
+            <span style={{ color: '#10B981' }}>✓ 3/3 JOBS SUCCEEDED</span>
+            <span>•</span>
+            <span>PIPELINE RUN #104</span>
+            <span>•</span>
+            <span style={{ color: theme.colors.brightAccent }}>ZERO DOWNTIME</span>
           </div>
         </div>
 

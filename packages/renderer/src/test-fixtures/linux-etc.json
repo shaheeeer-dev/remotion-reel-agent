@@ -10,7 +10,7 @@
   "script": {
     "schemaVersion": 1,
     "topic": "Linux: What is /etc?",
-    "hook": "Where does Linux store all system configurations?",
+    "hook": "Where does Linux *store* all system configurations?",
     "durationSeconds": 16,
     "narrationText": null,
     "scenes": [
@@ -19,6 +19,7 @@
         "durationSeconds": 3,
         "badge": "Linux Fundamentals",
         "headline": "Where does Linux keep all its configuration?",
+        "visualMetaphor": "folder_drawer",
         "subtext": "Every service, network setting, and user rule lives in one place."
       },
       {
@@ -28,19 +29,39 @@
         "rootPath": "/",
         "highlightPath": "/etc",
         "tree": [
-          { "name": "/bin", "isDirectory": true, "description": "User binaries" },
+          {
+            "name": "/bin",
+            "isDirectory": true,
+            "description": "User binaries"
+          },
           {
             "name": "/etc",
             "isDirectory": true,
             "highlight": true,
             "description": "System config files (Editable Text)",
             "children": [
-              { "name": "nginx/", "isDirectory": true, "description": "Web server rules" },
-              { "name": "hosts", "isDirectory": false, "description": "IP domain mappings" },
-              { "name": "passwd", "isDirectory": false, "description": "User accounts" }
+              {
+                "name": "nginx/",
+                "isDirectory": true,
+                "description": "Web server rules"
+              },
+              {
+                "name": "hosts",
+                "isDirectory": false,
+                "description": "IP domain mappings"
+              },
+              {
+                "name": "passwd",
+                "isDirectory": false,
+                "description": "User accounts"
+              }
             ]
           },
-          { "name": "/var", "isDirectory": true, "description": "Variable data & logs" }
+          {
+            "name": "/var",
+            "isDirectory": true,
+            "description": "Variable data & logs"
+          }
         ],
         "explanation": "/etc holds host-specific, editable configuration files for system daemons and services."
       },
@@ -66,7 +87,12 @@
       }
     ],
     "caption": "Ever wondered where Linux keeps all its system settings? Meet /etc — the heart of host configuration (illustrative educational demonstration).",
-    "hashtags": ["Linux", "DevOps", "SysAdmin", "LearnOps", "Terminal"]
+    "hashtags": [
+      "Linux",
+      "DevOps",
+      "SysAdmin",
+      "LearnOps",
+      "Terminal"
+    ]
   }
 }
-

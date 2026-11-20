@@ -9,6 +9,7 @@ import linuxEtcFixture from './test-fixtures/linux-etc.json' assert { type: 'jso
 import dockerFixture from './test-fixtures/docker-container.json' assert { type: 'json' };
 import cicdFixture from './test-fixtures/devops-cicd.json' assert { type: 'json' };
 import chmodChownFixture from './test-fixtures/chmod-chown.json' assert { type: 'json' };
+import nginxFixture from './test-fixtures/nginx-load-balancing.json' assert { type: 'json' };
 
 const FPS = 30;
 const WIDTH = 1080;
@@ -134,6 +135,17 @@ export const RemotionRoot: React.FC = () => {
         width={WIDTH}
         height={HEIGHT}
         defaultProps={chmodChownFixture as unknown as ReelRenderInput}
+      />
+
+      {/* Test Video: Nginx Load Balancing Strategies */}
+      <Composition
+        id="Test2-NginxLoadBalancing"
+        component={MainReel}
+        durationInFrames={nginxFixture.script.durationSeconds * FPS}
+        fps={FPS}
+        width={WIDTH}
+        height={HEIGHT}
+        defaultProps={nginxFixture as unknown as ReelRenderInput}
       />
     </>
   );

@@ -10,7 +10,7 @@
   "script": {
     "schemaVersion": 1,
     "topic": "DevOps: What is CI/CD?",
-    "hook": "What actually happens when you git push in DevOps?",
+    "hook": "What actually happens when you *git push* in DevOps?",
     "durationSeconds": 17,
     "narrationText": null,
     "scenes": [
@@ -19,6 +19,7 @@
         "durationSeconds": 3,
         "badge": "DevOps Pipeline",
         "headline": "What actually happens when you git push?",
+        "visualMetaphor": "pipeline_flow",
         "subtext": "From local commit to production deployment in minutes — automatically."
       },
       {
@@ -27,10 +28,26 @@
         "title": "Continuous Integration & Delivery",
         "trigger": "git push origin main",
         "stages": [
-          { "name": "1. Source & Checkout", "status": "success", "details": "commit e8a3d12 validated" },
-          { "name": "2. Build & Containerize", "status": "success", "details": "Docker image compiled" },
-          { "name": "3. Automated Testing", "status": "running", "details": "428 unit & e2e tests passing" },
-          { "name": "4. Deploy to Kubernetes", "status": "pending", "details": "Zero-downtime rolling update" }
+          {
+            "name": "1. Source & Checkout",
+            "status": "success",
+            "details": "commit e8a3d12 validated"
+          },
+          {
+            "name": "2. Build & Containerize",
+            "status": "success",
+            "details": "Docker image compiled"
+          },
+          {
+            "name": "3. Automated Testing",
+            "status": "running",
+            "details": "428 unit & e2e tests passing"
+          },
+          {
+            "name": "4. Deploy to Kubernetes",
+            "status": "pending",
+            "details": "Zero-downtime rolling update"
+          }
         ],
         "takeaway": "CI automates build & testing; CD automates release & deployment safely."
       },
@@ -57,7 +74,12 @@
       }
     ],
     "caption": "CI/CD is the backbone of modern engineering. Push code, pass automated checks, ship to production safely (illustrative educational demonstration).",
-    "hashtags": ["DevOps", "CICD", "Automation", "GitHubActions", "LearnOps"]
+    "hashtags": [
+      "DevOps",
+      "CICD",
+      "Automation",
+      "GitHubActions",
+      "LearnOps"
+    ]
   }
 }
-
