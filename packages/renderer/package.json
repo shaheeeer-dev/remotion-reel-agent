@@ -7,8 +7,7 @@
   "scripts": {
     "start": "remotion preview src/index.ts",
     "build": "tsc",
-    "render": "remotion render src/index.ts MainReel out/test-video.mp4",
-    "render:test2": "tsx scripts/render-test-reels.ts"
+    "render": "remotion render src/index.ts MainReel out/test-video.mp4"
   },
   "dependencies": {
     "@learnops/schema": "*",
