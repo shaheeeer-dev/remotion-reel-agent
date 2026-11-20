@@ -56,9 +56,9 @@ export function deriveSubtitleChunks(
   if (chunks.length === 0) return [];
 
   const totalFrames = Math.round(durationSeconds * fps);
-  const speechStartFrame = 3;
-  // Leave a 0.25s cushion at the end of the scene before cutting
-  const speechEndFrame = Math.max(speechStartFrame + 12, totalFrames - Math.round(0.25 * fps));
+  const speechStartFrame = 0; // Start immediately from 0:00 without artificial delay
+  // Leave a 0.4s natural breathing cushion at the end of the scene before cutting
+  const speechEndFrame = Math.max(speechStartFrame + 12, totalFrames - Math.round(0.4 * fps));
   const availableFrames = speechEndFrame - speechStartFrame;
 
   // Weight chunks by character count + punctuation pauses
@@ -267,8 +267,8 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
                 textShadow: isCurrent
                   ? '0 2px 8px rgba(0, 0, 0, 0.4)'
                   : isHook
-                  ? '0 2px 6px rgba(0, 0, 0, 0.25)'
-                  : '0 2px 6px rgba(0, 0, 0, 0.5)',
+                    ? '0 2px 6px rgba(0, 0, 0, 0.25)'
+                    : '0 2px 6px rgba(0, 0, 0, 0.5)',
               }}
             >
               {w.word}

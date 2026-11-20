@@ -282,11 +282,9 @@ export const FolderTreeScene: React.FC<{ scene: FolderTreeSceneType }> = ({ scen
           </div>
         </div>
 
-        {/* Tier 3 (Bottom): Animated Subtitles Pill (Brand Box + White Text) */}
+        {/* Tier 3 (Bottom): Animated Subtitles Pill starting immediately from 0:00 */}
         <div
           style={{
-            transform: `translateY(${(1 - subtextSpring) * 20}px)`,
-            opacity: subtextSpring,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',

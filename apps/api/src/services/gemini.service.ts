@@ -29,55 +29,68 @@ function normalizeSceneDurations(script: ReelScript, targetDurationSeconds: numb
   const frameCounts = Array.from({ length: 4 }, (_, index) => framesPerContentScene + (index < extraContentFrames ? 1 : 0));
   frameCounts.push(outroFrames);
 
+  const normalizedScenes = script.scenes.map((scene, index) => {
+    const durSec = frameCounts[index] / RENDER_FPS;
+    const maxWords = Math.floor(durSec * 2.5);
+
+    // Clean and sanitize voiceover for TTS
+    let voiceover = scene.voiceover;
+    if (!voiceover || typeof voiceover !== 'string' || !voiceover.trim()) {
+      // Fallback voiceover derived from visual content
+      if (scene.kind === 'hook') {
+        voiceover = `${scene.headline}. ${scene.subtext || ''}`;
+      } else if (scene.kind === 'folder_tree') {
+        voiceover = `${scene.title}. ${scene.explanation}`;
+      } else if (scene.kind === 'container_diagram') {
+        voiceover = `${scene.title}. ${scene.comparisonNote || ''}`;
+      } else if (scene.kind === 'pipeline') {
+        voiceover = `${scene.title}. ${scene.takeaway}`;
+      } else if (scene.kind === 'comparison') {
+        voiceover = scene.takeaway;
+      } else if (scene.kind === 'terminal') {
+        voiceover = scene.explanation;
+      } else if (scene.kind === 'outro') {
+        voiceover = scene.tagline || 'Follow for daily tutorials.';
+      }
+    }
+
+    // Strip asterisks, code backticks, brackets, and markdown noise
+    voiceover = (voiceover || '')
+      .replace(/\*+/g, '')
+      .replace(/`+/g, '')
+      .replace(/[\[\]{}()]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Word budget enforcement: ensure speech fits comfortably without cutting off mid-clause
+    const words = voiceover.split(' ').filter(Boolean);
+    if (words.length > maxWords) {
+      const sliced = words.slice(0, maxWords);
+      // Remove trailing prepositions/conjunctions that leave broken phrases
+      while (
+        sliced.length > 3 &&
+        /^(and|or|using|with|the|a|an|of|for|in|on|at|to|from|by|that|this|which)$/i.test(
+          sliced[sliced.length - 1].replace(/[^a-zA-Z]/g, '')
+        )
+      ) {
+        sliced.pop();
+      }
+      voiceover = sliced.join(' ');
+      if (!/[.?!]$/.test(voiceover)) voiceover += '.';
+    }
+
+    return {
+      ...scene,
+      durationSeconds: durSec,
+      voiceover,
+    };
+  }) as ReelScript['scenes'];
+
   return {
     ...script,
     durationSeconds: totalFrames / RENDER_FPS,
-    scenes: script.scenes.map((scene, index) => {
-      const durSec = frameCounts[index] / RENDER_FPS;
-      const maxWords = Math.floor(durSec * 2.2);
-
-      // Clean and sanitize voiceover for TTS
-      let voiceover = scene.voiceover;
-      if (!voiceover || typeof voiceover !== 'string' || !voiceover.trim()) {
-        // Fallback voiceover derived from visual content
-        if (scene.kind === 'hook') {
-          voiceover = `${scene.headline}. ${scene.subtext || ''}`;
-        } else if (scene.kind === 'folder_tree') {
-          voiceover = `${scene.title}. ${scene.explanation}`;
-        } else if (scene.kind === 'container_diagram') {
-          voiceover = `${scene.title}. ${scene.comparisonNote || ''}`;
-        } else if (scene.kind === 'pipeline') {
-          voiceover = `${scene.title}. ${scene.takeaway}`;
-        } else if (scene.kind === 'comparison') {
-          voiceover = scene.takeaway;
-        } else if (scene.kind === 'terminal') {
-          voiceover = scene.explanation;
-        } else if (scene.kind === 'outro') {
-          voiceover = scene.tagline || 'Follow for daily tutorials.';
-        }
-      }
-
-      // Strip asterisks, code backticks, brackets, and markdown noise
-      voiceover = (voiceover || '')
-        .replace(/\*+/g, '')
-        .replace(/`+/g, '')
-        .replace(/[\[\]{}()]/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      // Word budget enforcement: cap words so audio strictly fits within the slot
-      const words = voiceover.split(' ').filter(Boolean);
-      if (words.length > maxWords) {
-        voiceover = words.slice(0, maxWords).join(' ');
-        if (!voiceover.endsWith('.')) voiceover += '.';
-      }
-
-      return {
-        ...scene,
-        durationSeconds: durSec,
-        voiceover,
-      };
-    }) as ReelScript['scenes'],
+    narrationText: normalizedScenes.map((s) => s.voiceover).filter(Boolean).join(' '),
+    scenes: normalizedScenes,
   };
 }
 
@@ -241,12 +254,15 @@ RULES:
      * Real-world Context: Connect how it actually works in real DevOps / Linux systems.
      * The Key Insight: Reveal the core takeaway that makes them feel smarter.
      * Call to Action: Seamless outro prompt to follow.
-   - Natural Pacing & Word Budget (~2.6 - 2.8 words/second):
-     * For a 16-second reel: 42 to 46 words TOTAL across the entire monologue.
-     * Each scene's "voiceover" field MUST be the exact sentence or clause from "narrationText" that aligns with that scene's visual moment:
-       - 3-second scene: 8 to 9 words.
-       - 4-second scene: 10 to 12 words.
-       - 2-second outro: 5 to 6 words.
+   - Natural Pacing & Word Budget (~2.2 - 2.4 words/second at natural conversational cadence):
+     * For a 16-second reel: 36 to 40 words TOTAL across the entire monologue.
+     * For a 22-second reel: 46 to 52 words TOTAL across the entire monologue.
+     * Each scene's "voiceover" field MUST be a complete, standalone thought or sentence that ends cleanly with punctuation:
+       - 3-second scene: 6 to 7 words.
+       - 4-second scene: 8 to 10 words.
+       - 5-second scene: 10 to 12 words.
+       - 2-second outro: 4 to 5 words (e.g. "Follow LearnOps for daily DevOps insights!").
+     * CRITICAL: NEVER end a scene voiceover on a dangling conjunction or preposition (e.g. "using.", "and.", "with."). Each scene must stand alone grammatically.
    - PURE SPOKEN TEXT:
      * Write purely for natural human speech with natural commas for breath pauses.
      * Do NOT use asterisks, backticks, emojis, code tags, or slashes in "voiceover" or "narrationText". Write pronounceable words (e.g. "slash etc", "nginx", "nano").

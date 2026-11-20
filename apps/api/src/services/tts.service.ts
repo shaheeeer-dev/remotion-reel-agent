@@ -44,6 +44,48 @@ export function trimSilence(audio: { audio: Float32Array; sampling_rate: number 
   audio.audio = samples.subarray(startPadded, endPadded);
 }
 
+/**
+ * Writes a standard 16-bit mono PCM WAV file Buffer from a Float32Array.
+ */
+export function createWavBuffer(samples: Float32Array, sampleRate = 24000): Buffer {
+  const numChannels = 1;
+  const bytesPerSample = 2; // 16-bit PCM
+  const blockAlign = numChannels * bytesPerSample;
+  const byteRate = sampleRate * blockAlign;
+  const dataSize = samples.length * bytesPerSample;
+  const buffer = Buffer.alloc(44 + dataSize);
+
+  // RIFF chunk descriptor
+  buffer.write('RIFF', 0);
+  buffer.writeUInt32LE(36 + dataSize, 4);
+  buffer.write('WAVE', 8);
+
+  // fmt sub-chunk
+  buffer.write('fmt ', 12);
+  buffer.writeUInt32LE(16, 16); // Subchunk1Size (16 for PCM)
+  buffer.writeUInt16LE(1, 20); // AudioFormat (1 for PCM)
+  buffer.writeUInt16LE(numChannels, 22);
+  buffer.writeUInt32LE(sampleRate, 24);
+  buffer.writeUInt32LE(byteRate, 28);
+  buffer.writeUInt16LE(blockAlign, 32);
+  buffer.writeUInt16LE(16, 34); // BitsPerSample
+
+  // data sub-chunk
+  buffer.write('data', 36);
+  buffer.writeUInt32LE(dataSize, 40);
+
+  // Write PCM samples with soft clipping
+  let offset = 44;
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    const pcm = s < 0 ? s * 0x8000 : s * 0x7fff;
+    buffer.writeInt16LE(Math.round(pcm), offset);
+    offset += 2;
+  }
+
+  return buffer;
+}
+
 export class TtsService {
   private validVoiceIds = new Set(CURATED_KOKORO_VOICES.map((v) => v.id));
 
@@ -54,11 +96,16 @@ export class TtsService {
     return 'af_heart'; // High quality default
   }
 
+  /**
+   * Synthesizes audio for each scene in the reel, pacing speech naturally (1.0x - 1.05x),
+   * preserving natural breath pauses, and compositing a master audio track with exact
+   * scene alignment and natural stays between scenes.
+   */
   async synthesizeReelAudio(
     reelId: string,
     scenes: Scene[],
     voiceId?: string
-  ): Promise<SceneAudio[]> {
+  ): Promise<{ sceneAudios: SceneAudio[]; masterAudio: MasterAudio }> {
     const selectedVoice = this.resolveVoiceId(voiceId);
     const rootDir = getMonorepoRoot();
     const audioDir = path.resolve(rootDir, 'storage/media/audio/reels', reelId);
@@ -66,26 +113,32 @@ export class TtsService {
 
     const tts = await getSharedTTSInstance();
     const sceneAudios: SceneAudio[] = [];
+    const sceneRawAudios: (Float32Array | null)[] = [];
+    const sampleRate = 24000;
 
     for (let i = 0; i < scenes.length; i++) {
       const scene = scenes[i];
       const rawText = scene.voiceover?.trim();
       if (!rawText) {
+        sceneRawAudios.push(null);
         continue;
       }
 
       const cleanText = cleanTextForSpeech(rawText);
       if (!cleanText) {
+        sceneRawAudios.push(null);
         continue;
       }
 
       const slotSeconds = scene.durationSeconds;
-      // Target speech duration: reserve comfortable cushion so speech finishes cleanly before scene cut
-      const targetDuration = Math.max(0.8, slotSeconds - 0.35);
+      // Target speech duration: reserve natural breathing room (~0.4s to 0.7s) before next scene starts
+      const targetDuration = Math.max(1.0, slotSeconds - 0.45);
 
-      console.log(`[TtsService] Synthesizing Scene ${i} ("${selectedVoice}", slot: ${slotSeconds}s): "${cleanText}"`);
+      console.log(
+        `[TtsService] Synthesizing Scene ${i} [${scene.kind}] ("${selectedVoice}", slot: ${slotSeconds}s, target: ${targetDuration.toFixed(2)}s): "${cleanText}"`
+      );
 
-      // Initial synthesis at normal speed (1.0)
+      // Initial synthesis at natural, relaxed conversational speed (1.0x)
       let speed = 1.0;
       let audio = await tts.generate(cleanText, {
         voice: selectedVoice as any,
@@ -95,14 +148,15 @@ export class TtsService {
 
       let durationSeconds = audio.audio.length / audio.sampling_rate;
 
-      // If speech duration exceeds slot target cushion, dynamically adjust speed to fit
+      // If speech duration exceeds target cushion, subtly adjust speed to fit comfortably
       if (durationSeconds > targetDuration) {
-        const neededSpeed = (durationSeconds / targetDuration) * 1.05; // 5% extra margin
-        speed = Math.min(1.5, Math.max(1.05, Number(neededSpeed.toFixed(2))));
+        const neededSpeed = (durationSeconds / targetDuration) * 1.02;
+        // Cap speed at 1.15x max so the narrator never sounds rushed
+        speed = Math.min(1.15, Math.max(1.0, Number(neededSpeed.toFixed(2))));
 
         console.log(
-          `[TtsService] Scene ${i} audio duration (${durationSeconds.toFixed(2)}s) exceeds target (${targetDuration.toFixed(2)}s). ` +
-          `Pacing with ${speed}x speed to fit cleanly in slot.`
+          `[TtsService] Scene ${i} speech duration (${durationSeconds.toFixed(2)}s) exceeds target (${targetDuration.toFixed(2)}s). ` +
+          `Refining speed to ${speed}x for natural stay before transition.`
         );
 
         audio = await tts.generate(cleanText, {
@@ -111,18 +165,6 @@ export class TtsService {
         });
         trimSilence(audio);
         durationSeconds = audio.audio.length / audio.sampling_rate;
-
-        // If still over slot duration, try one more adjustment step up to 1.6x
-        if (durationSeconds > slotSeconds - 0.15 && speed < 1.6) {
-          speed = Math.min(1.6, Number((speed * (durationSeconds / (slotSeconds - 0.25))).toFixed(2)));
-          console.log(`[TtsService] Fine-tuning Scene ${i} pacing to ${speed}x.`);
-          audio = await tts.generate(cleanText, {
-            voice: selectedVoice as any,
-            speed,
-          });
-          trimSilence(audio);
-          durationSeconds = audio.audio.length / audio.sampling_rate;
-        }
       }
 
       // Hard safety guard: guarantee audio ends within slotSeconds by fading out last 50ms if necessary
@@ -155,18 +197,52 @@ export class TtsService {
       };
 
       sceneAudios.push(sceneAudio);
+      sceneRawAudios.push(audio.audio);
+
       console.log(
-        `[TtsService] Scene ${i} voiceover ready: ${durationSeconds.toFixed(2)}s / ${slotSeconds}s slot (cushion: ${(slotSeconds - durationSeconds).toFixed(2)}s)`
+        `[TtsService] Scene ${i} voiceover ready: ${durationSeconds.toFixed(2)}s / ${slotSeconds}s slot (stay pause: ${(slotSeconds - durationSeconds).toFixed(2)}s)`
       );
     }
 
-    return sceneAudios;
+    // Composite master audio track with exact scene alignment and natural stays
+    const totalDurationSeconds = scenes.reduce((sum, s) => sum + s.durationSeconds, 0);
+    const totalSamples = Math.ceil(totalDurationSeconds * sampleRate);
+    const masterSamples = new Float32Array(totalSamples);
+
+    let sceneStartSec = 0;
+    for (let i = 0; i < scenes.length; i++) {
+      const startSample = Math.round(sceneStartSec * sampleRate);
+      const samples = sceneRawAudios[i];
+      if (samples) {
+        const copyLen = Math.min(samples.length, totalSamples - startSample);
+        masterSamples.set(samples.subarray(0, copyLen), startSample);
+      }
+      sceneStartSec += scenes[i].durationSeconds;
+    }
+
+    const masterWavBuffer = createWavBuffer(masterSamples, sampleRate);
+    const masterOutPath = path.join(audioDir, 'master.wav');
+    await fs.writeFile(masterOutPath, masterWavBuffer);
+
+    const masterAudioDataUri = `data:audio/wav;base64,${masterWavBuffer.toString('base64')}`;
+    const masterAudioUrl = `/media/audio/reels/${reelId}/master.wav`;
+
+    console.log(
+      `[TtsService] Master scene-aligned audio ready: ${totalDurationSeconds.toFixed(2)}s across ${scenes.length} scenes.`
+    );
+
+    const masterAudio: MasterAudio = {
+      audioPath: masterOutPath,
+      audioUrl: masterAudioUrl,
+      audioDataUri: masterAudioDataUri,
+      durationSeconds: Number(totalDurationSeconds.toFixed(2)),
+    };
+
+    return { sceneAudios, masterAudio };
   }
 
   /**
-   * Synthesizes the full reel narrative as ONE continuous master audio stream.
-   * This provides natural, attention-grabbing storytelling with organic pauses,
-   * completely eliminating artificial silence gaps between scenes.
+   * Legacy wrapper for backward compatibility.
    */
   async synthesizeStoryAudio(
     reelId: string,
@@ -185,65 +261,19 @@ export class TtsService {
     }
 
     const tts = await getSharedTTSInstance();
-    // Target duration: leave 0.5s breathing room before video ends
-    const targetDuration = Math.max(2.0, targetDurationSeconds - 0.5);
-
-    console.log(
-      `[TtsService] Synthesizing continuous story voiceover ("${selectedVoice}", target: ${targetDuration.toFixed(2)}s): "${cleanText}"`
-    );
-
-    // Initial synthesis at natural pace (1.05x)
-    let speed = 1.05;
-    let audio = await tts.generate(cleanText, {
+    const audio = await tts.generate(cleanText, {
       voice: selectedVoice as any,
-      speed,
+      speed: 1.0,
     });
     trimSilence(audio);
 
-    let durationSeconds = audio.audio.length / audio.sampling_rate;
-    console.log(`[TtsService] Initial continuous narration duration: ${durationSeconds.toFixed(2)}s`);
-
-    // Dynamic pacing: if duration differs from target by more than 0.7s, adjust speed
-    if (Math.abs(durationSeconds - targetDuration) > 0.7) {
-      const neededSpeed = speed * (durationSeconds / targetDuration);
-      speed = Math.min(1.4, Math.max(0.95, Number(neededSpeed.toFixed(2))));
-
-      console.log(
-        `[TtsService] Adjusting narration speed to ${speed}x to match reel duration (${targetDuration.toFixed(2)}s)...`
-      );
-      audio = await tts.generate(cleanText, {
-        voice: selectedVoice as any,
-        speed,
-      });
-      trimSilence(audio);
-      durationSeconds = audio.audio.length / audio.sampling_rate;
-      console.log(`[TtsService] Paced continuous narration duration: ${durationSeconds.toFixed(2)}s`);
-    }
-
-    // Safety guard: ensure audio never spills past targetDurationSeconds
-    const maxAllowedSamples = Math.floor((targetDurationSeconds - 0.1) * audio.sampling_rate);
-    if (audio.audio.length > maxAllowedSamples) {
-      const fadeSamples = Math.round(0.05 * audio.sampling_rate);
-      const clamped = audio.audio.subarray(0, maxAllowedSamples);
-      const fadeStart = maxAllowedSamples - fadeSamples;
-      for (let s = fadeStart; s < maxAllowedSamples; s++) {
-        const factor = (maxAllowedSamples - s) / fadeSamples;
-        clamped[s] *= factor;
-      }
-      audio.audio = clamped;
-      durationSeconds = audio.audio.length / audio.sampling_rate;
-    }
-
+    const durationSeconds = audio.audio.length / audio.sampling_rate;
     const outPath = path.join(audioDir, 'master.wav');
     await audio.save(outPath);
 
     const fileBuffer = await fs.readFile(outPath);
     const audioDataUri = `data:audio/wav;base64,${fileBuffer.toString('base64')}`;
     const audioUrl = `/media/audio/reels/${reelId}/master.wav`;
-
-    console.log(
-      `[TtsService] Master continuous story audio ready: ${durationSeconds.toFixed(2)}s / ${targetDurationSeconds}s reel.`
-    );
 
     return {
       audioPath: outPath,
