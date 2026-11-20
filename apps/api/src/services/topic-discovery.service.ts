@@ -210,133 +210,153 @@ Return a JSON array of ${neededCount} topic objects matching this schema:
 ]
 Return ONLY the raw JSON array without markdown backticks.`;
 
-    const userPrompt = `EXISTING TOPICS TO AVOID (DO NOT REPEAT):
-${existingTitlesAndBriefs.slice(0, 40).map((t) => `- ${t}`).join('\n')}
+    let addedCount = 0;
+    const queuedTopics: any[] = [];
+    let iterations = 0;
+    const maxIterations = 3;
+
+    while (currentQueued + addedCount < targetBacklog && iterations < maxIterations) {
+      iterations++;
+      const deficit = targetBacklog - (currentQueued + addedCount);
+      // Over-provision by 2x to account for semantic deduplication filtering
+      const neededCount = Math.max(6, Math.ceil(deficit * 2));
+      console.log(`[TopicDiscovery] Pass ${iterations}: Deficit of ${deficit} topics. Requesting ${neededCount} candidates from Gemini...`);
+
+      const userPrompt = `EXISTING TOPICS TO AVOID (DO NOT REPEAT):
+${existingTitlesAndBriefs.slice(0, 60).map((t) => `- ${t}`).join('\n')}
 
 VERIFIED REFERENCE DOCUMENTS:
 ${docSummaries.join('\n\n')}
 
 Discover exactly ${neededCount} high-potential, diverse, non-repetitive Reel ideas across our available categories.`;
 
-    let generatedCandidates: DiscoveredTopicCandidate[] = [];
-    try {
-      const { GoogleGenAI } = await import('@google/genai');
-      const apiKey = env.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error('GEMINI_API_KEY is not configured.');
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
-      const modelsToTry = [
-        env.GEMINI_MODEL,
-        'gemini-3.5-flash',
-        'gemini-3.1-flash-lite',
-        'gemini-2.5-flash-lite',
-      ];
-      const uniqueModels = [...new Set(modelsToTry)];
-
-      let responseText = '';
-      for (const model of uniqueModels) {
-        try {
-          const response = await ai.models.generateContent({
-            model,
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
-              },
-            ],
-            config: {
-              temperature: 0.7,
-              responseMimeType: 'application/json',
-            },
-          });
-          responseText = response.text?.trim() || '';
-          if (responseText) break;
-        } catch (mErr: any) {
-          console.warn(`[TopicDiscovery] Model ${model} failed: ${mErr.message}. Trying next model...`);
-        }
-      }
-
-      if (responseText) {
-        // Strip markdown backticks if present
-        const cleaned = responseText.replace(/^```json\s*|^```\s*|```$/g, '').trim();
-        const parsed = JSON.parse(cleaned);
-        if (Array.isArray(parsed)) {
-          generatedCandidates = parsed;
-        }
-      }
-    } catch (err: any) {
-      console.error('[TopicDiscovery] Gemini topic discovery failed:', err.message);
-      return { added: 0, totalQueued: currentQueued, topics: [] };
-    }
-
-    // 5. Semantic Deduplication & Database Persistence
-    let addedCount = 0;
-    const queuedTopics: any[] = [];
-
-    for (const candidate of generatedCandidates) {
-      if (!candidate.title || !candidate.category || !candidate.semanticKey) continue;
-
-      // Check 1: Exact semantic key match
-      if (existingSemanticKeys.has(candidate.semanticKey)) {
-        console.log(`[TopicDiscovery] Skipping duplicate semantic key: ${candidate.semanticKey}`);
-        continue;
-      }
-
-      // Check 2: Semantic concept similarity against all existing topics (> 0.35 is a duplicate)
-      const fullText = `${candidate.title} ${candidate.brief}`;
-      let isDuplicate = false;
-      for (const existing of existingTitlesAndBriefs) {
-        const sim = this.computeSimilarity(fullText, existing);
-        if (sim > 0.35) {
-          console.log(`[TopicDiscovery] Skipping semantically similar idea: "${candidate.title}" (similarity: ${(sim * 100).toFixed(0)}% with "${existing.slice(0, 40)}")`);
-          isDuplicate = true;
-          break;
-        }
-      }
-      if (isDuplicate) continue;
-
-      // 6. Persist to database with relational join table
+      let generatedCandidates: DiscoveredTopicCandidate[] = [];
       try {
-        const topic = await prisma.topic.create({
-          data: {
-            brandId,
-            title: candidate.title,
-            category: candidate.category,
-            brief: candidate.brief,
-            status: 'QUEUED',
-            sourceType: candidate.sourceType === 'LEARNOPS_LESSON' ? 'LEARNOPS_LESSON' : 'GENERAL_DEVOPS',
-            learnopsLessonId: candidate.learnopsLessonId || null,
-            audienceLevel: candidate.audienceLevel || 'beginner',
-            visualMetaphor: candidate.visualMetaphor || 'comparison',
-            priorityScore: Number(candidate.priorityScore) || 75,
-            semanticKey: candidate.semanticKey,
-            isUsed: false,
-          },
-        });
+        const { GoogleGenAI } = await import('@google/genai');
+        const apiKey = env.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+          throw new Error('GEMINI_API_KEY is not configured.');
+        }
 
-        // Link to cited knowledge documents
-        if (candidate.sourceDocumentIds && Array.isArray(candidate.sourceDocumentIds)) {
-          for (const docId of candidate.sourceDocumentIds) {
-            const docExists = approvedDocs.find((d) => d.id === docId);
-            if (docExists) {
-              await prisma.topicKnowledgeDocument.create({
-                data: {
-                  topicId: topic.id,
-                  documentId: docId,
+        const ai = new GoogleGenAI({ apiKey });
+        const modelsToTry = [
+          env.GEMINI_MODEL,
+          'gemini-3.5-flash-lite',
+          'gemini-3.1-flash-lite',
+          'gemini-3.8-flash',
+        ];
+        const uniqueModels = [...new Set(modelsToTry)];
+
+        let responseText = '';
+        for (const model of uniqueModels) {
+          try {
+            const response = await ai.models.generateContent({
+              model,
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }],
                 },
-              }).catch(() => {});
+              ],
+              config: {
+                temperature: 0.7,
+                responseMimeType: 'application/json',
+              },
+            });
+            responseText = response.text?.trim() || '';
+            if (responseText) break;
+          } catch (mErr: any) {
+            console.warn(`[TopicDiscovery] Model ${model} failed: ${mErr.message}. Trying next model...`);
+            const isTransient = mErr?.status === 503 || mErr?.status === 429 || mErr?.message?.includes('503') || mErr?.message?.includes('429');
+            if (isTransient) {
+              await new Promise((r) => setTimeout(r, 2500));
             }
           }
         }
 
-        existingSemanticKeys.add(candidate.semanticKey);
-        existingTitlesAndBriefs.push(fullText);
-        queuedTopics.push(topic);
-        addedCount++;
+        if (responseText) {
+          // Strip markdown backticks if present
+          const cleaned = responseText.replace(/^```json\s*|^```\s*|```$/g, '').trim();
+          const parsed = JSON.parse(cleaned);
+          if (Array.isArray(parsed)) {
+            generatedCandidates = parsed;
+          }
+        }
       } catch (err: any) {
-        console.warn(`[TopicDiscovery] Error saving topic "${candidate.title}":`, err.message);
+        console.error('[TopicDiscovery] Gemini topic discovery failed:', err.message);
+        break;
+      }
+
+      console.log(`[TopicDiscovery] Received ${generatedCandidates.length} candidate ideas from Gemini.`);
+
+      // Semantic Deduplication & Database Persistence
+      for (const candidate of generatedCandidates) {
+        if (!candidate.title || !candidate.category || !candidate.semanticKey) continue;
+
+        if (currentQueued + addedCount >= targetBacklog) {
+          break;
+        }
+
+        // Check 1: Exact semantic key match
+        if (existingSemanticKeys.has(candidate.semanticKey)) {
+          console.log(`[TopicDiscovery] Skipping duplicate semantic key: ${candidate.semanticKey}`);
+          continue;
+        }
+
+        // Check 2: Semantic concept similarity against all existing topics (> 0.35 is a duplicate)
+        const fullText = `${candidate.title} ${candidate.brief}`;
+        let isDuplicate = false;
+        for (const existing of existingTitlesAndBriefs) {
+          const sim = this.computeSimilarity(fullText, existing);
+          if (sim > 0.35) {
+            console.log(`[TopicDiscovery] Skipping semantically similar idea: "${candidate.title}" (similarity: ${(sim * 100).toFixed(0)}% with "${existing.slice(0, 40)}")`);
+            isDuplicate = true;
+            break;
+          }
+        }
+        if (isDuplicate) continue;
+
+        // Persist to database with relational join table
+        try {
+          const topic = await prisma.topic.create({
+            data: {
+              brandId,
+              title: candidate.title,
+              category: candidate.category,
+              brief: candidate.brief,
+              status: 'QUEUED',
+              sourceType: candidate.sourceType === 'LEARNOPS_LESSON' ? 'LEARNOPS_LESSON' : 'GENERAL_DEVOPS',
+              learnopsLessonId: candidate.learnopsLessonId || null,
+              audienceLevel: candidate.audienceLevel || 'beginner',
+              visualMetaphor: candidate.visualMetaphor || 'comparison',
+              priorityScore: Number(candidate.priorityScore) || 75,
+              semanticKey: candidate.semanticKey,
+              isUsed: false,
+            },
+          });
+
+          // Link to cited knowledge documents
+          if (candidate.sourceDocumentIds && Array.isArray(candidate.sourceDocumentIds)) {
+            for (const docId of candidate.sourceDocumentIds) {
+              const docExists = approvedDocs.find((d) => d.id === docId);
+              if (docExists) {
+                await prisma.topicKnowledgeDocument.create({
+                  data: {
+                    topicId: topic.id,
+                    documentId: docId,
+                  },
+                }).catch(() => {});
+              }
+            }
+          }
+
+          existingSemanticKeys.add(candidate.semanticKey);
+          existingTitlesAndBriefs.push(fullText);
+          queuedTopics.push(topic);
+          addedCount++;
+        } catch (err: any) {
+          console.warn(`[TopicDiscovery] Error saving topic "${candidate.title}":`, err.message);
+        }
       }
     }
 

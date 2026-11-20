@@ -34,42 +34,42 @@ export class SchedulerService {
   }
 
   private async checkAndTriggerDailySchedules() {
-    const [targetHour, targetMinute] = env.DAILY_PUBLISH_TIME.split(':').map(Number);
-    const now = new Date();
-
-    // Format current time in configured timezone
-    const formatter = new Intl.DateTimeFormat('en-CA', {
-      timeZone: env.SCHEDULER_TIMEZONE,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-
-    const parts = formatter.formatToParts(now);
-    const dateObj: Record<string, string> = {};
-    for (const part of parts) {
-      dateObj[part.type] = part.value;
-    }
-
-    const currentHour = Number(dateObj.hour);
-    const currentMinute = Number(dateObj.minute);
-    const todayDateStr = `${dateObj.year}-${dateObj.month}-${dateObj.day}`;
-
-    // Only trigger if matching the configured hour & minute
-    if (currentHour !== targetHour || currentMinute !== targetMinute) {
-      return;
-    }
-
-    console.log(`[Scheduler] Daily trigger matched for ${todayDateStr} ${env.DAILY_PUBLISH_TIME}...`);
-
     const activeBrands = await prisma.brand.findMany({
       where: { isActive: true },
     });
 
+    const now = new Date();
+
     for (const brand of activeBrands) {
+      const brandTz = brand.timezone || env.SCHEDULER_TIMEZONE || 'Asia/Karachi';
+      const [targetHour, targetMinute] = env.DAILY_PUBLISH_TIME.split(':').map(Number);
+
+      // Format current time in brand's configured timezone
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: brandTz,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+
+      const parts = formatter.formatToParts(now);
+      const dateObj: Record<string, string> = {};
+      for (const part of parts) {
+        dateObj[part.type] = part.value;
+      }
+
+      const currentHour = Number(dateObj.hour);
+      const currentMinute = Number(dateObj.minute);
+      const todayDateStr = `${dateObj.year}-${dateObj.month}-${dateObj.day}`;
+
+      // Only trigger if matching the configured hour & minute
+      if (currentHour !== targetHour || currentMinute !== targetMinute) {
+        continue;
+      }
+
       const idempotencyKey = `daily:${brand.id}:${todayDateStr}`;
 
       // Check if already enqueued today
@@ -81,7 +81,7 @@ export class SchedulerService {
         continue;
       }
 
-      console.log(`[Scheduler] Enqueuing daily schedule for brand "${brand.displayName}" (${idempotencyKey})`);
+      console.log(`[Scheduler] Daily trigger matched for brand "${brand.displayName}" on ${todayDateStr} ${env.DAILY_PUBLISH_TIME} (${brandTz}). Enqueuing...`);
       await queueService.enqueueJob('DAILY_SCHEDULE', { brandId: brand.id }, idempotencyKey);
     }
   }

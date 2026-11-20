@@ -278,53 +278,64 @@ Target duration: ${targetDuration} seconds`;
 
     const modelsToTry = [
       env.GEMINI_MODEL,
-      'gemini-3.1-flash-lite',
-      'gemini-3.5-flash',
-      'gemini-2.5-flash-lite',
       'gemini-3.5-flash-lite',
+      'gemini-3.1-flash-lite',
+      'gemini-3.8-flash',
     ];
     const uniqueModels = [...new Set(modelsToTry)];
 
     let lastError: any = null;
+    const maxRetries = 3;
 
-    for (const model of uniqueModels) {
-      try {
-        dailyRequestsCount++;
-        const response = await this.ai.models.generateContent({
-          model,
-          contents: [
-            { role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
-          ],
-          config: {
-            responseMimeType: 'application/json',
-            temperature: 0.2,
-          },
-        });
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      for (const model of uniqueModels) {
+        try {
+          dailyRequestsCount++;
+          const response = await this.ai.models.generateContent({
+            model,
+            contents: [
+              { role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
+            ],
+            config: {
+              responseMimeType: 'application/json',
+              temperature: 0.2,
+            },
+          });
 
-        const responseText = response.text || '';
-        if (!responseText.trim()) {
-          throw new Error(`Gemini model ${model} returned an empty response.`);
+          const responseText = response.text || '';
+          if (!responseText.trim()) {
+            throw new Error(`Gemini model ${model} returned an empty response.`);
+          }
+
+          const parsedJson = JSON.parse(responseText.trim());
+
+          // Defensive hydration if model missed top-level keys
+          if (!parsedJson.topic) parsedJson.topic = options.topic;
+          if (!parsedJson.hook) parsedJson.hook = parsedJson.scenes?.[0]?.headline || options.topic;
+          if (!parsedJson.durationSeconds) parsedJson.durationSeconds = targetDuration;
+          if (!parsedJson.caption) parsedJson.caption = `${options.topic} - Educational explainer.`;
+          if (!parsedJson.hashtags || !Array.isArray(parsedJson.hashtags) || parsedJson.hashtags.length === 0) {
+            parsedJson.hashtags = ['devops', 'linux', 'cloud'];
+          }
+
+          // Strict validation against versioned Zod schema
+          const validated = ReelScriptSchema.parse(parsedJson);
+          const paced = normalizeSceneDurations(validated, targetDuration);
+          return ReelScriptSchema.parse(paced);
+        } catch (err: any) {
+          lastError = err;
+          const isTransient = err?.status === 503 || err?.status === 429 || err?.message?.includes('503') || err?.message?.includes('429') || err?.message?.includes('high demand');
+          console.warn(`[GeminiService] [Attempt ${attempt}] Model ${model} generation attempt failed:`, err?.message || err);
+          if (isTransient) {
+            console.log(`[GeminiService] Transient demand spike detected. Backing off 2.5s before next attempt...`);
+            await new Promise((resolve) => setTimeout(resolve, 2500));
+          }
         }
+      }
 
-        const parsedJson = JSON.parse(responseText.trim());
-
-        // Defensive hydration if model missed top-level keys
-        if (!parsedJson.topic) parsedJson.topic = options.topic;
-        if (!parsedJson.hook) parsedJson.hook = parsedJson.scenes?.[0]?.headline || options.topic;
-        if (!parsedJson.durationSeconds) parsedJson.durationSeconds = targetDuration;
-        if (!parsedJson.caption) parsedJson.caption = `${options.topic} - Educational explainer.`;
-        if (!parsedJson.hashtags || !Array.isArray(parsedJson.hashtags) || parsedJson.hashtags.length === 0) {
-          parsedJson.hashtags = ['devops', 'linux', 'cloud'];
-        }
-
-        // Strict validation against versioned Zod schema
-        const validated = ReelScriptSchema.parse(parsedJson);
-        const paced = normalizeSceneDurations(validated, targetDuration);
-        return ReelScriptSchema.parse(paced);
-      } catch (err: any) {
-        lastError = err;
-        console.warn(`[GeminiService] Model ${model} generation attempt failed:`, err?.message || err);
-        // Continue to fallback model
+      if (attempt < maxRetries) {
+        console.log(`[GeminiService] Retrying script generation pass ${attempt + 1}/${maxRetries} after 3s delay...`);
+        await new Promise((resolve) => setTimeout(resolve, 3000));
       }
     }
 

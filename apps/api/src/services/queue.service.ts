@@ -64,19 +64,64 @@ export class QueueService {
     }
   }
 
-  async enqueueJob(name: string, data: any, idempotencyKey: string) {
-    // Record in durable JobRun table
-    await prisma.jobRun.upsert({
-      where: { idempotencyKey },
-      update: { status: 'QUEUED', jobType: name },
-      create: {
-        idempotencyKey,
-        jobType: name,
-        status: 'QUEUED',
-        brandId: data.brandId,
-        reelId: data.reelId,
-      },
+  async recoverStalledJobs(): Promise<number> {
+    const stalledJobs = await prisma.jobRun.findMany({
+      where: { status: 'RUNNING' },
     });
+    if (stalledJobs.length > 0) {
+      console.warn(`[Queue] Recovering ${stalledJobs.length} stalled job(s) from previous server crash/restart...`);
+      for (const job of stalledJobs) {
+        await prisma.jobRun.update({
+          where: { id: job.id },
+          data: {
+            status: 'FAILED_FINAL',
+            errorSummary: 'Process interrupted by server restart',
+            completedAt: new Date(),
+          },
+        });
+      }
+      console.log(`[Queue] Recovered ${stalledJobs.length} stalled job(s).`);
+    }
+    return stalledJobs.length;
+  }
+
+  async enqueueJob(name: string, data: any, idempotencyKey: string) {
+    // Durable idempotency check
+    const existing = await prisma.jobRun.findUnique({
+      where: { idempotencyKey },
+    });
+
+    if (existing) {
+      if (existing.status === 'SUCCEEDED') {
+        console.log(`[Queue] Job ${idempotencyKey} already SUCCEEDED. Skipping enqueue.`);
+        return { jobId: existing.bullMqJobId || idempotencyKey, idempotencyKey, status: 'SUCCEEDED', alreadyCompleted: true };
+      }
+      if (existing.status === 'RUNNING') {
+        console.log(`[Queue] Job ${idempotencyKey} is currently RUNNING. Skipping enqueue.`);
+        return { jobId: existing.bullMqJobId || idempotencyKey, idempotencyKey, status: 'RUNNING', inProgress: true };
+      }
+      // If FAILED_FINAL or QUEUED, reset for retry
+      await prisma.jobRun.update({
+        where: { idempotencyKey },
+        data: {
+          status: 'QUEUED',
+          jobType: name,
+          startedAt: null,
+          completedAt: null,
+          errorSummary: null,
+        },
+      });
+    } else {
+      await prisma.jobRun.create({
+        data: {
+          idempotencyKey,
+          jobType: name,
+          status: 'QUEUED',
+          brandId: data.brandId,
+          reelId: data.reelId,
+        },
+      });
+    }
 
     if (this.queue && this.isRedisConnected) {
       try {
@@ -387,6 +432,12 @@ export class QueueService {
       });
     } catch (err: any) {
       console.error(`[Queue] Job ${job.name} failed:`, err);
+      if (reelId) {
+        await prisma.reel.update({
+          where: { id: reelId },
+          data: { status: REEL_STATUS.FAILED },
+        }).catch(() => {});
+      }
       await prisma.jobRun.update({
         where: { idempotencyKey },
         data: {
