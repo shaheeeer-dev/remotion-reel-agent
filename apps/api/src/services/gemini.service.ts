@@ -127,7 +127,7 @@ export class GeminiService {
     brandTone?: string;
     brandAudience?: string;
     targetDurationSeconds?: number;
-    approvedKnowledge: Array<{ title: string; content: string }>;
+    approvedKnowledge?: Array<{ title: string; content: string }>;
   }): Promise<ReelScript> {
     checkDailyQuota();
 
@@ -141,7 +141,7 @@ export class GeminiService {
     const brandTone = options.brandTone || 'Clear, technical, authoritative, encouraging';
     const brandAudience = options.brandAudience || 'Beginner to intermediate Linux & DevOps learners';
 
-    const knowledgeContext = options.approvedKnowledge.length > 0
+    const knowledgeContext = options.approvedKnowledge && options.approvedKnowledge.length > 0
       ? options.approvedKnowledge.map((k) => `### ${k.title}\n${k.content}`).join('\n\n')
       : 'No specific approved documents provided; use only verified, standard technical facts.';
 

@@ -127,6 +127,7 @@ export class KnowledgeService {
     const lessonsBase = path.join(repoPath, 'backend/lessons');
     console.log(`[KnowledgeService] Syncing LearnOps lessons from: ${lessonsBase}`);
 
+    const activePaths = new Set<string>();
     let trackDirs: string[] = [];
     try {
       const entries = await fs.readdir(lessonsBase, { withFileTypes: true });
@@ -168,6 +169,7 @@ export class KnowledgeService {
           const lessonId = metadata.id || path.basename(lessonDir);
           const title = metadata.title || lessonId.replace(/-/g, ' ');
           const sourcePath = path.relative(repoPath, contentPath);
+          activePaths.add(sourcePath);
           const sourceUrl = `https://www.learnops.dev/lessons/${metadata.slug || lessonId}`;
           const checksum = crypto.createHash('sha256').update(contentRaw).digest('hex');
 
@@ -231,6 +233,22 @@ export class KnowledgeService {
       }
     }
 
+    // Handle stale or deleted LearnOps lessons
+    const staleDocs = await prisma.knowledgeDocument.updateMany({
+      where: {
+        brandId,
+        sourceType: 'LEARNOPS_LESSON',
+        sourcePath: { notIn: Array.from(activePaths) },
+        isApproved: true,
+      },
+      data: {
+        isApproved: false,
+      },
+    });
+    if (staleDocs.count > 0) {
+      console.log(`[KnowledgeService] Deactivated ${staleDocs.count} stale/deleted LearnOps lessons.`);
+    }
+
     console.log(
       `[KnowledgeService] LearnOps Sync Finished: ${result.added} added, ${result.updated} updated, ${result.skipped} skipped.`
     );
@@ -245,6 +263,7 @@ export class KnowledgeService {
     const result: IngestionResult = { added: 0, updated: 0, skipped: 0, total: 0, errors: [] };
     const rootDir = getMonorepoRoot();
     const kbDir = path.resolve(rootDir, env.KNOWLEDGE_BASE_DIR);
+    const activePaths = new Set<string>();
 
     const subDirs = ['devops', 'brand'];
     for (const sub of subDirs) {
@@ -262,6 +281,7 @@ export class KnowledgeService {
           const raw = await fs.readFile(filePath, 'utf8');
           const { frontmatter, body } = parseFrontmatter(raw);
           const relativePath = path.relative(kbDir, filePath);
+          activePaths.add(relativePath);
           const checksum = crypto.createHash('sha256').update(raw).digest('hex');
 
           const title = frontmatter.title || path.basename(filePath, '.md').replace(/-/g, ' ');
@@ -328,6 +348,22 @@ export class KnowledgeService {
           result.errors.push(`Error syncing ${filePath}: ${err.message}`);
         }
       }
+    }
+
+    // Handle stale or deleted DevOps reference documents
+    const staleDocs = await prisma.knowledgeDocument.updateMany({
+      where: {
+        brandId,
+        sourceType: { in: ['GENERAL_DEVOPS', 'BRAND_PROFILE'] },
+        sourcePath: { notIn: Array.from(activePaths) },
+        isApproved: true,
+      },
+      data: {
+        isApproved: false,
+      },
+    });
+    if (staleDocs.count > 0) {
+      console.log(`[KnowledgeService] Deactivated ${staleDocs.count} stale/deleted DevOps documents.`);
     }
 
     console.log(

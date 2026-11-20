@@ -23,31 +23,74 @@ export interface DiscoveredTopicCandidate {
 }
 
 export class TopicDiscoveryService {
+  private static readonly STOP_WORDS = new Set([
+    'what', 'how', 'why', 'the', 'and', 'for', 'with', 'does', 'are', 'is', 'in', 'vs',
+    'versus', 'seconds', 'quick', 'breakdown', 'learn', 'explore', 'explaining', 'explained',
+    'understanding', 'understand', 'between', 'into', 'from', 'guide', 'deep', 'dive',
+    'critical', 'highlight', 'demonstration', 'clear', 'without', 'about', 'that', 'they'
+  ]);
+
+  private static readonly STEMS: Record<string, string> = {
+    containers: 'container', pods: 'pod', links: 'link', sockets: 'socket',
+    proxies: 'proxy', filesystems: 'filesystem', permissions: 'permission',
+    processes: 'process', applications: 'application', dependencies: 'dependency',
+    environments: 'environment', interfaces: 'interface', adapters: 'adapter',
+    machines: 'machine', volumes: 'volume', namespaces: 'namespace',
+    operating: 'os', system: 'os', systems: 'os'
+  };
+
   /**
-   * Normalizes text for semantic duplicate comparison.
+   * Extracts normalized tokens and bigrams for semantic duplicate comparison.
    */
-  private normalizeForComparison(text: string): string[] {
-    return text
+  private extractFeatures(text: string): { tokens: string[]; bigrams: string[] } {
+    const rawTokens = text
       .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/[^a-z0-9\.\s]/g, ' ')
       .split(/\s+/)
-      .filter((w) => w.length > 2 && !['what', 'how', 'why', 'the', 'and', 'for', 'with', 'does'].includes(w));
+      .map((t) => t.replace(/^\.+|\.+$/g, ''))
+      .filter((t) => t.length > 1 && !TopicDiscoveryService.STOP_WORDS.has(t))
+      .map((t) => TopicDiscoveryService.STEMS[t] || t);
+
+    const bigrams: string[] = [];
+    for (let i = 0; i < rawTokens.length - 1; i++) {
+      bigrams.push(`${rawTokens[i]}_${rawTokens[i + 1]}`);
+    }
+
+    return { tokens: rawTokens, bigrams };
   }
 
   /**
-   * Computes Jaccard word-overlap similarity between two topics.
+   * Computes semantic similarity between two topic concepts:
+   * 1. Concept containment (fraction of concise concept contained in the other).
+   * 2. Bigram phrase overlap (detects shared technical phrases like "docker_container").
+   * 3. Lead subject boost (detects shared primary topic entity, e.g. "docker" or "127.0.0.1").
    */
-  private computeSimilarity(textA: string, textB: string): number {
-    const setA = new Set(this.normalizeForComparison(textA));
-    const setB = new Set(this.normalizeForComparison(textB));
+  public computeSimilarity(textA: string, textB: string): number {
+    const { tokens: tokA, bigrams: biA } = this.extractFeatures(textA);
+    const { tokens: tokB, bigrams: biB } = this.extractFeatures(textB);
+
+    const setA = new Set(tokA);
+    const setB = new Set(tokB);
     if (setA.size === 0 || setB.size === 0) return 0;
 
-    let intersection = 0;
-    for (const w of setA) {
-      if (setB.has(w)) intersection++;
+    let intTok = 0;
+    for (const t of setA) {
+      if (setB.has(t)) intTok++;
     }
-    const union = new Set([...setA, ...setB]).size;
-    return intersection / union;
+    const minTok = Math.min(setA.size, setB.size);
+    const tokContainment = intTok / minTok;
+
+    const biSetB = new Set(biB);
+    const biOverlap = biA.filter((b) => biSetB.has(b)).length;
+    const bigramBoost = biOverlap > 0 ? 0.25 : 0.0;
+
+    const leadA = new Set(tokA.slice(0, 2));
+    const leadB = new Set(tokB.slice(0, 2));
+    const leadShared = Array.from(leadA).filter((t) => leadB.has(t) && t !== 'linux' && t !== 'devops');
+    const leadBoost = leadShared.length >= 1 ? 0.20 : 0.0;
+
+    const score = 0.55 * tokContainment + bigramBoost + leadBoost;
+    return Math.min(1.0, score);
   }
 
   /**
@@ -241,12 +284,12 @@ Discover exactly ${neededCount} high-potential, diverse, non-repetitive Reel ide
         continue;
       }
 
-      // Check 2: Word-overlap semantic similarity against all existing topics (> 0.55 is a duplicate)
+      // Check 2: Semantic concept similarity against all existing topics (> 0.35 is a duplicate)
       const fullText = `${candidate.title} ${candidate.brief}`;
       let isDuplicate = false;
       for (const existing of existingTitlesAndBriefs) {
         const sim = this.computeSimilarity(fullText, existing);
-        if (sim > 0.55) {
+        if (sim > 0.35) {
           console.log(`[TopicDiscovery] Skipping semantically similar idea: "${candidate.title}" (similarity: ${(sim * 100).toFixed(0)}% with "${existing.slice(0, 40)}")`);
           isDuplicate = true;
           break;
@@ -308,43 +351,76 @@ Discover exactly ${neededCount} high-potential, diverse, non-repetitive Reel ide
   }
 
   /**
-   * Selects the highest-priority unused topic for daily reel production.
-   * Promotes the topic status to 'SELECTED'.
+   * Selects the next topic for production using smart diversity balancing:
+   * 1. Inspects the last 3-5 published or selected reels/topics.
+   * 2. Avoids back-to-back duplicate categories (e.g. no 3 Kubernetes reels in a row).
+   * 3. Alternates difficulty (Beginner vs Intermediate).
+   * 4. Balances between LearnOps Lessons and General DevOps references.
+   * 5. Selects the highest priority score within the balanced candidate pool.
    */
   async selectNextTopicForProduction(brandId: string): Promise<any | null> {
-    const topic = await prisma.topic.findFirst({
+    // 1. Fetch recent topics (last 5 in production or published)
+    const recentTopics = await prisma.topic.findMany({
       where: {
         brandId,
-        status: 'QUEUED',
-        isUsed: false,
+        status: { in: ['SELECTED', 'IN_PRODUCTION', 'PUBLISHED'] },
       },
+      orderBy: { updatedAt: 'desc' },
+      take: 5,
+      select: { category: true, audienceLevel: true, sourceType: true },
+    });
+
+    const recentCategories = new Set(recentTopics.slice(0, 2).map((t) => t.category));
+    const lastDifficulty = recentTopics[0]?.audienceLevel || 'beginner';
+    const lastSourceType = recentTopics[0]?.sourceType || 'GENERAL_DEVOPS';
+
+    // 2. Query all queued topics
+    let queued = await prisma.topic.findMany({
+      where: { brandId, status: 'QUEUED', isUsed: false },
       include: {
         documents: {
           include: { document: true },
         },
       },
-      orderBy: [
-        { priorityScore: 'desc' },
-        { createdAt: 'asc' },
-      ],
+      orderBy: [{ priorityScore: 'desc' }, { createdAt: 'asc' }],
     });
 
-    if (!topic) {
-      // Trigger backlog refresh if empty
+    if (queued.length === 0) {
       await this.ensureBacklog(brandId, 25);
-      return prisma.topic.findFirst({
+      queued = await prisma.topic.findMany({
         where: { brandId, status: 'QUEUED', isUsed: false },
-        include: { documents: { include: { document: true } } },
+        include: {
+          documents: {
+            include: { document: true },
+          },
+        },
         orderBy: [{ priorityScore: 'desc' }, { createdAt: 'asc' }],
       });
     }
 
+    if (queued.length === 0) return null;
+
+    // 3. Filter candidate pool for category diversity (avoiding immediate category repeats)
+    let candidatePool = queued.filter((t) => !recentCategories.has(t.category));
+    if (candidatePool.length === 0) {
+      candidatePool = queued; // fallback if all queued share the same category
+    }
+
+    // 4. Prefer alternating difficulty and balanced source type
+    const preferredPool = candidatePool.filter(
+      (t) => t.audienceLevel !== lastDifficulty || t.sourceType !== lastSourceType
+    );
+    const finalPool = preferredPool.length > 0 ? preferredPool : candidatePool;
+
+    // Pick top scored idea in balanced pool
+    const selected = finalPool[0] || queued[0];
+
     await prisma.topic.update({
-      where: { id: topic.id },
+      where: { id: selected.id },
       data: { status: 'SELECTED' },
     });
 
-    return topic;
+    return selected;
   }
 }
 
