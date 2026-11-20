@@ -3,9 +3,41 @@ import { resolveBrand } from '../middleware/resolve-brand.js';
 import crypto from 'node:crypto';
 import { prisma } from '../prisma/client.js';
 import { queueService } from '../services/queue.service.js';
+import { topicDiscoveryService } from '../services/topic-discovery.service.js';
 
 export const topicsRouter = Router({ mergeParams: true });
 topicsRouter.use(resolveBrand);
+
+// POST /api/v1/brands/:brandId/topics/discover
+topicsRouter.post('/discover', async (req, res, next) => {
+  try {
+    const brandId = res.locals.brandId as string;
+    const targetBacklog = Number(req.body.targetBacklog) || 25;
+    const result = await topicDiscoveryService.ensureBacklog(brandId, targetBacklog);
+    res.json({ message: 'Topic discovery complete', data: result });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/v1/brands/:brandId/topics/backlog
+topicsRouter.get('/backlog', async (req, res, next) => {
+  try {
+    const brandId = res.locals.brandId as string;
+    const topics = await prisma.topic.findMany({
+      where: { brandId, status: 'QUEUED' },
+      include: {
+        documents: {
+          include: { document: true },
+        },
+      },
+      orderBy: { priorityScore: 'desc' },
+    });
+    res.json({ data: topics, count: topics.length });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // GET /api/v1/brands/:brandId/topics
 topicsRouter.get('/', async (req, res, next) => {
@@ -13,6 +45,11 @@ topicsRouter.get('/', async (req, res, next) => {
     const brandId = res.locals.brandId as string;
     const topics = await prisma.topic.findMany({
       where: { brandId },
+      include: {
+        documents: {
+          include: { document: true },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
     res.json({ data: topics });

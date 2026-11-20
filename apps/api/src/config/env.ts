@@ -28,6 +28,8 @@ const EnvSchema = z.object({
   DAILY_PUBLISH_TIME: z.string().default('14:00'),
   WORKER_CONCURRENCY: z.coerce.number().default(2),
   MAX_RENDER_SECONDS: z.coerce.number().default(180),
+  LEARNOPS_REPO_PATH: z.string().default('../LearnOps'),
+  KNOWLEDGE_BASE_DIR: z.string().default('./knowledge-base'),
 });
 
 export const env = EnvSchema.parse(process.env);

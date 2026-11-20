@@ -14,7 +14,9 @@
     "render:test2": "npm --workspace=@learnops/renderer run render:test2",
     "setup:kokoro": "npm --workspace=@learnops/api run setup:kokoro:model",
     "prisma:generate": "npm --workspace=@learnops/api run prisma:generate",
-    "prisma:seed": "npm --workspace=@learnops/api run seed"
+    "prisma:seed": "npm --workspace=@learnops/api run seed",
+    "knowledge:sync": "tsx scripts/sync-knowledge.ts",
+    "topics:discover": "tsx scripts/discover-topics.ts"
   },
   "devDependencies": {
     "typescript": "^5.5.4"

@@ -48,40 +48,92 @@ model BrandProfile {
   brand          Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
 }
 
+enum KnowledgeSourceType {
+  LEARNOPS_LESSON
+  GENERAL_DEVOPS
+  BRAND_PROFILE
+}
+
+enum TopicStatus {
+  DISCOVERED
+  QUEUED
+  SELECTED
+  IN_PRODUCTION
+  PUBLISHED
+  REJECTED
+  FAILED
+}
+
 model KnowledgeDocument {
-  id          String   @id @default(uuid())
-  brandId     String
-  title       String
-  category    String
-  source      String
-  content     String   @db.Text
-  version     Int      @default(1)
-  isApproved  Boolean  @default(false)
-  approvedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String                 @id @default(uuid())
+  brandId         String
+  title           String
+  category        String
+  source          String                 @default("learnops-official")
+  sourceType      KnowledgeSourceType    @default(LEARNOPS_LESSON)
+  sourcePath      String?
+  sourceUrl       String?
+  lessonId        String?
+  docVersion      String?
+  retrievedAt     DateTime?
+  content         String                 @db.Text
+  version         Int                    @default(1)
+  checksumSha256  String?
+  isVerified      Boolean                @default(false)
+  isApproved      Boolean                @default(false)
+  approvedAt      DateTime?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
 
-  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  brand           Brand                  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  topicDocuments  TopicKnowledgeDocument[]
 
+  @@unique([brandId, sourcePath])
   @@index([brandId, isApproved])
   @@index([brandId, category])
+  @@index([brandId, sourceType])
 }
 
 model Topic {
-  id          String   @id @default(uuid())
-  brandId     String
-  title       String
-  category    String
-  brief       String   @db.Text
-  isUsed      Boolean  @default(false)
-  lastUsedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String                 @id @default(uuid())
+  brandId          String
+  title            String
+  category         String
+  brief            String                 @db.Text
+  status           TopicStatus            @default(DISCOVERED)
+  sourceType       KnowledgeSourceType    @default(GENERAL_DEVOPS)
+  learnopsLessonId String?
+  audienceLevel    String                 @default("beginner")
+  visualMetaphor   String?
+  priorityScore    Int                    @default(50)
+  semanticKey      String?
+  isUsed           Boolean                @default(false)
+  lastUsedAt       DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
 
-  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
-  reels       Reel[]
+  brand            Brand                  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  reels            Reel[]
+  documents        TopicKnowledgeDocument[]
 
+  @@index([brandId, status])
+  @@index([brandId, category])
   @@index([brandId, isUsed])
+  @@index([brandId, semanticKey])
+}
+
+model TopicKnowledgeDocument {
+  id         String            @id @default(uuid())
+  topicId    String
+  documentId String
+  createdAt  DateTime          @default(now())
+
+  topic      Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, documentId])
+  @@index([topicId])
+  @@index([documentId])
 }
 
 model Reel {
