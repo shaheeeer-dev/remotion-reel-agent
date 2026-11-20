@@ -99,7 +99,7 @@ async function main() {
       schemaVersion: 1,
       topic: 'Docker: What is a Container Really?',
       hook: 'What is a *Container*?',
-      durationSeconds: totalDuration,
+      durationSeconds: masterAudio.durationSeconds,
       scenes,
       caption: 'Containers are NOT virtual machines! 🐳 #docker #devops',
       hashtags: ['docker', 'devops', 'linux'],

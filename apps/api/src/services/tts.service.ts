@@ -1,6 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import type { Scene, SceneAudio, MasterAudio } from '@learnops/schema';
+import { deriveSubtitleChunks } from '@learnops/schema';
 import { getMonorepoRoot } from './remotion.service.js';
 import { getSharedTTSInstance, CURATED_KOKORO_VOICES } from './voice.service.js';
 
@@ -199,8 +200,22 @@ export class TtsService {
       sceneAudios.push(sceneAudio);
       sceneRawAudios.push(audio.audio);
 
+      // Generate exact subtitle chunks calibrated to actual speech duration
+      const fps = 30;
+      scene.subtitles = deriveSubtitleChunks(cleanText, durationSeconds, fps);
+
+      // Natural pause between scenes: ~0.35s (matches 0.33s-0.40s in benchmark reel)
+      // For outro, ensure at least 2.0s total so brand call-to-action is comfortably legible
+      const isOutro = scene.kind === 'outro';
+      const naturalStay = isOutro ? 0.25 : 0.35;
+      const sceneVisualDuration = isOutro
+        ? Math.max(2.0, Number((durationSeconds + naturalStay).toFixed(2)))
+        : Number((durationSeconds + naturalStay).toFixed(2));
+
+      scene.durationSeconds = sceneVisualDuration;
+
       console.log(
-        `[TtsService] Scene ${i} voiceover ready: ${durationSeconds.toFixed(2)}s / ${slotSeconds}s slot (stay pause: ${(slotSeconds - durationSeconds).toFixed(2)}s)`
+        `[TtsService] Scene ${i} voiceover ready: ${durationSeconds.toFixed(2)}s speech -> ${sceneVisualDuration}s visual (snappy stay: ${naturalStay}s)`
       );
     }
 

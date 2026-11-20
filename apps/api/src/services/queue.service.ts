@@ -224,6 +224,7 @@ export class QueueService {
             voiceId
           );
           console.log(`[Queue] Scene-aligned voiceover ready: ${sceneAudios.length} scenes, master audio (${masterAudio.durationSeconds}s).`);
+          script.durationSeconds = script.scenes.reduce((sum: number, s: any) => sum + s.durationSeconds, 0);
 
           const renderInput: ReelRenderInput = {
             reelId: reel.id,
