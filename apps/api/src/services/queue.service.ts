@@ -5,6 +5,7 @@ import { geminiService } from './gemini.service.js';
 import { remotionService } from './remotion.service.js';
 import { ttsService } from './tts.service.js';
 import { instagramService } from './instagram.service.js';
+import { topicDiscoveryService } from './topic-discovery.service.js';
 import { REEL_STATUS, type ReelRenderInput } from '@learnops/schema';
 import { decryptToken } from '../utils/crypto.js';
 
@@ -189,6 +190,16 @@ export class QueueService {
               data: { isUsed: true, lastUsedAt: new Date() },
             });
           }
+
+          if (job.data.autoRender || brand?.autoPublish) {
+            const renderIdempotencyKey = `render_${reel.id}_${Date.now()}`;
+            await this.enqueueJob(
+              'RENDER_VIDEO',
+              { brandId, reelId: reel.id },
+              renderIdempotencyKey
+            );
+            console.log(`[Queue] Auto-enqueued video rendering for reel "${reel.title}".`);
+          }
           break;
         }
 
@@ -264,6 +275,16 @@ export class QueueService {
             where: { id: reel.id },
             data: { status: nextStatus },
           });
+
+          if (reel.brand.autoPublish) {
+            const publishIdempotencyKey = `publish_${reel.id}_${Date.now()}`;
+            await this.enqueueJob(
+              'PUBLISH_REEL',
+              { brandId: reel.brandId, reelId: reel.id },
+              publishIdempotencyKey
+            );
+            console.log(`[Queue] Auto-enqueued publishing for approved reel "${reel.title}".`);
+          }
           break;
         }
 
@@ -342,23 +363,20 @@ export class QueueService {
 
         case 'DAILY_SCHEDULE': {
           const brand = await prisma.brand.findUniqueOrThrow({ where: { id: brandId } });
-          const unusedTopic = await prisma.topic.findFirst({
-            where: { brandId, isUsed: false },
-            orderBy: { createdAt: 'asc' },
-          });
+          const selectedTopic = await topicDiscoveryService.selectNextTopicForProduction(brandId);
 
-          if (!unusedTopic) {
-            console.log(`[Queue] No unused topics found for brand "${brand.displayName}". Daily run completed.`);
+          if (!selectedTopic) {
+            console.log(`[Queue] No available topics found for brand "${brand.displayName}". Daily run completed.`);
             break;
           }
 
-          const genIdempotencyKey = `daily_gen_${brandId}_${unusedTopic.id}_${Date.now()}`;
+          const genIdempotencyKey = `daily_gen_${brandId}_${selectedTopic.id}_${Date.now()}`;
           await this.enqueueJob(
             'GENERATE_SCRIPT',
-            { brandId, topicId: unusedTopic.id },
+            { brandId, topicId: selectedTopic.id, autoRender: true },
             genIdempotencyKey
           );
-          console.log(`[Queue] Enqueued daily script generation for topic "${unusedTopic.title}".`);
+          console.log(`[Queue] Enqueued daily script generation for topic "${selectedTopic.title}".`);
           break;
         }
       }
