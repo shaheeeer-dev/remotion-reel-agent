@@ -219,11 +219,18 @@ async function main() {
       (acc) => acc.platform === 'INSTAGRAM' && acc.isConnected
     );
 
-    const accessToken = socialAccount?.encryptedToken
-      ? decryptToken(socialAccount.encryptedToken)
-      : env.META_ACCESS_TOKEN;
+    let accessToken = env.META_ACCESS_TOKEN;
+    if (!accessToken && socialAccount?.encryptedToken) {
+      try {
+        accessToken = decryptToken(socialAccount.encryptedToken);
+      } catch (err: any) {
+        console.warn('⚠️ Token decryption warning:', err.message);
+      }
+    } else if (socialAccount?.encryptedToken && !accessToken) {
+      accessToken = decryptToken(socialAccount.encryptedToken);
+    }
 
-    const igUserId = socialAccount?.providerUserId || env.META_IG_USER_ID;
+    const igUserId = env.META_IG_USER_ID || socialAccount?.providerUserId || '17841429087138843';
 
     if (!finalPublicUrl.startsWith('https://')) {
       console.warn('⚠️ Video URL is not HTTPS. Skipping live Instagram publish.');

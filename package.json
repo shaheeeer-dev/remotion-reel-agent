@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspace=@learnops/schema && npm run build --workspace=@learnops/renderer && npm run build --workspace=@learnops/api && npm run build --workspace=@learnops/dashboard",
+    "build:packages": "npm run build --workspace=@learnops/schema && npm run build --workspace=@learnops/renderer",
     "dev:api": "npm --workspace=@learnops/api run dev",
     "dev:dashboard": "npm --workspace=@learnops/dashboard run dev",
     "setup:kokoro": "npm --workspace=@learnops/api run setup:kokoro:model",

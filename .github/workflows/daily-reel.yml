@@ -55,6 +55,9 @@ jobs:
       - name: Install Node Dependencies
         run: npm ci
 
+      - name: Build Core Monorepo Packages
+        run: npm run build:packages
+
       - name: Ensure Remotion Browser Shell
         run: npx remotion browser ensure
 
@@ -73,6 +76,7 @@ jobs:
         env:
           NODE_ENV: production
           FORCE_PUBLISH: ${{ inputs.force || false }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET || 'bfd1e5bc60e90a1506c11e60825a34a72421818256c53107695e264821635b29' }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-3.5-flash-lite' }}
