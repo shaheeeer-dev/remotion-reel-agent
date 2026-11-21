@@ -21,6 +21,8 @@ jobs:
     name: Generate & Publish Reel
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      ONNXRUNTIME_NODE_INSTALL_CUDA: skip
 
     steps:
       - name: Checkout Code
