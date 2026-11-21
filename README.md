@@ -1,11 +1,11 @@
 # Autonomous Reel Agent
 
-> **AI-Powered Educational Video Generator & Autonomous Instagram Publisher**  
-> An autonomous end-to-end pipeline that ingests technical knowledge, discovers engaging topics, writes grounded scripts, synthesizes human speech, renders dynamic Remotion motion graphics, and publishes daily Instagram Reels — 100% free and automated.
+**AI-Powered Educational Video Generator & Autonomous Instagram Publisher**  
+An autonomous end-to-end pipeline that ingests technical knowledge, discovers engaging topics, writes grounded scripts, synthesizes human speech, renders dynamic Remotion motion graphics, and publishes daily Instagram Reels — 100% free and automated.
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ```mermaid
 flowchart TD
@@ -41,7 +41,7 @@ flowchart TD
 
 ---
 
-## ✨ Core Features & Invariants
+## Core Features & Invariants
 
 ### 1. Two-Source Knowledge Base Architecture
 * **Source A (Primary Course Curriculum):** Ingests lessons directly from course markdown directories (`content.md` + `metadata.json`) with SHA-256 checksum incremental sync. Never duplicates lesson files manually.
@@ -76,7 +76,7 @@ flowchart TD
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 remotion-reel-agent/
@@ -103,7 +103,7 @@ remotion-reel-agent/
 
 ---
 
-## 🚀 Quickstart
+## Quickstart
 
 ### Prerequisites
 * **Node.js:** v22 or v24
@@ -146,7 +146,7 @@ npm --workspace=@learnops/renderer start
 
 ---
 
-## 🛠️ CLI Utilities & Commands
+## CLI Utilities & Commands
 
 | Command | Purpose |
 | :--- | :--- |
@@ -159,5 +159,5 @@ npm --workspace=@learnops/renderer start
 
 ---
 
-## 📄 License
+## License
 MIT License. Open for educational and autonomous video production systems.
