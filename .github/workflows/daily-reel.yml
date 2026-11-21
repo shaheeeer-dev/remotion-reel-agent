@@ -1,0 +1,74 @@
+name: Daily Automated Instagram Reel
+
+on:
+  schedule:
+    # 09:00 UTC = 14:00 (2:00 PM) Asia/Karachi (PKT) every day
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    # Allows manual trigger at any time from GitHub Actions UI
+
+concurrency:
+  group: daily-reel-run
+  cancel-in-progress: false
+
+jobs:
+  publish-reel:
+    name: Generate & Publish Reel
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install System Graphics & Audio Dependencies for Remotion / Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgbm-dev \
+            libasound2 \
+            libnss3 \
+            libatk1.0-0 \
+            libatk-bridge2.0-0 \
+            libcups2 \
+            libdrm2 \
+            libxkbcommon0 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2 \
+            ffmpeg
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Setup Kokoro TTS Models
+        run: npm run setup:kokoro
+
+      - name: Synchronize Database Schema
+        run: npx prisma db push --schema=apps/api/prisma/schema.prisma
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Execute Daily Reel Pipeline
+        run: npm run publish:daily
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-3.5-flash-lite' }}
+          META_APP_ID: ${{ secrets.META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.META_APP_SECRET }}
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          META_IG_USER_ID: ${{ secrets.META_IG_USER_ID }}
+          META_GRAPH_API_VERSION: 'v27.0'
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          SCHEDULER_TIMEZONE: 'Asia/Karachi'
+          PUBLIC_MEDIA_BASE_URL: 'https://res.cloudinary.com'

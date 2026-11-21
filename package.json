@@ -17,7 +17,8 @@
     "knowledge:sync": "tsx scripts/sync-knowledge.ts",
     "topics:discover": "tsx scripts/discover-topics.ts",
     "test:7day": "tsx scripts/test-7day-autonomous-suite.ts",
-    "instagram:setup": "tsx scripts/setup-instagram.ts"
+    "instagram:setup": "tsx scripts/setup-instagram.ts",
+    "publish:daily": "tsx scripts/run-daily-publish.ts"
   },
   "devDependencies": {
     "typescript": "^5.5.4"
