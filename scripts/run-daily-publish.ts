@@ -93,13 +93,15 @@ async function main() {
       where: { brandId: brand.id, isApproved: true },
     });
 
+    const targetDurationSeconds = brand.defaultDuration || 20;
+
     const script = await geminiService.generateReelScript({
       topic: selectedTopic.title,
       category: selectedTopic.category,
       brandName: brand.displayName,
       brandTone: brand.profile?.voiceTone || 'energetic',
       brandAudience: brand.profile?.audience || 'junior-to-mid',
-      targetDurationSeconds: 16,
+      targetDurationSeconds,
       approvedKnowledge: approvedDocs.map((d) => ({ title: d.title, content: d.content })),
     });
 

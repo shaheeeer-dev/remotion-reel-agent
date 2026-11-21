@@ -13,7 +13,7 @@ model Brand {
   displayName        String
   isActive           Boolean             @default(true)
   timezone           String              @default("UTC")
-  defaultDuration    Int                 @default(16)
+  defaultDuration    Int                 @default(20)
   autoPublish        Boolean             @default(false)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
@@ -145,7 +145,7 @@ model Reel {
   hook            String
   caption         String           @db.Text
   hashtags        String[]
-  durationSeconds Int              @default(16)
+  durationSeconds Int              @default(20)
   scriptJson      Json
   promptVersion   Int              @default(1)
   modelName       String           @default("gemini-3.8-flash")

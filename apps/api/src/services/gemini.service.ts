@@ -20,8 +20,8 @@ function normalizeSceneDurations(script: ReelScript, targetDurationSeconds: numb
   }
 
   const totalFrames = Math.round(targetDurationSeconds * RENDER_FPS);
-  // Allocate 2 seconds for outro (60 frames) so a 3-4 word spoken CTA comfortably fits
-  const outroDurationSeconds = targetDurationSeconds >= 14 ? 2 : 1.5;
+  // Allocate 2.5 seconds for outro when target >= 18s so brand CTA comfortably fits
+  const outroDurationSeconds = targetDurationSeconds >= 18 ? 2.5 : targetDurationSeconds >= 14 ? 2 : 1.5;
   const outroFrames = Math.round(outroDurationSeconds * RENDER_FPS);
   const contentFrames = totalFrames - outroFrames;
   const framesPerContentScene = Math.floor(contentFrames / 4);
@@ -145,7 +145,7 @@ export class GeminiService {
       ? options.approvedKnowledge.map((k) => `### ${k.title}\n${k.content}`).join('\n\n')
       : 'No specific approved documents provided; use only verified, standard technical facts.';
 
-    const targetDuration = options.targetDurationSeconds || 16;
+    const targetDuration = options.targetDurationSeconds || 20;
 
     const systemPrompt = `You are an expert technical curriculum designer and social video manager for "${brandName}".
 Brand Voice & Tone: ${brandTone}
@@ -255,13 +255,14 @@ RULES:
      * The Key Insight: Reveal the core takeaway that makes them feel smarter.
      * Call to Action: Seamless outro prompt to follow.
    - Natural Pacing & Word Budget (~2.2 - 2.4 words/second at natural conversational cadence):
-     * For a 16-second reel: 36 to 40 words TOTAL across the entire monologue.
-     * For a 22-second reel: 46 to 52 words TOTAL across the entire monologue.
+     * Target Duration: 18 to 22 seconds (Nominal: 20 seconds).
+     * Total Spoken Monologue: 46 to 52 words TOTAL across the entire monologue.
      * Each scene's "voiceover" field MUST be a complete, standalone thought or sentence that ends cleanly with punctuation:
-       - 3-second scene: 6 to 7 words.
-       - 4-second scene: 8 to 10 words.
-       - 5-second scene: 10 to 12 words.
-       - 2-second outro: 4 to 5 words (e.g. "Follow LearnOps for daily DevOps insights!").
+       - Scene 0 (Hook): 8 to 10 words (curiosity question or relatable challenge).
+       - Scene 1 (Visual Metaphor): 10 to 12 words (explaining the mental model or architecture).
+       - Scene 2 (Comparison): 10 to 12 words (distinguishing key differences or common pitfall).
+       - Scene 3 (Terminal Example): 10 to 12 words (practical command usage and concrete takeaway).
+       - Scene 4 (Outro): 6 to 8 words (clear call to action: "Follow LearnOps for daily DevOps tutorials!").
      * CRITICAL: NEVER end a scene voiceover on a dangling conjunction or preposition (e.g. "using.", "and.", "with."). Each scene must stand alone grammatically.
    - PURE SPOKEN TEXT:
      * Write purely for natural human speech with natural commas for breath pauses.
