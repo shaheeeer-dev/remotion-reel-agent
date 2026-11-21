@@ -21,10 +21,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 22
+      - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'npm'
 
       - name: Install System Graphics & Audio Dependencies for Remotion / Chrome
@@ -50,8 +50,10 @@ jobs:
       - name: Setup Kokoro TTS Models
         run: npm run setup:kokoro
 
-      - name: Synchronize Database Schema
-        run: npx prisma db push --schema=apps/api/prisma/schema.prisma
+      - name: Generate Prisma Client & Synchronize Database Schema
+        run: |
+          npm run prisma:generate
+          npx prisma db push --schema=apps/api/prisma/schema.prisma
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
