@@ -1,7 +1,6 @@
 import React from 'react';
 import { Composition } from 'remotion';
 import { MainReel } from './composition/MainReel.js';
-import { LinuxEtcMotionReel } from './scenes/educational/LinuxEtcMotionReel.js';
 import type { ReelRenderInput } from '@learnops/schema';
 
 // Test fixtures
@@ -18,61 +17,7 @@ const HEIGHT = 1920;
 export const RemotionRoot: React.FC = () => {
   return (
     <>
-      {/* Dynamic Motion Graphics Video: Linux /etc Directory (4 Educational Scenes) */}
-      <Composition
-        id="LinuxEtcMotionGraphics"
-        component={LinuxEtcMotionReel}
-        durationInFrames={360} // fallback 12 seconds @ 30 fps
-        fps={FPS}
-        width={WIDTH}
-        height={HEIGHT}
-        defaultProps={{
-          durationSeconds: 12,
-          brand: {
-            name: 'LearnOps',
-            primaryColor: '#F29F67', // Peach / Coral
-            secondaryColor: '#34B1AA', // Teal Mint
-            backgroundColor: '#1E1E2C', // Obsidian Navy
-            cardBackground: '#262638',
-            textColor: '#FFFFFF',
-          },
-        }}
-        calculateMetadata={async ({ props }) => {
-          const duration = (props as any)?.durationSeconds || 12;
-          return {
-            durationInFrames: Math.round(duration * FPS),
-          };
-        }}
-      />
-
-      {/* 12-Second Motion Graphics Video (LearnOps Edition) */}
-      <Composition
-        id="LinuxEtcLearnOps"
-        component={LinuxEtcMotionReel}
-        durationInFrames={360} // 12 seconds @ 30 fps
-        fps={FPS}
-        width={WIDTH}
-        height={HEIGHT}
-        defaultProps={{
-          durationSeconds: 12,
-          brand: {
-            name: 'LearnOps',
-            primaryColor: '#783CEB', // LearnOps Brand Purple
-            secondaryColor: '#B28BFF',
-            backgroundColor: '#110F17',
-            cardBackground: '#1C1824',
-            textColor: '#FFFFFF',
-          },
-        }}
-        calculateMetadata={async ({ props }) => {
-          const duration = (props as any)?.durationSeconds || 12;
-          return {
-            durationInFrames: Math.round(duration * FPS),
-          };
-        }}
-      />
-
-      {/* Dynamic Main Reel Composition */}
+      {/* Primary Dynamic Reel Composition (Used in Production) */}
       <Composition
         id="MainReel"
         component={MainReel}
@@ -93,7 +38,7 @@ export const RemotionRoot: React.FC = () => {
         }}
       />
 
-      {/* Test 2 Video 1: Linux /etc Directory */}
+      {/* Test Video 1: Linux /etc Directory (Filesystem Tree Metaphor) */}
       <Composition
         id="Test2-LinuxEtc"
         component={MainReel}
@@ -104,7 +49,7 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={linuxEtcFixture as unknown as ReelRenderInput}
       />
 
-      {/* Test 2 Video 2: Docker Container Architecture */}
+      {/* Test Video 2: Docker Container Architecture (Dashed Sandbox Metaphor) */}
       <Composition
         id="Test2-DockerContainer"
         component={MainReel}
@@ -115,7 +60,7 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={dockerFixture as unknown as ReelRenderInput}
       />
 
-      {/* Test 2 Video 3: DevOps CI/CD Pipeline */}
+      {/* Test Video 3: DevOps CI/CD Pipeline (Horizontal Pipeline Metaphor) */}
       <Composition
         id="Test2-DevOpsCICD"
         component={MainReel}
@@ -126,7 +71,7 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={cicdFixture as unknown as ReelRenderInput}
       />
 
-      {/* Test 2 Video 4: Linux Permissions chmod vs chown */}
+      {/* Test Video 4: Linux Permissions chmod vs chown (Octal 755 Grid Metaphor) */}
       <Composition
         id="Test2-ChmodChown"
         component={MainReel}
@@ -137,7 +82,7 @@ export const RemotionRoot: React.FC = () => {
         defaultProps={chmodChownFixture as unknown as ReelRenderInput}
       />
 
-      {/* Test Video: Nginx Load Balancing Strategies */}
+      {/* Test Video 5: Nginx Load Balancing Strategies (Network Flow Metaphor) */}
       <Composition
         id="Test2-NginxLoadBalancing"
         component={MainReel}
@@ -150,4 +95,3 @@ export const RemotionRoot: React.FC = () => {
     </>
   );
 };
-
