@@ -41,17 +41,22 @@ async function main() {
     hour12: false,
   });
   const dateStr = formatter.format(new Date());
-  const dailyScheduleKey = `daily:${brand.id}:${dateStr}`;
+  const isForce = process.env.FORCE_PUBLISH === 'true';
+  const dailyScheduleKey = isForce
+    ? `daily:${brand.id}:${dateStr}-${Date.now()}`
+    : `daily:${brand.id}:${dateStr}`;
 
-  console.log(`      Timezone: ${brandTz} | Today's Key: ${dailyScheduleKey}`);
+  console.log(`      Timezone: ${brandTz} | Today's Key: ${dailyScheduleKey}${isForce ? ' (FORCE_PUBLISH active)' : ''}`);
 
-  // Prevent duplicate runs on the same calendar day
-  const existingJob = await prisma.jobRun.findUnique({
-    where: { idempotencyKey: dailyScheduleKey },
-  });
-  if (existingJob && existingJob.status === 'SUCCEEDED') {
-    console.log(`⚠️ Note: Daily Reel for date "${dateStr}" has already been published. Exiting cleanly.`);
-    return;
+  // Prevent duplicate runs on the same calendar day (unless FORCE_PUBLISH is active)
+  if (!isForce) {
+    const existingJob = await prisma.jobRun.findUnique({
+      where: { idempotencyKey: dailyScheduleKey },
+    });
+    if (existingJob && existingJob.status === 'SUCCEEDED') {
+      console.log(`⚠️ Note: Daily Reel for date "${dateStr}" has already been published. Exiting cleanly.`);
+      return;
+    }
   }
 
   const jobRun = await prisma.jobRun.upsert({

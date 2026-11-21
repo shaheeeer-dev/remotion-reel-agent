@@ -5,7 +5,12 @@ on:
     # 09:00 UTC = 14:00 (2:00 PM) Asia/Karachi (PKT) every day
     - cron: '0 9 * * *'
   workflow_dispatch:
-    # Allows manual trigger at any time from GitHub Actions UI
+    inputs:
+      force:
+        description: 'Force publish even if already ran today'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: daily-reel-run
@@ -27,25 +32,29 @@ jobs:
           node-version: 24
           cache: 'npm'
 
-      - name: Install System Graphics & Audio Dependencies for Remotion / Chrome
+      - name: Ensure Multimedia & Headless Chrome Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libgbm-dev \
-            libasound2 \
+          sudo apt-get update || true
+          # Install audio/graphics libraries with fallback across Ubuntu versions (22.04 / 24.04 / 26.04)
+          sudo apt-get install -y --no-install-recommends \
+            ffmpeg \
+            libgbm1 \
             libnss3 \
-            libatk1.0-0 \
-            libatk-bridge2.0-0 \
             libcups2 \
             libdrm2 \
             libxkbcommon0 \
             libxcomposite1 \
             libxdamage1 \
             libxrandr2 \
-            ffmpeg
+            libasound2t64 \
+            || sudo apt-get install -y --no-install-recommends libasound2 \
+            || true
 
       - name: Install Node Dependencies
         run: npm ci
+
+      - name: Ensure Remotion Browser Shell
+        run: npx remotion browser ensure
 
       - name: Setup Kokoro TTS Models
         run: npm run setup:kokoro
@@ -61,6 +70,7 @@ jobs:
         run: npm run publish:daily
         env:
           NODE_ENV: production
+          FORCE_PUBLISH: ${{ inputs.force || false }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-3.5-flash-lite' }}
