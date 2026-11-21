@@ -30,6 +30,10 @@ const EnvSchema = z.object({
   MAX_RENDER_SECONDS: z.coerce.number().default(180),
   LEARNOPS_REPO_PATH: z.string().default('../LearnOps'),
   KNOWLEDGE_BASE_DIR: z.string().default('./knowledge-base'),
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
+  CLOUDINARY_URL: z.string().optional(),
 });
 
 export const env = EnvSchema.parse(process.env);

@@ -16,7 +16,8 @@
     "prisma:seed": "npm --workspace=@learnops/api run seed",
     "knowledge:sync": "tsx scripts/sync-knowledge.ts",
     "topics:discover": "tsx scripts/discover-topics.ts",
-    "test:7day": "tsx scripts/test-7day-autonomous-suite.ts"
+    "test:7day": "tsx scripts/test-7day-autonomous-suite.ts",
+    "instagram:setup": "tsx scripts/setup-instagram.ts"
   },
   "devDependencies": {
     "typescript": "^5.5.4"

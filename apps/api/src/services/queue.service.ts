@@ -6,6 +6,7 @@ import { remotionService } from './remotion.service.js';
 import { ttsService } from './tts.service.js';
 import { instagramService } from './instagram.service.js';
 import { topicDiscoveryService } from './topic-discovery.service.js';
+import { cloudinaryService } from './cloudinary.service.js';
 import { REEL_STATUS, type ReelRenderInput } from '@learnops/schema';
 import { decryptToken } from '../utils/crypto.js';
 
@@ -301,11 +302,26 @@ export class QueueService {
           const outputFileName = `reel_${reel.id}_${Date.now()}.mp4`;
           const renderResult = await remotionService.renderReelVideo(renderInput, outputFileName);
 
+          let finalPublicUrl = renderResult.publicUrl;
+
+          // If Cloudinary is configured, upload to Cloudinary for reliable public HTTPS delivery
+          if (cloudinaryService.isConfigured()) {
+            try {
+              const upload = await cloudinaryService.uploadVideo(
+                renderResult.storagePath,
+                `reel_${reel.id}`
+              );
+              finalPublicUrl = upload.publicUrl;
+            } catch (cloudErr: any) {
+              console.warn('[Queue] Cloudinary upload warning (will keep local media URL):', cloudErr.message);
+            }
+          }
+
           await prisma.mediaAsset.create({
             data: {
               reelId: reel.id,
               storagePath: renderResult.storagePath,
-              publicUrl: renderResult.publicUrl,
+              publicUrl: finalPublicUrl,
               fileSizeBytes: BigInt(renderResult.fileSizeBytes),
               width: renderResult.width,
               height: renderResult.height,
@@ -344,12 +360,23 @@ export class QueueService {
             throw new Error('Reel has no rendered media asset to publish');
           }
 
+          // If publicUrl is local and Cloudinary is configured, upload to Cloudinary now
+          if (!media.publicUrl.startsWith('https://') && cloudinaryService.isConfigured() && media.storagePath) {
+            console.log(`[Queue] Media asset has local URL. Uploading to Cloudinary before publishing...`);
+            const upload = await cloudinaryService.uploadVideo(media.storagePath, `reel_${reel.id}`);
+            media.publicUrl = upload.publicUrl;
+            await prisma.mediaAsset.update({
+              where: { id: media.id },
+              data: { publicUrl: upload.publicUrl },
+            });
+          }
+
           if (reel.status !== REEL_STATUS.APPROVED && reel.status !== REEL_STATUS.SCHEDULED) {
             throw new Error('Only an approved or scheduled Reel can be published.');
           }
 
           if (!media.publicUrl.startsWith('https://')) {
-            throw new Error('Publishing requires a publicly reachable HTTPS media URL.');
+            throw new Error('Publishing requires a publicly reachable HTTPS media URL. Configure Cloudinary or a public HTTPS domain.');
           }
 
           const socialAccount = reel.brand.socialAccounts.find(
