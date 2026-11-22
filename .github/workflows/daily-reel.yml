@@ -2,8 +2,10 @@ name: Daily Automated Instagram Reel
 
 on:
   schedule:
-    # 09:00 UTC = 14:00 (2:00 PM) Asia/Karachi (PKT) every day
-    - cron: '0 9 * * *'
+    # 09:15 UTC = 14:15 (2:15 PM) Asia/Karachi (PKT) off-peak fallback cron
+    - cron: '15 9 * * *'
+  repository_dispatch:
+    types: [daily-reel-publish]
   workflow_dispatch:
     inputs:
       force:
