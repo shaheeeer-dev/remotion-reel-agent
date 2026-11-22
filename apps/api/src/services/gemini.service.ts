@@ -4,11 +4,12 @@ import { env } from '../config/env.js';
 
 const RENDER_FPS = 30;
 
-function normalizeSceneDurations(script: ReelScript, targetDurationSeconds: number): ReelScript {
-  const [hook, visual, comparison, terminal, outro] = script.scenes;
+function normalizeSceneDurations(script: any, targetDurationSeconds: number): ReelScript {
+  const [hook, visual, comparison, terminal, outro] = script?.scenes || [];
   const visualKinds = new Set(['folder_tree', 'container_diagram', 'pipeline']);
 
   if (
+    !script?.scenes ||
     script.scenes.length !== 5 ||
     hook?.kind !== 'hook' ||
     !visual || !visualKinds.has(visual.kind) ||
@@ -29,7 +30,7 @@ function normalizeSceneDurations(script: ReelScript, targetDurationSeconds: numb
   const frameCounts = Array.from({ length: 4 }, (_, index) => framesPerContentScene + (index < extraContentFrames ? 1 : 0));
   frameCounts.push(outroFrames);
 
-  const normalizedScenes = script.scenes.map((scene, index) => {
+  const normalizedScenes = script.scenes.map((scene: any, index: number) => {
     const durSec = frameCounts[index] / RENDER_FPS;
     const maxWords = Math.floor(durSec * 2.5);
 
@@ -162,7 +163,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
   "scenes": [
     {
       "kind": "hook",
-      "durationSeconds": 3,
+      "durationSeconds": 3.5,
       "badge": "CATEGORY OR TOPIC BADGE",
       "headline": "Main Punchy Title",
       "subtext": "Brief teaser text",
@@ -171,7 +172,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
     },
     {
       "kind": "folder_tree",
-      "durationSeconds": 4,
+      "durationSeconds": 4.5,
       "title": "Directory Anatomy",
       "rootPath": "/",
       "highlightPath": "/etc",
@@ -181,7 +182,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
     },
     {
       "kind": "comparison",
-      "durationSeconds": 4,
+      "durationSeconds": 4.5,
       "title": "Scope Distinction",
       "leftLabel": "SYSTEM",
       "leftTitle": "The Machine",
@@ -196,7 +197,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
     },
     {
       "kind": "terminal",
-      "durationSeconds": 4,
+      "durationSeconds": 4.5,
       "title": "Inspect Files",
       "promptUser": "learner@linux:~$",
       "command": "ls /etc",
@@ -206,7 +207,7 @@ You must output a single, raw JSON object strictly adhering to this exact struct
     },
     {
       "kind": "outro",
-      "durationSeconds": 2,
+      "durationSeconds": 3,
       "brandName": "${brandName}",
       "tagline": "Follow for daily tutorials.",
       "callToAction": "Follow",
@@ -319,10 +320,10 @@ Target duration: ${targetDuration} seconds`;
             parsedJson.hashtags = ['devops', 'linux', 'cloud'];
           }
 
-          // Strict validation against versioned Zod schema
-          const validated = ReelScriptSchema.parse(parsedJson);
-          const paced = normalizeSceneDurations(validated, targetDuration);
-          return ReelScriptSchema.parse(paced);
+          // Normalize scene durations to mathematically match targetDuration BEFORE validation
+          const paced = normalizeSceneDurations(parsedJson, targetDuration);
+          const validated = ReelScriptSchema.parse(paced);
+          return validated;
         } catch (err: any) {
           lastError = err;
           const isTransient = err?.status === 503 || err?.status === 429 || err?.message?.includes('503') || err?.message?.includes('429') || err?.message?.includes('high demand');
